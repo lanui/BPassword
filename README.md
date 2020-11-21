@@ -1,6 +1,6 @@
-# Bpassword extension
+# BPassword extension
 
-![BPassword Extension](/docs/assets/icons/bpass_git_logo.jpg?raw=true 'BPassword Extension')
+[![BPassword Extension](/docs/assets/icons/bpass_git_logo.jpg?raw=true 'BPassword Extension')](https://sites.google.com/view/bpwd/)
 
 > Bpassword extension for chrome &amp; firefox
 
