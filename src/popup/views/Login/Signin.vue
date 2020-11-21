@@ -120,7 +120,6 @@ export default {
   watch: {
     isUnlocked: function (val, old) {
       if (val && old === false) {
-        console.log(val);
         this.redirectIndex();
       }
     },

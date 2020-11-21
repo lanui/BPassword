@@ -44,7 +44,6 @@ export default {
       const text = this.selectedAddress;
       QRCode.toDataURL(text)
         .then((url) => {
-          console.log(url);
           this.qrcode = url;
         })
         .catch((err) => {

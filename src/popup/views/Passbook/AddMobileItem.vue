@@ -112,7 +112,6 @@ export default {
         whisperer
           .sendSimpleMessage(API_RT_ADD_MOB_ITEM, data)
           .then(async (websiteState) => {
-            console.log('>>>>>>>Mobile RespData>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', websiteState);
             await this.$store.dispatch('passbook/subInitState4Mob', websiteState);
             this.gobackHandle();
           })

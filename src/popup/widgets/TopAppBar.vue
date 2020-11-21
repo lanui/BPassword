@@ -25,7 +25,6 @@ export default {
     ...mapGetters('ui', ['p3Dense', 'p3Drawer']),
     drawerStyle() {
       const top = this.$vuetify.application.top;
-      console.log('>>>>>>>>>>>>>>>>>>', top);
       return `height: 100%;top:${top}px;`;
     },
   },
@@ -39,13 +38,9 @@ export default {
     togglerDrawer() {
       this.$store.dispatch('ui/togglePopupDrawer', null);
     },
-    setDrawerValue($event) {
-      // console.log('Drawer>>>>>', $event);
-    },
+    setDrawerValue($event) {},
   },
-  mounted() {
-    console.log(this.$vuetify.application.top);
-  },
+  mounted() {},
 };
 </script>
 <style>

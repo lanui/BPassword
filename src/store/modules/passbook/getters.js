@@ -11,7 +11,6 @@
 
 export const webdiff = (state) => {
   const webPlain = state.webPlain;
-  console.log('>>>>>>>>', webPlain);
   if (
     !webPlain ||
     !webPlain.ChainData ||

@@ -175,7 +175,6 @@ class TopController extends EventEmitter {
    * @todo when login feilds in top
    */
   startResizeObserver(options) {
-    // console.log('TopController:startResizeObserver>>>', this, options);
     const { innerHref } = options;
     this.resizeObserver && this.resizeObserver.observe(document.body);
   }
@@ -187,7 +186,6 @@ class TopController extends EventEmitter {
   startupScrollObserver(options) {
     const { hasLogin, isInner } = this.cfgStore.getState();
     if (hasLogin) {
-      // console.log("startupScrollObserver>>>>>>>>>>>>>>>>>>>>", `isInner:[${isInner}]`)
       if (isInner) {
       } else {
         window.addEventListener('scroll', (e) => {

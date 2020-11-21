@@ -2,6 +2,7 @@ import * as types from './mutation-types';
 import { fetchEnv3 } from '@/libs/storage/fast-helper';
 
 import { AsyncOpenWallet } from '@/libs/accounts/wallet-generator';
+import logger from '@/libs/logger';
 
 /**
  *
@@ -34,7 +35,7 @@ export const initState = async ({ commit, dispatch }, initState = {}) => {
 
 export const loadEnv3FromLocale = async ({ commit }) => {
   const env3 = await fetchEnv3();
-  console.log('Store:startup loaded env3', env3);
+  logger.debug('Store:startup loaded env3', env3);
   commit(types.UPDATE_ENV3, env3);
 };
 

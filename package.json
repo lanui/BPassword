@@ -11,7 +11,7 @@
     "lint": "eslint --ext .js,.vue src",
     "prettier": "prettier \"src/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
-    "build": "cross-env NODE_ENV=production APP_VERSION=2.0.0 webpack --config ci/webpack.config.js --hide-modules",
+    "build": "cross-env NODE_ENV=production webpack --config ci/webpack.config.js --hide-modules",
     "build:dev": "cross-env NODE_ENV=development webpack --config ci/webpack.config.js --hide-modules",
     "build-zip": "node ci/build-zip.js",
     "watch": "cross-env HMR=true npm run build -- --watch",
@@ -20,6 +20,7 @@
     "watch:prod": "cross-env APP_VERSION=2.0.0 HMR=true npm run build:dev -- ",
     "build-pre": "cross-env HMR=true NODE_ENV=development  webpack --config ci/webpack.config.js --hide-modules",
     "pre:watch": "cross-env HMR=true npm run build-pre -- --watch",
+    "build:fox": "cross-env APP_VERSION=1.0.0 EXT_TARGET=firefox LOG_LEVEL=WARN webpack --config ci/webpack.config.js --hide-modules",
     "watch:fox": "cross-env EXT_TARGET=firefox HMR=true npm run build:dev -- --watch"
   },
   "husky": {

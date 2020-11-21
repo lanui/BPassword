@@ -125,7 +125,6 @@ class WhispererListener {
     try {
       const subPriKey = await this.controller.accountController.getSubPriKey();
       const respData = await this.controller.websiteController.updateItem(subPriKey, reqData);
-      console.log(`WhispererListener :${apiType} >>>>>>`, reqData, sendResponse);
       const respMessage = buildResponseMessage(apiType, respData);
       sendResponse(respMessage);
 
@@ -141,7 +140,6 @@ class WhispererListener {
     try {
       const subPriKey = await this.controller.accountController.getSubPriKey();
       const respData = await this.controller.websiteController.deleteItem(subPriKey, reqData);
-      console.log(`WhispererListener :${apiType} >>>>>>`, reqData, sendResponse);
       const respMessage = buildResponseMessage(apiType, respData);
       sendResponse(respMessage);
 

@@ -41,7 +41,7 @@ async function startup() {
 
   // log.debug('BP dom >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', injetState);
   await domIsReady();
-  // console.log('BP dom ready.(oﾟ▽ﾟ)o ')
+  logger.info('BP dom ready.(oﾟ▽ﾟ)o ');
 }
 
 async function setupStream() {

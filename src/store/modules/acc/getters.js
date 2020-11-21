@@ -8,7 +8,6 @@ export const ethBalText = (state) => {
 export const diamondsBalText = (state) => {
   // return '3123.00';
   const bal = state.ethBalance || 0;
-  console.log('bal', bal);
   return (parseFloat(fromWei(bal.toString(), 'ether')) * 10000).toFixed(2);
 };
 

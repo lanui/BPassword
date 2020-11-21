@@ -115,12 +115,12 @@ export default {
         whisperer
           .sendSimpleMessage(API_RT_IMPORT_WALLET, reqData)
           .then(async (initState) => {
-            console.log('initState>>>>>>>>>>', initState);
+            // console.log('initState>>>>>>>>>>', initState);
             await this.$store.dispatch('initState', initState);
             this.gotoIndex();
           })
           .catch((err) => {
-            console.log('Error>>>>>>>>>>', err);
+            // console.log('Error>>>>>>>>>>', err);
             this.ctrl.loading = false;
             this.pwdError = err.message;
             setTimeout(() => {
