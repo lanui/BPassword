@@ -1,0 +1,23 @@
+bp-feilds-button,
+bpass-button,
+bp-selector-options {
+  all: initial !important;
+  position: fixed !important;
+  z-index: 2747483646 !important;
+}
+
+bp-selector-options {
+  right: 0px !important;
+  top: 0px !important;
+  bottom: 0px !important;
+  left: 0px !important;
+  pointer-events: none !important;
+}
+
+.icon-btext {
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+  background: url('../icons/icon-btext-circle.png') center center no-repeat;
+  background-size: cover;
+}

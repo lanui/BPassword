@@ -1,0 +1,28 @@
+html,
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: rgba(25, 25, 29, 1);
+  width: 357px;
+  height: 600px;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.error-tips {
+  display: flex;
+  width: 100%;
+  text-align: center;
+  vertical-align: middle;
+  justify-content: center;
+  color: red;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.error-tips .tips__content {
+  flex: 0 1 auto;
+  padding: auto 1rem;
+}

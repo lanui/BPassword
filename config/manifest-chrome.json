@@ -1,0 +1,36 @@
+{
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+9",
+        "mac": "Command+Shift+9"
+      }
+    },
+    "lock": {
+      "description": "Lock the extension",
+      "name": "lock",
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      }
+    }
+  },
+  "content_scripts": [],
+  "externally_connectable": {
+    "ids": ["*"],
+    "matches": ["*://extensions/*"],
+    "accepts_tls_channel_id": false
+  },
+  "permissions": [
+    "<all_urls>",
+    "background",
+    "tabs",
+    "activeTab",
+    "storage",
+    "unlimitedStorage",
+    "notifications",
+    "idle",
+    "privacy"
+  ],
+  "minimum_chrome_version": "73"
+}

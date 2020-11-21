@@ -1,0 +1,41 @@
+{
+  "name": "BPassword",
+  "description": "BPassword management your certificates",
+  "version": null,
+  "author": "<author>",
+  "manifest_version": 2,
+  "icons": {
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "browser_action": {
+    "default_title": "BPassword",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "scripts": [
+      "share/js/buffer.min.js",
+      "share/js/aes.min.js",
+      "share/js/nacl.min.js",
+      "share/js/ed2curve.min.js",
+      "share/js/keythereum.min.js",
+      "share/js/data_storage.js",
+      "background.js"
+    ]
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "chrome_style": true
+  },
+  "web_accessible_resources": [
+    "contentscript.js",
+    "injet/injet-top.js",
+    "injet/injet-top.js.map",
+    "injet/injet.js",
+    "injet/injet.js.map",
+    "injet/injet.css",
+    "p2/*",
+    "share/*"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';img-src 'self'"
+}
