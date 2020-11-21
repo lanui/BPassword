@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+# locak env ignore
+config/.*.env.js
+
+# project ignore
+yarn.lock
