@@ -151,7 +151,7 @@ export default class AccountController extends EventEmitter {
 
       return { ...ret, isUnlocked: Boolean(ret.dev3) };
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       throw err;
     }
   }

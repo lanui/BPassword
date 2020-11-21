@@ -14,7 +14,7 @@ const PKG_VERSION = pkgJson.version || '2.0.0';
  *
  */
 module.exports = {
-  APP_NAME: mixinProperty('APP_NAME', 'BPassword-dev'),
+  APP_NAME: mixinProperty('APP_NAME', 'BPassword'),
   APP_VERSION: mixinProperty('APP_VERSION', PKG_VERSION),
   APP_AUTHOR: process.env.APP_AUTHOR || pkgJson.author,
   INFURA_PROJECTID: mixinProperty('INFURA_PROJECTID', ''),

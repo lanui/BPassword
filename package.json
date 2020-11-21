@@ -20,8 +20,9 @@
     "watch:prod": "cross-env APP_VERSION=2.0.0 HMR=true npm run build:dev -- ",
     "build-pre": "cross-env HMR=true NODE_ENV=development  webpack --config ci/webpack.config.js --hide-modules",
     "pre:watch": "cross-env HMR=true npm run build-pre -- --watch",
+    "watch:fox": "cross-env EXT_TARGET=firefox HMR=true npm run build:dev -- --watch",
     "build:fox": "cross-env APP_VERSION=1.0.0 EXT_TARGET=firefox LOG_LEVEL=WARN webpack --config ci/webpack.config.js --hide-modules",
-    "watch:fox": "cross-env EXT_TARGET=firefox HMR=true npm run build:dev -- --watch"
+    "zip-fox": "cross-env LOG_LEVEL=WARN node ci/zip-fox.js"
   },
   "husky": {
     "hooks": {
@@ -105,6 +106,7 @@
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.12",
     "vuetify-loader": "^1.6.0",
+    "web-ext": "^5.4.0",
     "web-ext-types": "^3.2.1",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",

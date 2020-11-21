@@ -28,7 +28,7 @@
 
 ### Version 1.0.1
 
-> Completion Features
+> Future Features
 
 - [ ] Add Website pass item on website login page.
 - [ ] Filled pass item to website login fields(username&password).

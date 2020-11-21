@@ -117,7 +117,6 @@ export default {
     },
     creatWallet() {
       if (this.$refs.dataForm.validate()) {
-        // console.log(">>>>>>>>>>>>>>",this.password,this.rePassword)
         if (this.password !== this.rePassword) {
           this.errors = '你输入的确认密码不一致.';
           setTimeout(() => {

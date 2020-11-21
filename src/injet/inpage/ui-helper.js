@@ -19,7 +19,6 @@ const ICON_SIZES = {
  * @param {String} wrapid
  */
 export const createOptionWrapNode = (wrapid) => {
-  // console.log('>>>>>>>>>>>>>',window.location.href)
   // let wrapNode = window.document.querySelector(OPTIONS_WRAP_TAG)
   // if (wrapNode) return;
   const optionsWrap = window.document.createElement(OPTIONS_WRAP_TAG);
