@@ -2,6 +2,8 @@
 
 > Bpassword extension for chrome &amp; firefox
 
+> Learn more about the BPassword Extension project,please see [our BPassword gitPages](https://lanui.github.io/BPassword/).
+
 ## Chrome Distribute History
 
 ## Firefox Distribute History
