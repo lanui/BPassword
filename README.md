@@ -26,6 +26,6 @@
 
 > Completion Features
 
-- [] Add Website pass item on website login page.
-- [] Filled pass item to website login fields(username&password).
-- [] inject contentscript into website page.
+- [ ] Add Website pass item on website login page.
+- [ ] Filled pass item to website login fields(username&password).
+- [ ] inject contentscript into website page.
