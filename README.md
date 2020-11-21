@@ -1,4 +1,6 @@
-# ![BPassword Extension](/docs/assets/icons/bpass_git_logo.jpg?raw=true 'BPassword Extension')
+# Bpassword extension
+
+![BPassword Extension](/docs/assets/icons/bpass_git_logo.jpg?raw=true 'BPassword Extension')
 
 > Bpassword extension for chrome &amp; firefox
 
@@ -10,7 +12,7 @@
 
 ### Version 1.0.0
 
-> fork from chrome v2.0.0, no injet scripts
+> fork from chrome v2.0.0, no inject content scripts
 
 > > Features
 
