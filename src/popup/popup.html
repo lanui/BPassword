@@ -3,10 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <title><%=APP_NAME%>-popup</title>
-    <link rel="stylesheet" href="popup.css" />
     <% if (NODE_ENV === 'development') { %>
     <!-- Load some resources only in development environment -->
+    <link rel="stylesheet" href="/vendors-popup/popup.css" />
     <% } %>
+    <link rel="stylesheet" href="popup.css" />
+
+    <script src="/share/js/lodash.min.js"></script>
     <script src="/share/js/buffer.min.js"></script>
     <script src="/share/js/aes.min.js"></script>
     <script src="/share/js/nacl.min.js"></script>
@@ -15,6 +18,13 @@
   </head>
   <body>
     <div id="app"></div>
+    <!-- Load Externals -->
+    <script src="/commons.js"></script>
+    <script src="/ui-vendors.js"></script>
+    <script src="/ui-vuetify.js"></script>
+    <% if (NODE_ENV === 'development') { %>
+    <script src="/vendors~popup/popup.js"></script>
+    <% } %>
     <script src="popup.js"></script>
   </body>
 </html>

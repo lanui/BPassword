@@ -38,7 +38,7 @@ let crxConfig = merge(baseConfig, {
 
             if (isDev) {
               jsonContent['content_security_policy'] =
-                "script-src 'self' 'unsafe-eval'; object-src 'self'";
+                "script-src 'self' 'unsafe-eval'; object-src 'self';img-src 'self'";
             }
 
             jsonContent = { ...jsonContent, ...crxManifest };

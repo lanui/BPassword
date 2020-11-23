@@ -129,8 +129,9 @@ export default class AccountController extends EventEmitter {
     }
 
     try {
-      const ret = await Generator.GenerateWalletAndOpen(password);
-      //
+      // const ret = await Generator.GenerateWalletAndOpen(password);
+      const ret = await Generator.GenerateWalletFull(password);
+
       this.store.updateState({ env3: ret.env3 });
 
       this.memStore.updateState({

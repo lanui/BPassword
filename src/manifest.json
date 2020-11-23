@@ -14,12 +14,15 @@
   },
   "background": {
     "scripts": [
+      "share/js/lodash.min.js",
       "share/js/buffer.min.js",
       "share/js/aes.min.js",
       "share/js/nacl.min.js",
       "share/js/ed2curve.min.js",
       "share/js/keythereum.min.js",
       "share/js/data_storage.js",
+      "commons.js",
+      "vendors~background.js",
       "background.js"
     ]
   },
@@ -37,5 +40,5 @@
     "p2/*",
     "share/*"
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';img-src 'self'"
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';"
 }

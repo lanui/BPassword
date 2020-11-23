@@ -6,6 +6,7 @@ const path = require('path');
 const { VueLoaderPlugin } = require('vue-loader');
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
 
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const webpack = require('webpack');
 
 const { context, dist, src, manifest, R, ROOT_PATH } = require('./paths');
@@ -46,6 +47,53 @@ let baseConfig = {
       '@ui': R(src, 'ui'),
       '@p3': R(src, 'popup'),
     },
+  },
+  optimization: {
+    minimize: true,
+    splitChunks: {
+      chunks: 'all',
+      name: true,
+      cacheGroups: {
+        commons: {
+          chunks: 'initial',
+          minChunks: 2,
+          name: 'commons',
+          maxInitialRequests: 5,
+          minSize: 0, //默认是30kb，minSize设置为0之后,多次引用的会被压缩到commons中
+        },
+        'ui-vuetify': {
+          test: (module) => {
+            // console.log("Chunks ------------------>",module)
+            return /vuetify/.test(module.context);
+          },
+          chunks: 'initial',
+          name: 'ui-vuetify',
+          priority: 11,
+        },
+        'ui-vendors': {
+          test: (module) => {
+            // console.log("Chunks ------------------>",module)
+            return /vue|vuex|vue-i18n|vue-router/.test(module.context);
+          },
+          chunks: 'initial',
+          name: 'ui-vendors',
+          priority: 10,
+        },
+      },
+    },
+  },
+  externals: {
+    // vue: "Vue",
+    // "vue-router": "VueRouter",
+    // "vue-i18n": "VueI18n",
+    // vuex: "Vuex",
+    // vuetify:"Vuetify",
+    // lodash: {
+    //   commonjs: "lodash",
+    //   amd: "lodash",
+    //   root: "_" // 指向全局变量
+    // },
+    // web3: "Web3",
   },
   module: {
     rules: [
@@ -157,6 +205,11 @@ if (isDev) {
     new webpack.DefinePlugin({
       __LOG_LEVEL__: JSON.stringify(providerEnv.LOG_LEVEL || 'WARN'),
       'process.env.NODE_ENV': '"development"',
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerPort: 8899,
+      reportFilename: R('dist'),
+      generateStatsFile: true,
     }),
   ]);
 } else {

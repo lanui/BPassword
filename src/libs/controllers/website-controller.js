@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import _ from 'lodash';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
 
@@ -49,10 +49,10 @@ class WebsiteController extends EventEmitter {
     this.activeValtStore = new ObservableStore();
     this.activeValtStore.subscribe(this.notifyLeechPageValtStateListener.bind(this));
 
-    this.on('notify:injet:client', debounce(this.callNotifiedInjetClient.bind(this), 500));
+    this.on('notify:injet:client', _.debounce(this.callNotifiedInjetClient.bind(this), 500));
   }
 
-  /**
+  /*
    *
    * @param {*} tabId
    * @param {*} valtState

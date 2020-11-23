@@ -1,4 +1,4 @@
-import { memoize } from 'lodash';
+// import _ from 'lodash';
 
 import extension from '../extensionizer';
 
@@ -27,7 +27,7 @@ export const checkForError = () => {
 /**
  *
  */
-export const getEnvironmentTypeMemo = memoize((url) => {
+export const getEnvironmentTypeMemo = _.memoize((url) => {
   const parseUrl = new URL(url);
 
   if (parseUrl.pathname === POPUP_PAGER) {

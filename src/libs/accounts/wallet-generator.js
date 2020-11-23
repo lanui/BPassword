@@ -67,6 +67,49 @@ export function GenerateWallet(password) {
   return pWallet;
 }
 
+export function GenerateWalletFull(password) {
+  // create eth account
+  var params = {
+    keyBytes: 32,
+    ivBytes: 16,
+  };
+  var edk = keythereum.create(params);
+  var keyObject = keythereum.dump(password, edk.privateKey, edk.salt, edk.iv, options);
+  //create ed25519 keypair
+  var ed25519KeyPair = nacl.sign.keyPair();
+  //derive aes key
+  var determinsticSalt = ed25519KeyPair.publicKey.slice(0, 8);
+  var pass = Buffer.from(password);
+  var dk = keythereum.deriveKey(Buffer.from(pass), determinsticSalt, {
+    kdf: 'scrypt',
+    kdfparams: {
+      n: 32768,
+    },
+  });
+  //encrypt ed25519 priKey
+  var cipher = aesEncrypt(dk, ed25519KeyPair.secretKey);
+  //base58 encode
+  var base58Cipher = bs58.encode(cipher);
+  //output wallet
+  var subAddr = 'BP' + bs58.encode(ed25519KeyPair.publicKey);
+  var pWallet = {
+    version: 1,
+    mainAddress: '0x' + keyObject.address,
+    crypto: keyObject.crypto,
+    subAddress: subAddr,
+    subCipher: base58Cipher,
+  };
+  //return [pWallet, edk.privateKey, ed25519KeyPair.secretKey]
+
+  return {
+    env3: pWallet,
+    dev3: {
+      MainPriKey: edk.privateKey,
+      SubPriKey: ed25519KeyPair.secretKey,
+    },
+  };
+}
+
 /**
  *
  * @param {*} password
