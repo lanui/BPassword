@@ -34,7 +34,6 @@ global.BPError = BPError;
 // global.browser = require('webextension-polyfill');
 
 let localStore = new LocalStore();
-logger.debug('>>>>>>>>>>', localStore);
 global.$local = localStore;
 
 /**

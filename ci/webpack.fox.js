@@ -57,7 +57,7 @@ let foxConfig = merge(baseConfig, {
 
             if (isDev) {
               jsonContent['content_security_policy'] =
-                "script-src 'self' 'unsafe-eval'; object-src 'self';img-src 'self'";
+                "script-src 'self' 'unsafe-eval'; object-src 'self';";
             }
 
             jsonContent = { ...jsonContent, ...foxManifest };
