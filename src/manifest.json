@@ -30,14 +30,5 @@
     "page": "options/options.html",
     "chrome_style": true
   },
-  "web_accessible_resources": [
-    "contentscript.js",
-    "injet/injet-top.js",
-    "injet/injet-top.js.map",
-    "injet/injet.js",
-    "injet/injet.js.map",
-    "injet/injet.css",
-    "p2/*",
-    "share/*"
-  ]
+  "web_accessible_resources": ["contentscript.js", "share/*"]
 }

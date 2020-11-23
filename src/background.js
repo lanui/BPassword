@@ -32,7 +32,6 @@ import { isFox } from './libs/platforms/utils';
 global.BPError = BPError;
 
 // global.browser = require('webextension-polyfill');
-
 let localStore = new LocalStore();
 global.$local = localStore;
 

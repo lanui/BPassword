@@ -23,7 +23,7 @@ const isDev = providerEnv.NODE_ENV === 'development';
 const isProd = providerEnv.NODE_ENV === 'production';
 
 const { COMM_PATTERNS } = require('./copy-utils');
-const foxManifest = require('../config/manifest-fox.json');
+const foxManifest = require('../src/manifest-fox.json');
 
 console.log('Build locale env>>>>>', JSON.stringify(providerEnv, '/n', 2));
 
@@ -39,6 +39,7 @@ console.log('Build locale env>>>>>', JSON.stringify(providerEnv, '/n', 2));
  *    @comments:
  **********************************************************************/
 let foxConfig = merge(baseConfig, {
+  target: 'web',
   mode: providerEnv.NODE_ENV,
   plugins: [
     new webpack.DefinePlugin({
@@ -58,6 +59,7 @@ let foxConfig = merge(baseConfig, {
             if (isDev) {
               jsonContent['content_security_policy'] =
                 "script-src 'self' 'unsafe-eval'; object-src 'self';";
+            } else {
             }
 
             jsonContent = { ...jsonContent, ...foxManifest };
@@ -69,6 +71,10 @@ let foxConfig = merge(baseConfig, {
   ],
 });
 
+/** ContentScript */
+
+const foxjetConfig = require('./webpack.foxjet.js');
+
 if (process.env.HMR === 'true') {
   foxConfig.plugins = (foxConfig.plugins || []).concat([
     new ExtensionReloader({
@@ -76,15 +82,24 @@ if (process.env.HMR === 'true') {
       manifest: manifest,
       reloadPage: true,
       entries: {
-        contentScript: [],
+        contentScript: [R(src, 'foxjet/index.js'), 'foxjet/top-injet', 'foxjet/sub-injet'],
         background: 'background',
       },
       extensionPage: ['popup/popup.html'],
     }),
   ]);
+
+  // foxjetConfig.plugins = (foxjetConfig.plugins || []).concat([
+  //   new ExtensionReloader({
+  //     port: 9527,
+  //     reloadPage: false,
+
+  //     entries: {
+  //       contentScript: ["contentscript", "foxjet/top-injet","foxjet/sub-injet"],
+  //     },
+  //   }),
+  // ]);
 }
-// "externally_connectable": {
-//   "ids": ["*"],
-//     "matchex": ["*://moz-extension/*"]
-// },
-module.exports = foxConfig;
+
+module.exports = [foxConfig, foxjetConfig];
+// module.exports = foxConfig;
