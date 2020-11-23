@@ -15,13 +15,14 @@
     "build:dev": "cross-env NODE_ENV=development webpack --config ci/webpack.config.js --hide-modules",
     "build-zip": "node ci/build-zip.js",
     "watch": "cross-env HMR=true npm run build -- --watch",
-    "watch:crx": "cross-env HMR=true npm run build:dev -- --watch",
     "init:dev": "node ci/init-development-env.js",
     "watch:prod": "cross-env APP_VERSION=2.0.0 HMR=true npm run build:dev -- ",
     "build-pre": "cross-env HMR=true NODE_ENV=development  webpack --config ci/webpack.config.js --hide-modules",
     "pre:watch": "cross-env HMR=true npm run build-pre -- --watch",
-    "watch:fox": "cross-env EXT_TARGET=firefox HMR=true npm run build:dev -- --watch",
-    "build:fox": "cross-env APP_VERSION=1.0.0 EXT_TARGET=firefox LOG_LEVEL=WARN webpack --config ci/webpack.config.js --hide-modules",
+    "build:crx": "cross-env EXT_TARGET=chrome webpack --config ci/webpack.crx.js --hide-modules",
+    "watch:crx": "cross-env HMR=true LOG_LEVEL=DEBUG npm run build:crx -- --watch",
+    "build:fox": "cross-env EXT_TARGET=firefox webpack --config ci/webpack.fox.js --hide-modules",
+    "watch:fox": "cross-env HMR=true LOG_LEVEL=DEBUG npm run build:fox -- --watch",
     "zip-fox": "cross-env LOG_LEVEL=WARN node ci/zip-fox.js",
     "sign": "web-ext sign --config ci/webext-config.js "
   },
@@ -111,6 +112,7 @@
     "web-ext-types": "^3.2.1",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "webpack-extension-reloader": "^1.1.4"
+    "webpack-extension-reloader": "^1.1.4",
+    "webpack-merge": "4.2.2"
   }
 }
