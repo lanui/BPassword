@@ -7,15 +7,22 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "js": ["contentscript.js", "foxjet/top-injet.js"],
+      "match_about_blank": false,
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
       "css": ["share/css/injet.css"],
-      "js": ["contentscript.js", "foxjet/top-injet.js", "foxjet/sub-injet.js"],
+      "js": ["foxjet/sub-injet.js"],
       "match_about_blank": false,
       "run_at": "document_end",
       "all_frames": true
     }
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
-  "web_accessible_resources": ["contentscript.js", "foxjet/*", "p2/*", "share/*"],
+  "web_accessible_resources": ["contentscript.js", "foxjet/*.js", "p2/*", "share/*"],
   "permissions": [
     "<all_urls>",
     "tabs",

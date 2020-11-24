@@ -82,7 +82,7 @@ if (process.env.HMR === 'true') {
       manifest: manifest,
       reloadPage: true,
       entries: {
-        contentScript: [R(src, 'foxjet/index.js'), 'foxjet/top-injet', 'foxjet/sub-injet'],
+        contentScript: [R(src, 'foxjet/contentscript.js'), 'foxjet/top-injet', 'foxjet/sub-injet'],
         background: 'background',
       },
       extensionPage: ['popup/popup.html'],

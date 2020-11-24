@@ -54,10 +54,20 @@ let baseConfig = {
       chunks: 'all',
       name: true,
       cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          // filename: "commons/vendors-lib.js",
+          chunks: 'all',
+          minChunks: 1,
+          minSize: 0,
+          priority: -10,
+          reuseExistingChunk: true,
+        },
         commons: {
           chunks: 'initial',
           minChunks: 2,
           name: 'commons',
+          // filename:"commons/ext-lib.js",
           maxInitialRequests: 5,
           minSize: 0, //默认是30kb，minSize设置为0之后,多次引用的会被压缩到commons中
         },
@@ -68,15 +78,17 @@ let baseConfig = {
           },
           chunks: 'initial',
           name: 'ui-vuetify',
+          // filename:"ui-vuetify.js",
           priority: 11,
         },
-        'ui-vendors': {
+        'ui-vues': {
           test: (module) => {
             // console.log("Chunks ------------------>",module)
             return /vue|vuex|vue-i18n|vue-router/.test(module.context);
           },
           chunks: 'initial',
-          name: 'ui-vendors',
+          name: 'ui-vues',
+          // filename: "ui-vues.js",
           priority: 10,
         },
       },
@@ -181,6 +193,7 @@ let baseConfig = {
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
+      chunkFilename: '[name].css',
     }),
     new CopyPlugin({
       patterns: [...COMM_PATTERNS],

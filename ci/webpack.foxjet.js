@@ -10,6 +10,7 @@ const config = require('../config');
 
 const foxjetConfig = {
   target: 'web',
+  watch: isDev,
   mode: providerEnv.NODE_ENV,
   context: R(src, 'foxjet'),
   entry: {
@@ -60,10 +61,16 @@ const foxjetConfig = {
       filename: '[name].css',
     }),
   ],
+  watchOptions: {
+    // 监控
+    poll: 1000, // 每秒 1000次
+    aggregateTimeout: 500, // 防抖
+    ignored: /node_modules/, // 不需要监控的文件夹
+  },
 };
 
 if (isDev) {
-  foxjetConfig.devtool = config.devtool;
+  foxjetConfig.devtool = config.jetDevtool;
   foxjetConfig.plugins = (foxjetConfig.plugins || []).concat([
     new webpack.DefinePlugin({
       __LOG_LEVEL__: JSON.stringify(providerEnv.LOG_LEVEL || 'WARN'),
