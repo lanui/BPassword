@@ -38,6 +38,7 @@ export const API_RT_DELETE_MOB_ITEM = 'bpDeleteMobileItem';
 /** integrated runtime api types */
 
 /** API_JET */
+export const API_FETCH_EXT_STATE = 'bpInjetFetchExtInfo';
 export const API_JET_INIT_STATE = 'bpInjetInitState';
 
 /** Tab */

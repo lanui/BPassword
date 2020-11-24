@@ -2,6 +2,8 @@ import { nanoid } from 'nanoid';
 import extension from '../../extensionizer';
 import logger from '../../logger';
 
+import { injetExtState } from './extension-info';
+
 import {
   API_RT_CREATE_WALLET,
   API_RT_IMPORT_WALLET,
@@ -14,6 +16,7 @@ import {
   API_RT_EDIT_MOB_ITEM,
   API_RT_DELETE_MOB_ITEM,
   API_RT_FILL_FEILDS,
+  API_FETCH_EXT_STATE,
 } from '../../msgapi/api-types';
 
 import { checkApiType } from '../../msgapi';
@@ -36,6 +39,20 @@ class WhisperperListener {
     this._uuid = nanoid();
 
     extension.runtime.onMessage.addListener(HandleCypherApi.bind(this));
+  }
+
+  getExtInfo(reqData, sender) {
+    const respData = {
+      ...reqData,
+      ts: new Date().getTime(),
+      extid: 'bpassword_ext@gmail.com',
+    };
+
+    if (sender && sender.id === extension.runtime.id) {
+      return Object.assign({}, respData, injetExtState());
+    } else {
+      return respData;
+    }
   }
 
   async createWallet(reqData) {
@@ -140,6 +157,9 @@ async function HandleCypherApi(message, sender, sendResp) {
   try {
     let reqData = message.reqData;
     switch (apiType) {
+      case API_FETCH_EXT_STATE:
+        logger.debug('API_FETCH_EXT_STATE>>>>>>>>>>>>>>>>>>>>>>>>>>', sender, extension.runtime.id);
+        return this.getExtInfo(reqData, sender);
       case API_RT_CREATE_WALLET:
         return this.createWallet(reqData);
       case API_RT_IMPORT_WALLET:

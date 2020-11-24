@@ -41,6 +41,11 @@ console.log('Build locale env>>>>>', JSON.stringify(providerEnv, '/n', 2));
 let foxConfig = merge(baseConfig, {
   target: 'web',
   mode: providerEnv.NODE_ENV,
+  entry: {
+    contentscript: R(src, 'inpage/index.js'),
+    'inpage/top-injet': R(src, 'inpage/fox/top-injet.js'),
+    'inpage/sub-injet': R(src, 'inpage/fox/sub-injet.js'),
+  },
   plugins: [
     new webpack.DefinePlugin({
       __EXT_TARGET__: '"firefox"',
@@ -71,10 +76,6 @@ let foxConfig = merge(baseConfig, {
   ],
 });
 
-/** ContentScript */
-
-const foxjetConfig = require('./webpack.foxjet.js');
-
 if (process.env.HMR === 'true') {
   foxConfig.plugins = (foxConfig.plugins || []).concat([
     new ExtensionReloader({
@@ -82,12 +83,16 @@ if (process.env.HMR === 'true') {
       manifest: manifest,
       reloadPage: true,
       entries: {
-        contentScript: [R(src, 'foxjet/contentscript.js'), 'foxjet/top-injet', 'foxjet/sub-injet'],
+        contentScript: ['contentscript', 'foxjet/top-injet', 'foxjet/sub-injet'],
         background: 'background',
       },
       extensionPage: ['popup/popup.html'],
     }),
   ]);
+
+  /** ContentScript */
+
+  const foxjetConfig = require('./webpack.foxjet.js');
 
   // foxjetConfig.plugins = (foxjetConfig.plugins || []).concat([
   //   new ExtensionReloader({
@@ -101,5 +106,5 @@ if (process.env.HMR === 'true') {
   // ]);
 }
 
-module.exports = [foxConfig, foxjetConfig];
-// module.exports = foxConfig;
+// module.exports = [foxConfig, foxjetConfig];
+module.exports = foxConfig;

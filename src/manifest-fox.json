@@ -7,7 +7,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["contentscript.js", "foxjet/top-injet.js"],
+      "js": ["commons.js", "contentscript.js", "inpage/top-injet.js"],
       "match_about_blank": false,
       "run_at": "document_idle",
       "all_frames": false
@@ -15,14 +15,14 @@
     {
       "matches": ["<all_urls>"],
       "css": ["share/css/injet.css"],
-      "js": ["foxjet/sub-injet.js"],
+      "js": ["commons.js", "inpage/sub-injet.js"],
       "match_about_blank": false,
-      "run_at": "document_end",
+      "run_at": "document_idle",
       "all_frames": true
     }
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
-  "web_accessible_resources": ["contentscript.js", "foxjet/*.js", "p2/*", "share/*"],
+  "web_accessible_resources": ["commons.js", "contentscript.js", "inpage/*.js", "p2/*", "share/*"],
   "permissions": [
     "<all_urls>",
     "tabs",
