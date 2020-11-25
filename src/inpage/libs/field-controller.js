@@ -34,8 +34,9 @@ export const USERNAME_SELECTOR =
   'input[type="mail"][name],input[type="text"][name],input[type="text"][id],input[type="text"]';
 
 class FieldController extends BaseController {
-  constructor() {
+  constructor({ extid }) {
     super({ type: '__bpfield_' });
+    this.extid = extid;
 
     /** ------- event -------- */
     this.on('lookup:login:fields', this.checkLoginForm.bind(this));
@@ -109,6 +110,34 @@ class FieldController extends BaseController {
 
     return valtState;
   }
+
+  sendTargetPosition(activedTarget) {
+    logger.debug('*********************************************', activedTarget);
+    if (
+      !activedTarget ||
+      !activedTarget.getBoundingClientRect() ||
+      activedTarget.getBoundingClientRect().width === 0
+    )
+      return;
+
+    const domRect = activedTarget.getBoundingClientRect();
+    const transportMsg = {
+      posterId: this.getId(),
+      extid: this.extid,
+      nodeRootHref: window.location.href,
+      domRects: [
+        {
+          uuid: this.getId(),
+          domRect,
+          iframeSrc: window.location.href,
+          activedField: activedTarget === this.targetUsername ? 'username' : 'password',
+        },
+      ],
+    };
+
+    logger.debug('transportMsg*********************************************', transportMsg);
+    window.parent.postMessage(transportMsg, '*');
+  }
 }
 
 export default FieldController;
@@ -133,14 +162,15 @@ function BindingFocusEvents() {
     elem.addEventListener('focusin', (e) => {
       ctx.setActivedTarget(e.target);
 
+      //TODO send message to top & jet message listener
+      ctx.sendTargetPosition(e.target);
+
       const activedValtState = ctx.getValtState(e.target);
 
       //TODO send valtState to background
 
       // enabled:input:valtChanged event
       ctx.emit('enabled:input:valtChanged', e.target);
-
-      //TODO send message to top & jet message listener
 
       drawBPassButtonRoot.call(ctx, e);
 

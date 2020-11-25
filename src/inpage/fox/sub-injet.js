@@ -7,6 +7,8 @@ import { BPASS_BUTTON_TAG, BpassButton } from '../libs/bpass-button';
 
 import FieldController from '../libs/field-controller';
 
+const browser = require('webextension-polyfill');
+
 /*********************************************************************
  * AircraftClass ::
  *    @description:
@@ -20,11 +22,10 @@ import FieldController from '../libs/field-controller';
  **********************************************************************/
 
 if (shouldActivedJet()) {
-  const jet7id = nanoid();
+  const extid = browser.runtime.id;
 
-  injectNumSeven(jet7id, 'BPassword_ext@gmali.com');
   window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
-  startup().catch((err) => {
+  startup(extid).catch((err) => {
     logger.warn('SubJetStartup failed.', err);
   });
 }
@@ -32,13 +33,13 @@ if (shouldActivedJet()) {
 /**
  * subInjet Startup
  */
-async function startup() {
+async function startup(extid) {
   //make sure dom element rendered
   await domIsReady();
 
   //
-  const controller = new FieldController();
-  logger.debug('Sub script injected.>>>>>>>>>>>>>>>>>>', LOG_LEVEL);
+  const controller = new FieldController({ extid });
+  logger.debug('Sub script injected.>>>>>>>>>>>>>>>>>>', LOG_LEVEL, extid);
   if (LOG_LEVEL === 'DEBUG') {
     window.fctx = controller;
   }

@@ -16,7 +16,7 @@
         </span>
       </div>
       <div class="drawer-footer-row">
-        <span class="ext-test-ver">测试版</span>
+        <span class="ext-test-ver"></span>
       </div>
     </div>
   </v-footer>

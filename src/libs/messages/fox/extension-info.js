@@ -13,6 +13,9 @@ import extension from '../../extensionizer';
  **********************************************************************/
 export const TOP_ENTRY_FILE = 'inpage/top-injet.js';
 export const SUB_ENTRY_FILE = 'inpage/sub-injet.js';
+export const LEECH_INDEX_PATH = 'leech/leech.html';
+export const LEECH_ADDOR_PATH = 'leech/leech.html#/add_passbook';
+//#/add_passbook
 
 export const injetExtState = (isChrome = false) => {
   let runtime = extension.runtime;
@@ -20,5 +23,7 @@ export const injetExtState = (isChrome = false) => {
     extid: runtime.id,
     topInjetSrc: runtime.getURL(TOP_ENTRY_FILE),
     subInjetSrc: runtime.getURL(TOP_ENTRY_FILE),
+    leechIndexSrc: runtime.getURL(LEECH_INDEX_PATH),
+    leechaAddorSrc: runtime.getURL(LEECH_ADDOR_PATH),
   };
 };

@@ -1,5 +1,7 @@
-import EventEmitter from 'events';
+import ObservableStore from 'obs-store';
 import logger from '@lib/logger';
+
+import BaseController from './base-controller';
 
 /*********************************************************************
  * AircraftClass ::
@@ -15,7 +17,7 @@ import logger from '@lib/logger';
  *      so all dependencies extid resources need fetch back used message
  *      at instance lifetime
  **********************************************************************/
-class TopController extends EventEmitter {
+class TopController extends BaseController {
   constructor(opts = {}) {
     super();
 
@@ -25,6 +27,8 @@ class TopController extends EventEmitter {
       matchedNum: 0,
       exactMatched: false,
     });
+
+    logger.debug('>>>TopController>>>>>>>>>>>>>>>>>>', this.getId());
   }
 }
 

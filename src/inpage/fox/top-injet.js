@@ -17,19 +17,23 @@ import browser from 'webextension-polyfill';
  *    @created:  2020-11-24
  *    @comments:
  **********************************************************************/
-let extInfo = !1;
+
+logger.debug('top script injected.>>>>>>>>>>>>>>>>>>');
 
 const posiChains = [];
 const ifrCommunications = {};
 if (shouldActivedJet()) {
   logger.debug('top script injected.>>>>>>>>>>>>>>>>>>');
 
-  fetchInitTopConfig();
-  const controller = new TopController({});
+  const topCtx = new TopController({});
+  global.topCtx = topCtx;
 
   if (LOG_LEVEL === 'DEBUG') {
-    global.tctx = controller;
+    logger.warn('BPassword is Development Mode.', LOG_LEVEL);
+    global.topCtx = topCtx;
   }
+
+  // fetchInitTopConfig();
 }
 
 function startupTopJetMessageListener() {
