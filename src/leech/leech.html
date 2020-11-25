@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%=APP_NAME%>-leech</title>
+    <% if (NODE_ENV === 'development') { %>
+    <link rel="stylesheet" href="../vendors~leech/leech.css" />
+    <% } %>
+    <link rel="stylesheet" href="leech.css" />
+  </head>
+
+  <body id="LeechBody">
+    <div id="Root"></div>
+    <script src="/commons.js"></script>
+    <script src="/ui-vues.js"></script>
+    <script src="/ui-vuetify.js"></script>
+    <% if (NODE_ENV === 'development') { %>
+    <script src="/vendors~leech/leech.js"></script>
+    <% } %>
+    <script src="leech.js"></script>
+  </body>
+</html>

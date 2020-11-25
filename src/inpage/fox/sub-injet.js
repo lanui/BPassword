@@ -1,6 +1,11 @@
 import { nanoid } from 'nanoid';
+
 import logger from '@lib/logger';
+import { LOG_LEVEL } from '@lib/code-settings';
 import { shouldActivedJet } from '../injet-helper';
+import { BPASS_BUTTON_TAG, BpassButton } from '../libs/bpass-button';
+
+import FieldController from '../libs/field-controller';
 
 /*********************************************************************
  * AircraftClass ::
@@ -17,11 +22,34 @@ import { shouldActivedJet } from '../injet-helper';
 if (shouldActivedJet()) {
   const jet7id = nanoid();
 
-  domIsReady().then((ret) => {
-    injectNumSeven(jet7id, 'BPassword-extId');
+  injectNumSeven(jet7id, 'BPassword_ext@gmali.com');
+  window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
+  startup().catch((err) => {
+    logger.warn('SubJetStartup failed.', err);
   });
 }
 
+/**
+ * subInjet Startup
+ */
+async function startup() {
+  //make sure dom element rendered
+  await domIsReady();
+
+  //
+  const controller = new FieldController();
+  logger.debug('Sub script injected.>>>>>>>>>>>>>>>>>>', LOG_LEVEL);
+  if (LOG_LEVEL === 'DEBUG') {
+    window.fctx = controller;
+  }
+  controller.checkLoginForm();
+}
+
+/**
+ * Management Position Message
+ * @param {string} uuid
+ * @param {string} extid
+ */
 function injectNumSeven(uuid, extid) {
   const jectContent = `
     (function(id,extid){
@@ -83,8 +111,8 @@ function injectNumSeven(uuid, extid) {
         console.log("Start Resize listener.....")
       }
 
-      window.bPListenerChain = new BPListenerChain(id,extid);
-      window.bPListenerChain.startListner();
+      window.__bPListenerChain = new BPListenerChain(id,extid);
+      window.__bPListenerChain.startListner();
 
     })(\"${uuid}\",\"${extid}\");
   `;
@@ -97,6 +125,12 @@ function injectNumSeven(uuid, extid) {
     const scriptEl = document.createElement('script');
     scriptEl.setAttribute('async', 'false');
     scriptEl.textContent = jectContent;
+
+    scriptEl.onload = function () {
+      if (LOG_LEVEL !== 'DEBUG') {
+        this.parentNode.removeChild(this);
+      }
+    };
 
     domContainer.appendChild(scriptEl);
     logger.debug('injectmessage success.');

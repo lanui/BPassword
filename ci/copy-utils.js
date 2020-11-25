@@ -17,6 +17,7 @@ const COMM_PATTERNS = [
   { from: R(src, 'icons'), to: R(dist, 'icons'), globOptions: { ignore: ['**/icon.xcf'] } },
   { from: R(src, 'share'), to: R(dist, 'share') },
   { from: R(src, 'popup/popup.html'), to: R(dist, 'popup/popup.html'), transform: transformHtml },
+  { from: R(src, 'leech/leech.html'), to: R(dist, 'leech/leech.html'), transform: transformHtml },
 ];
 
 function transformHtml(content) {

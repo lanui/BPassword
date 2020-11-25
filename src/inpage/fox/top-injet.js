@@ -3,7 +3,8 @@ import { shouldActivedJet } from '../injet-helper';
 import { LOG_LEVEL } from '@lib/code-settings';
 import TopController from '../libs/top-controller';
 
-import { API_WIN_FINDED_LOGIN } from '@lib/msgapi/api-types';
+import { API_WIN_FINDED_LOGIN, API_FETCH_EXT_STATE } from '@lib/msgapi/api-types';
+import browser from 'webextension-polyfill';
 
 /*********************************************************************
  * AircraftClass ::
@@ -23,6 +24,7 @@ const ifrCommunications = {};
 if (shouldActivedJet()) {
   logger.debug('top script injected.>>>>>>>>>>>>>>>>>>');
 
+  fetchInitTopConfig();
   const controller = new TopController({});
 
   if (LOG_LEVEL === 'DEBUG') {
@@ -48,6 +50,18 @@ function startupTopJetMessageListener() {
         break;
     }
   });
+}
+
+async function fetchInitTopConfig() {
+  try {
+    const topConfState = await browser.runtime.sendMessage({
+      apiType: API_FETCH_EXT_STATE,
+      reqData: { fetch: 'topInjet' },
+    });
+    logger.debug('top script injected.>>>>>>>>>>>>>>>>>>', topConfState);
+  } catch (error) {
+    logger.debug('top script injected.error>>>>>>>>>>>>>>>>>>', error);
+  }
 }
 
 function startupInjet() {

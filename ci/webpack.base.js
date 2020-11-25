@@ -34,6 +34,7 @@ let baseConfig = {
   entry: {
     background: R(src, './background.js'),
     'popup/popup': R(src, './popup/popup.js'),
+    'leech/leech': R(src, './leech/leech.js'),
   },
   output: {
     path: dist,

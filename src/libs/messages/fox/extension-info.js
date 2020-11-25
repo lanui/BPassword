@@ -11,10 +11,10 @@ import extension from '../../extensionizer';
  *    @created:  2020-11-24
  *    @comments: Background support public to Trusted Page Info
  **********************************************************************/
-export const TOP_ENTRY_FILE = 'foxjet/top-injet.js';
-export const SUB_ENTRY_FILE = 'foxjet/sub-injet.js';
+export const TOP_ENTRY_FILE = 'inpage/top-injet.js';
+export const SUB_ENTRY_FILE = 'inpage/sub-injet.js';
 
-export const injetExtState = () => {
+export const injetExtState = (isChrome = false) => {
   let runtime = extension.runtime;
   return {
     extid: runtime.id,
