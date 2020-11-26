@@ -273,19 +273,25 @@ class BackMainController extends EventEmitter {
 
   async setupInjetCommunication(port) {
     const sender = port.sender;
+    logger.debug('BackMainController:setupInjetSubCommunication>origin>>>', sender);
 
-    const { tab, origin, id } = sender;
+    //fixed firefox has url ,chrome has origin
+    const { tab, origin, url, id } = sender;
     let hostname = '';
-    try {
-      hostname = new URL(origin).hostname;
-    } catch (ex) {
-      logger.debug(`get hostname err [${origin}]:`, ex);
+    let hostUrl = origin || url;
+    if (!hostUrl) {
+      logger.warn('BackMainController:setupInjetSubCommunication: no url or origin in Sender.');
+      return;
     }
-    if (!sender || !origin || !hostname || !tab) {
+    try {
+      hostname = new URL(hostUrl).hostname;
+    } catch (ex) {
+      logger.debug(`get hostname err [${hostUrl}]:`, ex);
+    }
+    if (!sender || !hostname || !tab) {
       return;
     }
 
-    logger.debug('BackMainController:setupInjetSubCommunication>origin>>>', origin, hostname);
     const portStream = new PortStream(port);
 
     const tabId = tab.id;

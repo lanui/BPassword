@@ -46,7 +46,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
     username = '',
     password = '',
     hostname = '',
-    activeField = '',
+    activedField = '',
   } = options;
 
   let rows = 0,
@@ -54,7 +54,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
 
   if (!isUnlocked) {
     if ((username && password) || matchedNum) {
-      if (activeField === 'password') {
+      if (activedField === 'password') {
         return {
           isUnlocked,
           rows: matchedNum,
@@ -96,7 +96,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
           elemType: 'erase',
           tag: 'hidden page,exactMatched',
         };
-      } else if (activeField === 'password') {
+      } else if (activedField === 'password') {
         const nameMatched = items.find((it) => it.username === username);
         if (nameMatched) {
           return {
@@ -118,7 +118,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
             tag: 'show page,no matched name and password',
           };
         }
-      } else if (activeField === 'username') {
+      } else if (activedField === 'username') {
         //聚焦username
         const _actUnameFilters = items.filter((it) => it.username.startsWith(username));
         if (_actUnameFilters.length > 0) {

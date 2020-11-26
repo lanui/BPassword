@@ -26,29 +26,26 @@ async function startup() {
 }
 
 function fetchExtensionConfig() {
-  // browser.runtime.sendMessage({
-  //   apiType: API_FETCH_EXT_STATE,
-  //   reqData: { fetch: 'InjetExtInfo' },
-  // }).then(configState => {
-  //   const { extid } = configState
-  //   const uuid = nanoid()
-
-  // }).catch(err => {
-  //   logger.warn('BPassword failed.', err);
-  // });
-
   const uuid = nanoid();
   const leechSrc = browser.runtime.getURL('leech/leech.html');
   const extid = browser.runtime.id;
-  logger.debug('Cape7>>>>>>>', window.location.href, browser.runtime.getURL('leech/leech.html'));
+  // logger.debug('Cape7>>>>>>>', window.location.href, browser.runtime.getURL('leech/leech.html'));
   inJectNo7(uuid, extid, leechSrc);
 }
+/**
+ * inject Top bpass-selector
+ * @param {*} extid
+ * @param {*} leechSrc
+ * @param {*} leechAddorSrc
+ */
+function injectChannel5(extid, leechSrc, leechAddorSrc) {}
 
 function inJectNo7(uuid, extid, leechSrc) {
   const jetContent = `
-    (function(id,extid,leechSrc){
-      function BPListenerChain(id,extId,leechSrc){
-        this.uuid = id;
+    (function(uuid,extid,leechSrc){
+      console.log("Starting BPListenerChain:",uuid,extid,leechSrc)
+      function BPListenerChain(){
+        this.uuid = uuid;
         this.extid = extid;
         this.leechSrc = leechSrc;
         this.nodeRootHref = \"${window.location.href}\";
@@ -56,70 +53,65 @@ function inJectNo7(uuid, extid, leechSrc) {
       }
 
       BPListenerChain.leechSrc = leechSrc
+      BPListenerChain.extid = extid
 
-      BPListenerChain.prototype.startListener = function (){
+      BPListenerChain.prototype.startListener = function(){
+        const _this = this;
         window.addEventListener('message',(evt)=>{
-          const recData = evt.data;
+          /**console.log('No Seven Received :',evt); */
 
-          if(recData && recData.extid === this.extid && recData.nodeRootHref){
-            console.log("RECEIVED:BP>>>>>>>>>>>>>>",recData)
-
-            const findHref = recData.nodeRootHref
-            const uuid = recData.posterId,
-            const ifrPosi = {
-              uuid:uuid,
-              iframeSrc:findHref
-            };
-            const isContinue = (window.self !== window.parent);
+          const recData = evt.data
+          if(recData && recData.extid && recData.extid === _this.extid){
+            console.log('No Seven Received data:',recData);
+            const findHref = recData.nodeRootHref;
+            const recPosterId = recData.posterId;
 
             const transportMessage = {
-              extid:this.extId,
-              posterId: this.uuid,
+              extid:_this.extid,
+              posterId: _this.uuid,
               nodeRootHref:window.location.href,
-              domRects:recData.domRects||[]
+              domRects:Object.assign([],recData.domRects||[])
             };
-
 
             let domRect = false;
             document.querySelectorAll('iframe').forEach(ifr =>{
-              console.log('Lookup href result>>>',findHref,ifr.src,isContinue)
+              /** console.log('Matched Href:',ifr.src , findHref); */
               if(ifr.src === findHref) {
-                domRect = ifr.getBoundingClientRect()
+                domRect = ifr.getBoundingClientRect();
               }
-            });
+            })
 
-            console.log('Lookup href result>>>',window.location.href,domRect,isContinue)
+            const isContinue = window.self !== window.parent
+            const ifrPosi = {
+              uuid:recPosterId,
+              iframeSrc:findHref
+            };
 
-            if(domRect){
-              ifrPosi.domRect = domRect
-              transportMessage.domRects.push(ifrPosi)
+            if(domRect) {/** find iframe */
+              ifrPosi.domRect = domRect;
+              transportMessage.domRects.push(ifrPosi);
 
-              this.domRects = transportMessage.domRects
-              if(isContinue) {
-                window.parent.postMessage(transportMessage,"*")
-              }else {
-                window.__BPTopPosiChains = transportMessage.domRects
-                //if Selector find update position
+              _this.domRects = Object.assign([],transportMessage.domRects);
+
+              if(isContinue){
+                window.parent.postMessage(transportMessage,"*");
+              }else{
+                window.__bpTopPosiChains = transportMessage.domRects;
               }
-            }else {
-              this.domRects = transportMessage.domRects
-              // Zero Level
-              window.__BPTopPosiChains = transportMessage.domRects
+            }else{
+              /** unfound iframe, */
+              _this.domRects = Object.assign([],transportMessage.domRects);
+              window.__bpTopPosiChains = transportMessage.domRects;
             }
           }else {
-            // console.warn('may be an error occurred for find iframe.')
+            /** not BP system Message */
           }
         });
       }
 
-      BPListenerChain.prototype.startResizeListener = function(){
-        /** resize  */
-        console.log("Start Resize listener.....")
-      }
-
-      window.__bPListenerChain = new BPListenerChain(id,extid,leechSrc);
+      window.__bPListenerChain = new BPListenerChain();
       window.__bPListenerChain.startListener();
-    })(\"${uuid}\",\"${extid}\",\"${leechSrc}\")
+    })(\"${uuid}\",\"${extid}\",\"${leechSrc}\");
   `;
 
   // Inject
@@ -138,9 +130,9 @@ function inJectNo7(uuid, extid, leechSrc) {
     };
 
     domContainer.appendChild(scriptEl);
-    logger.debug('inject cape 7 message success.');
+    // logger.debug('inject cape 7 message success.');
   } catch (err) {
-    logger.debug('inject cape 7 message failed.', error);
+    logger.warn('inject cape 7 message failed.', error);
   }
 }
 

@@ -37,8 +37,6 @@ function injetExtInfo(configState) {
       (function(configSerialize){
         if(configSerialize){
           const config = JSON.parse(configSerialize)
-          console.log('>>>>>>>>>>>>>>>>>>>&&&&&&&&&&&&>>>>>>>>',config)
-
           window.__bp_extconfig = config
         }
       })('${serialize}')

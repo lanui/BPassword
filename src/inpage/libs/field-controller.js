@@ -1,7 +1,10 @@
 import { debounce } from 'lodash';
+import ObservableStore from 'obs-store';
 
 import logger from '@lib/logger';
 import BaseController from './base-controller';
+import Zombie from '@lib/messages/corpse-chaser';
+import { ifrSizeCalcWhenValtChanged } from '@lib/controllers/size-calculator';
 
 import {
   API_WIN_FINDED_LOGIN,
@@ -38,13 +41,34 @@ class FieldController extends BaseController {
     super({ type: '__bpfield_' });
     this.extid = extid;
 
+    this.backendStore = new ObservableStore({ isUnlocked: false, items: [], matchedNum: 0 });
+
     /** ------- event -------- */
     this.on('lookup:login:fields', this.checkLoginForm.bind(this));
     this.on('enabled:input:valtChanged', this.enabledInputFieldValtChangedListener.bind(this));
     this.on('disabled:input:valtChanged', this.disabledInputFieldValtChangedListener.bind(this));
+
+    this.once('actived:zombie-communication', this.activedZombieCommunication.bind(this));
   }
 
   /** =========================== Event Methods Start ============================== */
+
+  /**
+   *
+   * @param {string} hostname must
+   */
+  activedZombieCommunication(hostname) {
+    const opts = {
+      hostname,
+      portName: ENV_TYPE_INJET,
+      includeTlsChannelId: false,
+      updateMatchedState: this.updateBackendStore.bind(this),
+      filledInputFeilds: this.filledInputFields.bind(this),
+    };
+
+    this.zombie = new Zombie(opts);
+    this.zombie.startupZombie({ hostname });
+  }
 
   enabledInputFieldValtChangedListener(el) {
     logger.debug('FieldController:enabledInputFieldValtChangedListener#on>>>>>>', el);
@@ -60,11 +84,34 @@ class FieldController extends BaseController {
     el && el.removeEventListener('input', this.inputFieldValtChangedHandler.bind(this), true);
   }
 
+  /**
+   *
+   * @param {*} target
+   */
   inputFieldValtChangedHandler(target) {
-    logger.debug('inputFieldValtChangedHandler>>>', target, target.value);
+    const valtState = this.getValtState(target);
+    // logger.debug('inputFieldValtChangedHandler>>>', target, valtState);
+    this._sendMessageToTop(API_WIN_SELECTOR_UP_VALT, valtState);
   }
 
   /** =========================== Methods Start ============================== */
+
+  updateBackendStore(state) {
+    if (typeof state === 'object') {
+      this.backendStore.updateState(state);
+    }
+  }
+
+  filledInputFields(valtState) {
+    if (typeof valtState !== 'object') {
+      return;
+    }
+    const { username = '', password = '' } = valtState;
+
+    this.targetUsername && (this.targetUsername.value = username);
+    this.targetPassword && (this.targetPassword.vaule = password);
+  }
+
   /**
    * lookup password & username field element
    */
@@ -76,6 +123,7 @@ class FieldController extends BaseController {
     const hasFinded = targetPassword && targetUsername;
 
     if (hasFinded) {
+      const hostname = this.getHost();
       /**
        *
        * 0.bind focus events
@@ -88,8 +136,37 @@ class FieldController extends BaseController {
        */
       BindingFocusEvents.call(this);
 
-      // TODO emit active Long connect background
+      // send API_WIN_FINDED_LOGIN Message
+      const findedData = {
+        isInner: window.self !== window.top,
+        senderId: this.getId(),
+        href: window.location.href,
+        hostname: hostname,
+      };
+
+      this._sendMessageToTop(API_WIN_FINDED_LOGIN, findedData);
+
+      // emit active Long connect background
+      this.emit('actived:zombie-communication', hostname);
     }
+  }
+
+  _sendMessageToTop(apiType, data) {
+    const sendMessage = {
+      apiType,
+      data,
+    };
+    window.top.postMessage(sendMessage, '*');
+  }
+
+  /**
+   * warning : activeField -> activedField
+   * @param {element} activedTarget
+   */
+  _comboParams(activedTarget) {
+    const valtState = this.getValtState(activedTarget);
+    const backendState = this.backendStore.getState();
+    return { ...backendState, ...valtState };
   }
 
   setActivedTarget(target) {
@@ -102,7 +179,8 @@ class FieldController extends BaseController {
 
   getValtState(activedTarget) {
     const valtState = {
-      activeField: activedTarget && activedTarget === this.targetPassword ? 'password' : 'username',
+      activedField:
+        activedTarget && activedTarget === this.targetPassword ? 'password' : 'username',
       hostname: this.getHost(),
       username: this.targetUsername ? this.targetUsername.value : '',
       password: this.targetPassword ? this.targetPassword.value : '',
@@ -111,14 +189,18 @@ class FieldController extends BaseController {
     return valtState;
   }
 
+  /**
+   * actived the first Position chain message
+   * @param {element} activedTarget
+   */
   sendTargetPosition(activedTarget) {
-    logger.debug('*********************************************', activedTarget);
     if (
       !activedTarget ||
       !activedTarget.getBoundingClientRect() ||
       activedTarget.getBoundingClientRect().width === 0
-    )
+    ) {
       return;
+    }
 
     const domRect = activedTarget.getBoundingClientRect();
     const transportMsg = {
@@ -134,8 +216,7 @@ class FieldController extends BaseController {
         },
       ],
     };
-
-    logger.debug('transportMsg*********************************************', transportMsg);
+    logger.debug('actived the first Position chain message*****>>>', transportMsg, activedTarget);
     window.parent.postMessage(transportMsg, '*');
   }
 }
@@ -160,9 +241,11 @@ function BindingFocusEvents() {
      * Focusin
      */
     elem.addEventListener('focusin', (e) => {
+      e.target.setAttribute('autocomplete', 'off');
+
       ctx.setActivedTarget(e.target);
 
-      //TODO send message to top & jet message listener
+      // send message to top & jet message listener
       ctx.sendTargetPosition(e.target);
 
       const activedValtState = ctx.getValtState(e.target);
@@ -174,8 +257,27 @@ function BindingFocusEvents() {
 
       drawBPassButtonRoot.call(ctx, e);
 
+      /** 判断如何弹框和弹框高度 */
+      const paramState = ctx._comboParams(e.target);
+      const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
+
+      const { elemType, iHeight, tag } = ifrSizeState;
+      const activedDomRect = e.target.getBoundingClientRect();
+
+      if (elemType === 'drawing') {
+        const drawMessageData = {
+          ...activedValtState,
+          isInner: window.self !== window.top,
+          position: activedDomRect,
+          iHeight,
+        };
+
+        ctx._sendMessageToTop(API_WIN_SELECTOR_DRAWER, drawMessageData);
+      } else {
+        /** do nothing. */
+      }
+
       if (e.target === ctx.targetPassword) {
-        e.target.setAttribute('autocomplete', 'off');
       } else if (e.target === ctx.targetUsername) {
       }
     });

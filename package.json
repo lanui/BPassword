@@ -21,7 +21,7 @@
     "pre:watch": "cross-env HMR=true npm run build-pre -- --watch",
     "build:crx": "cross-env EXT_TARGET=chrome webpack --config ci/webpack.crx.js --hide-modules",
     "watch:crx": "cross-env HMR=true LOG_LEVEL=DEBUG npm run build:crx -- --watch",
-    "build:fox": "cross-env EXT_TARGET=firefox webpack --config ci/webpack.fox.js --hide-modules",
+    "build:fox": "cross-env EXT_TARGET=firefox APP_VERSION=0.1.0 webpack --config ci/webpack.fox.js --hide-modules",
     "watch:fox": "cross-env HMR=true NODE_ENV=development LOG_LEVEL=DEBUG npm run build:fox -- --watch",
     "zip-fox": "cross-env node ci/zip-fox.js",
     "sign": "web-ext sign --config ci/webext-config.js ",

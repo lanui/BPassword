@@ -1,12 +1,14 @@
 bp-feilds-button,
 bpass-button,
-bp-selector-options {
+bp-selector-options,
+bpass-selector {
   all: initial !important;
   position: fixed !important;
   z-index: 2747483646 !important;
 }
 
-bp-selector-options {
+bp-selector-options,
+bpass-selector {
   top: 100px !important;
   left: 0px !important;
   pointer-events: none !important;

@@ -1,8 +1,9 @@
 const pkgJson = require('../package.json');
 
+// default production
 const isProd = process.env.NODE_ENV === 'production';
 
-const localEnv = isProd ? require('./.prod.env.js') : require('./.dev.env.js');
+const localEnv = !isProd ? require('./.dev.env.js') : require('./.prod.env.js');
 
 const mixinProperty = (key, defaultValue = '') => {
   return process.env[key] || localEnv[key] || defaultValue;
@@ -19,7 +20,7 @@ module.exports = {
   APP_AUTHOR: process.env.APP_AUTHOR || pkgJson.author,
   INFURA_PROJECTID: mixinProperty('INFURA_PROJECTID', ''),
   INFURA_SECRET: mixinProperty('INFURA_SECRET', ''),
-  NODE_ENV: process.env.NODE_ENV || 'development',
+  NODE_ENV: process.env.NODE_ENV || 'production',
   LOG_LEVEL: mixinProperty('LOG_LEVEL', 'WARN'),
   FOX_KEY: localEnv.FOX_KEY,
   FOX_ID: localEnv.FOX_ID,
