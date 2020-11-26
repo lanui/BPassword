@@ -109,3 +109,4 @@ config/.*.env.js
 # project ignore
 yarn.lock
 dist-zip/
+tmp/
