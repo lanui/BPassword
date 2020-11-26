@@ -153,7 +153,7 @@ export default {
     fetchFieldsVol(hostname) {
       const that = this;
       this.item.hostname = hostname;
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         const tabId = tabs[0].id;
 
         const reqData = {
@@ -162,7 +162,7 @@ export default {
           favIconUrl: tabs[0].favIconUrl,
         };
 
-        chrome.tabs.sendMessage(tabId, reqData, {}, function (data) {
+        browser.tabs.sendMessage(tabId, reqData, {}, function (data) {
           logger.debug('Received fetch input data>>>>', data);
           if (typeof data === 'object') {
             if (!data.hostname) reqData.hostname = hostname;

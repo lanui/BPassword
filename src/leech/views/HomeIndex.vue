@@ -84,6 +84,7 @@ export default {
           console.log('Filled>>>>', response);
         })
         .catch((err) => {
+          this.error = err;
           setTimeout(() => {
             this.error = '';
           }, 6000);
