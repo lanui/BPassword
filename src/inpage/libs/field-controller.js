@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import { debounce, clone } from 'lodash';
 import ObservableStore from 'obs-store';
 
 import logger from '@lib/logger';
@@ -173,8 +173,37 @@ class FieldController extends BaseController {
     this.activedTarget = target || null;
   }
 
+  /**
+   * BPass icon click toggle selector
+   * @param {element} activedTarget
+   */
   iconClickHandler(activedTarget) {
-    logger.debug('iconClickHandler>>>>>>>>>>>>>>>>', this, activedTarget);
+    if (!activedTarget) {
+      logger.debug('iconClickHandler::return;>>>>>>>>>>>>>>>>', this, activedTarget);
+      return;
+    }
+
+    logger.debug(
+      'iconClickHandler::return;>>>>>>>>>>>>>>>>',
+      JSON.stringify(activedTarget.getBoundingClientRect())
+    );
+    const activedDomRect = activedTarget.getBoundingClientRect();
+    const activedValtState = this.getValtState(activedTarget);
+
+    const paramState = this._comboParams(activedTarget);
+    const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
+
+    const { elemType, iHeight, tag } = ifrSizeState;
+
+    const drawMessageData = {
+      ...activedValtState,
+      isInner: window.self !== window.top,
+      levelNum: this.getLevelNum(),
+      position: JSON.parse(JSON.stringify(activedDomRect)), //firefox domRect permission
+      iHeight,
+    };
+
+    this._sendMessageToTop(API_WIN_SELECTOR_DRAWER, drawMessageData);
   }
 
   getValtState(activedTarget) {
@@ -187,6 +216,16 @@ class FieldController extends BaseController {
     };
 
     return valtState;
+  }
+
+  getLevelNum() {
+    if (window.self === window.top) {
+      return 0;
+    }
+    if (window.self !== window.top && window.parent === window.top) {
+      return 1;
+    }
+    return 2;
   }
 
   /**
@@ -220,8 +259,6 @@ class FieldController extends BaseController {
     window.parent.postMessage(transportMsg, '*');
   }
 }
-
-export default FieldController;
 
 /** ++++++++++++++++++++++++++ Functions Start ++++++++++++++++++++++++++++++ */
 function BindingFocusEvents() {
@@ -264,6 +301,7 @@ function BindingFocusEvents() {
       const { elemType, iHeight, tag } = ifrSizeState;
       const activedDomRect = e.target.getBoundingClientRect();
 
+      logger.debug('FieldController::bindingActivedFocusEvents@focusin-->>', tag, elemType);
       if (elemType === 'drawing') {
         const drawMessageData = {
           ...activedValtState,
@@ -421,3 +459,5 @@ function recursiveQuery(target, selector) {
     return findElem;
   }
 }
+
+export default FieldController;

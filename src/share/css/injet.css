@@ -9,8 +9,9 @@ bpass-selector {
 
 bp-selector-options,
 bpass-selector {
-  top: 100px !important;
+  top: 0px !important;
   left: 0px !important;
+  overflow-y: auto !important;
   pointer-events: none !important;
 }
 
@@ -20,4 +21,8 @@ bpass-selector {
   width: 100%;
   background: url('../icons/icon-btext-circle.png') center center no-repeat;
   background-size: cover;
+}
+
+.bp-fox-scroller {
+  scrollbar-width: auto;
 }

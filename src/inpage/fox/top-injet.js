@@ -1,7 +1,10 @@
 import logger from '@lib/logger';
 import { shouldActivedJet } from '../injet-helper';
 import { LOG_LEVEL } from '@lib/code-settings';
+
 import TopController from '../libs/top-controller';
+
+import { BPASS_SELECTOR_TAG, BpassSelector } from '../libs/bpass-selector';
 
 import {
   API_FETCH_EXT_STATE,
@@ -9,6 +12,8 @@ import {
   API_WIN_SELECTOR_UP_VALT,
   API_WIN_SELECTOR_DRAWER,
 } from '@lib/msgapi/api-types';
+
+import { LEECH_INDEX_PATH, LEECH_ADDOR_PATH } from '@lib/messages/fox/extension-info';
 import browser from 'webextension-polyfill';
 
 /*********************************************************************
@@ -22,12 +27,22 @@ import browser from 'webextension-polyfill';
  *    @created:  2020-11-24
  *    @comments:
  **********************************************************************/
+if (window.top === window.self) {
+  try {
+    window.customElements.define(BPASS_SELECTOR_TAG, BpassSelector);
+  } catch (err) {
+    logger.warn('Top Registing custom.', err);
+  }
+}
 
-const posiChains = [];
-const ifrCommunications = {};
 if (shouldActivedJet()) {
-  // logger.debug('BPassword is Development Mode.', LOG_LEVEL);
-  const topCtx = new TopController({ type: 'BPTop_' });
+  const initConfig = {
+    extid: browser.runtime.id,
+    leechSrc: browser.runtime.getURL(LEECH_INDEX_PATH),
+    leechAddorSrc: browser.runtime.getURL(LEECH_ADDOR_PATH),
+  };
+  logger.debug('BPassword Top initConfig:', JSON.stringify(initConfig));
+  const topCtx = new TopController({ initConfig });
 
   if (LOG_LEVEL === 'DEBUG') {
     /** This code in firefox unhelp debug */
@@ -74,7 +89,9 @@ function startupTopJetMessageListener(controller) {
         );
         break;
       case API_WIN_SELECTOR_DRAWER:
-        logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_DRAWER>>>>', data, controller);
+        /** */
+        // logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_DRAWER>>>>', data, controller);
+        controller.drawingSelector(data);
         break;
 
       default:

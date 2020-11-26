@@ -13,4 +13,9 @@ export default {
   methods: {},
 };
 </script>
-<style></style>
+<style>
+html,
+body {
+  overflow-y: hidden;
+}
+</style>

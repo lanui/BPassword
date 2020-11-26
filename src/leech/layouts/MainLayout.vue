@@ -48,7 +48,7 @@
         >
           {{ $t('l.managementPass') }}
         </v-btn>
-        <div v-if="true" class="">
+        <div v-if="true">
           <span class="splitor" v-if="false">|</span>
           <v-btn
             text
@@ -157,5 +157,11 @@ footer.layout-footer > div {
 .btn-footerbar .v-btn:hover,
 .btn-footerbar .v-btn__content:hover {
   color: rgba(69, 138, 249, 1);
+}
+
+@-moz-document url-prefix() {
+  .btn-footerbar.v-btn.v-size--x-small {
+    font-size: 0.8rem;
+  }
 }
 </style>

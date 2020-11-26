@@ -20,11 +20,16 @@ const browser = require('webextension-polyfill');
  *    @created:  2020-11-24
  *    @comments:
  **********************************************************************/
-
+if (window.top === window.self) {
+  try {
+    window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
+  } catch (err) {
+    logger.warn('Sub Registing custom elements.', err);
+  }
+}
 if (shouldActivedJet()) {
   const extid = browser.runtime.id;
 
-  window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
   startup(extid).catch((err) => {
     logger.warn('SubJetStartup failed.', err);
   });
