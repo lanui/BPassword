@@ -9,6 +9,7 @@ import { ifrSizeCalcWhenValtChanged } from '@lib/controllers/size-calculator';
 import {
   API_WIN_FINDED_LOGIN,
   API_WIN_SELECTOR_DRAWER,
+  API_WIN_SELECTOR_TOGGLE,
   API_WIN_SELECTOR_ERASER,
   API_WIN_SELECTOR_ERASER_FORCE,
   API_WIN_SELECTOR_UP_POSITION,
@@ -49,6 +50,9 @@ class FieldController extends BaseController {
     this.on('disabled:input:valtChanged', this.disabledInputFieldValtChangedListener.bind(this));
 
     this.once('actived:zombie-communication', this.activedZombieCommunication.bind(this));
+
+    /* ------------ bind ------- */
+    this.toggleIconClick = _bpassButtonClick.bind(this);
   }
 
   /** =========================== Event Methods Start ============================== */
@@ -173,6 +177,31 @@ class FieldController extends BaseController {
     this.activedTarget = target || null;
   }
 
+  sendDrawerSelectorBoxMessage(activedTarget) {
+    if (!activedTarget) {
+      logger.debug('FieldController::sendDrawerSelectorBoxMessage>>>>>>>>>>>>>>>>', activedTarget);
+      return;
+    }
+
+    let activedDomRect = activedTarget.getBoundingClientRect();
+    if (activedDomRect) activedDomRect = JSON.parse(JSON.stringify(activedDomRect));
+    const activedValtState = this.getValtState(activedTarget);
+    const paramState = this._comboParams(activedTarget);
+    const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
+  }
+
+  /**
+   *
+   * @param {boolean} force
+   */
+  sendEraseSelectorBoxMessage(force = false) {
+    const sendMessage = {
+      apiType: !force ? API_WIN_SELECTOR_ERASER : API_WIN_SELECTOR_ERASER_FORCE,
+      data: { force },
+    };
+    window.top.postMessage(sendMessage, '*');
+  }
+
   /**
    * BPass icon click toggle selector
    * @param {element} activedTarget
@@ -183,50 +212,22 @@ class FieldController extends BaseController {
       return;
     }
 
-    logger.debug(
-      'iconClickHandler::return;>>>>>>>>>>>>>>>>',
-      JSON.stringify(activedTarget.getBoundingClientRect())
-    );
-    const activedDomRect = activedTarget.getBoundingClientRect();
+    //first send activedFieldPosition to posiChains
+    this.sendTargetPosition(activedTarget);
+
+    let activedDomRect = activedTarget.getBoundingClientRect();
+    let serializeDomRect = JSON.parse(JSON.stringify(activedDomRect));
+
+    // logger.debug('iconClickHandler::toggler>>>>>>>>>>>>>>>>', JSON.stringify(serializeDomRect));
     const activedValtState = this.getValtState(activedTarget);
 
     const paramState = this._comboParams(activedTarget);
     const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
 
-    const { elemType, iHeight, tag } = ifrSizeState;
+    const { elemType, ifrHeight, tag } = ifrSizeState;
+    const drawMessageData = this.comboSelectorBoxSendData(ifrHeight, serializeDomRect);
 
-    const drawMessageData = {
-      ...activedValtState,
-      atHref: window.location.href,
-      isInner: window.self !== window.top,
-      levelNum: this.getLevelNum(),
-      position: JSON.parse(JSON.stringify(activedDomRect)), //firefox domRect permission
-      ifrHeight: iHeight,
-    };
-
-    this._sendMessageToTop(API_WIN_SELECTOR_DRAWER, drawMessageData);
-  }
-
-  getValtState(activedTarget) {
-    const valtState = {
-      activedField:
-        activedTarget && activedTarget === this.targetPassword ? 'password' : 'username',
-      hostname: this.getHost(),
-      username: this.targetUsername ? this.targetUsername.value : '',
-      password: this.targetPassword ? this.targetPassword.value : '',
-    };
-
-    return valtState;
-  }
-
-  getLevelNum() {
-    if (window.self === window.top) {
-      return 0;
-    }
-    if (window.self !== window.top && window.parent === window.top) {
-      return 1;
-    }
-    return 2;
+    this._sendMessageToTop(API_WIN_SELECTOR_TOGGLE, drawMessageData);
   }
 
   /**
@@ -242,7 +243,7 @@ class FieldController extends BaseController {
       return;
     }
 
-    const domRect = activedTarget.getBoundingClientRect();
+    let domRect = activedTarget.getBoundingClientRect();
     const transportMsg = {
       posterId: this.getId(),
       extid: this.extid,
@@ -250,7 +251,7 @@ class FieldController extends BaseController {
       domRects: [
         {
           uuid: this.getId(),
-          domRect,
+          domRect: JSON.parse(JSON.stringify(domRect)),
           iframeSrc: window.location.href,
           activedField: activedTarget === this.targetUsername ? 'username' : 'password',
         },
@@ -259,9 +260,73 @@ class FieldController extends BaseController {
     logger.debug('actived the first Position chain message*****>>>', transportMsg, activedTarget);
     window.parent.postMessage(transportMsg, '*');
   }
+
+  /**
+   *
+   * @param {*} activedTarget
+   */
+  getValtState(activedTarget) {
+    const valtState = {
+      activedField:
+        activedTarget && activedTarget === this.targetPassword ? 'password' : 'username',
+      hostname: this.getHost(),
+      username: this.targetUsername ? this.targetUsername.value : '',
+      password: this.targetPassword ? this.targetPassword.value : '',
+    };
+
+    return valtState;
+  }
+
+  /**
+   * @deprecated
+   */
+  getLevelNum() {
+    if (window.self === window.top) {
+      return 0;
+    }
+    if (window.self !== window.top && window.parent === window.top) {
+      return 1;
+    }
+    return 2;
+  }
+
+  /**
+   * selector params :
+   *  left,top,width,height optional
+   *  ifrHeight must
+   * @param {json} serializeDomRect
+   * @param {number} ifrHeight
+   */
+  comboSelectorBoxSendData(ifrHeight, serializeDomRect) {
+    serializeDomRect = serializeDomRect || {
+      width: 0,
+      height: 0,
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      x: 0,
+      y: 0,
+    };
+
+    /**
+     * selector params :
+     * left: 0,top:0,width:0 optional
+     * height,ifrHeight: must
+     * isInner,atHref optional
+     */
+    let baseParam = {
+      isInner: window.self !== window.top,
+      atHref: window.location.href,
+    };
+
+    return { ...serializeDomRect, ...baseParam, ifrHeight };
+  }
 }
 
 /** ++++++++++++++++++++++++++ Functions Start ++++++++++++++++++++++++++++++ */
+function _bpassButtonClick() {}
+
 function BindingFocusEvents() {
   const ctx = this;
 
@@ -299,18 +364,17 @@ function BindingFocusEvents() {
       const paramState = ctx._comboParams(e.target);
       const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
 
-      const { elemType, iHeight, tag } = ifrSizeState;
+      const { elemType, ifrHeight, tag } = ifrSizeState;
       const activedDomRect = e.target.getBoundingClientRect();
 
-      logger.debug('FieldController::bindingActivedFocusEvents@focusin-->>', tag, elemType);
+      logger.debug(
+        'FieldController::bindingActivedFocusEvents@focusin-->>',
+        tag,
+        elemType,
+        ifrSizeState
+      );
       if (elemType === 'drawing') {
-        const drawMessageData = {
-          ...activedValtState,
-          isInner: window.self !== window.top,
-          position: activedDomRect,
-          iHeight,
-        };
-
+        const drawMessageData = ctx.comboSelectorBoxSendData(ifrHeight, activedDomRect);
         ctx._sendMessageToTop(API_WIN_SELECTOR_DRAWER, drawMessageData);
       } else {
         /** do nothing. */
@@ -322,14 +386,16 @@ function BindingFocusEvents() {
     });
 
     elem.addEventListener('focusout', (e) => {
-      ctx.setActivedTarget(null);
-
-      //TODO disabled:input:valtChanged
+      // disabled:input:valtChanged
       ctx.emit('disabled:input:valtChanged', e.target);
 
-      // document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
+      //remove icon when focusout
+      document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
 
-      //TODO send selector
+      // send selector box display
+      ctx.sendEraseSelectorBoxMessage(false);
+
+      ctx.setActivedTarget(null);
     });
   }
 }

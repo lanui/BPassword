@@ -6,6 +6,7 @@ import logger from '@lib/logger';
 import Zombie from '@lib/messages/corpse-chaser';
 import BaseController from './base-controller';
 import { ENV_TYPE_INJET_TOP } from '@lib/enums';
+import { SELECTOR_BOX_TAG } from '../chanel-five';
 
 /*********************************************************************
  * AircraftClass ::
@@ -50,6 +51,8 @@ class TopController extends BaseController {
 
     /** Bind Box Method begin */
     this.createSelectorBox = _createSelectorBox.bind(this);
+    this.updateBoxIfrHeight = _updateSelectorBoxIfrHeight.bind(this);
+    this.eraseSelectorBox = _removeSelectorBox.bind(this);
   }
 
   /* +++++++++++++++++++++++++ Events & Listeners begin +++++++++++++++++++++++++++++ */
@@ -94,6 +97,13 @@ class TopController extends BaseController {
     this.createSelectorBox(ifrSrc, data);
   }
 
+  toggleSelectorBox(data) {
+    const box = document.querySelector(SELECTOR_BOX_TAG);
+    logger.debug('toggleSelectorBox-->>>>>>>>>..', !!box, data);
+
+    !box ? this.drawingSelector(data) : this.eraseSelectorBox(false);
+  }
+
   /* ********************* Commons Methods Begin **************************** */
   getExtId() {
     const extid = this.initConfig.extid || '';
@@ -125,11 +135,11 @@ function _createSelectorBox(src, position) {
     logger.warn('Params miss>>>', position);
   }
   const { left = 0, top = 0, width = 0, height, ifrHeight, isInner, atHref = '' } = position;
-  let box = document.querySelector('selector-box');
+  let box = document.querySelector(SELECTOR_BOX_TAG);
   logger.debug('ToopController::_createSelectorBox->>>', box, position);
   const exists = !!box;
   if (!exists) {
-    box = document.createElement('selector-box');
+    box = document.createElement(SELECTOR_BOX_TAG);
   }
   box.setAttribute('uts', new Date().getTime());
   box.setAttribute('src', src);
@@ -150,6 +160,26 @@ function _createSelectorBox(src, position) {
 
   if (!exists) {
     document.body.insertAdjacentElement('beforeend', box);
+  }
+}
+
+function _updateSelectorBoxIfrHeight({ ifrHeight, isAddor = false }) {
+  if (!ifrHeight) {
+    return;
+  }
+  let box = document.querySelector(SELECTOR_BOX_TAG);
+  if (box) {
+    box.setAttribute('ifr-height', parseInt(ifrHeight));
+    if (isAddor) {
+      box.setAttribute('is-addor', true);
+    }
+  }
+}
+
+function _removeSelectorBox(force = false) {
+  const box = document.querySelector(SELECTOR_BOX_TAG);
+  if (box) {
+    force ? box.remove() : !box.hasAttribute('is-addor') && box.remove();
   }
 }
 

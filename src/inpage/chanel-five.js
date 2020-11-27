@@ -16,6 +16,7 @@ const browser = require('webextension-polyfill');
  *    @created:  2020-11-27
  *    @comments:
  **********************************************************************/
+export const SELECTOR_BOX_TAG = 'selector-box';
 const LEECH_INDEX_PATH = 'leech/leech.html';
 const LEECH_ADDOR_PATH = 'leech/leech.html#/add_passbook';
 
@@ -301,7 +302,7 @@ function injectSourceIntoDom(content, tag) {
     return;
   }
   try {
-    logger.debug(`BPassword inject [${tag}] starting...`);
+    // logger.debug(`BPassword inject [${tag}] starting...`);
     const domContainer = document.head || document.documentElement;
     const scriptEl = document.createElement('script');
     scriptEl.setAttribute('async', 'false');
@@ -315,7 +316,7 @@ function injectSourceIntoDom(content, tag) {
     };
 
     domContainer.appendChild(scriptEl);
-    logger.debug(`BPassword inject [${tag}] completed.`);
+    // logger.debug(`BPassword inject [${tag}] completed.`);
   } catch (error) {
     logger.debug(`BPassword inject [${tag}] failed.`, error.message);
   }

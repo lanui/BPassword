@@ -11,6 +11,8 @@ import {
   API_WIN_FINDED_LOGIN,
   API_WIN_SELECTOR_UP_VALT,
   API_WIN_SELECTOR_DRAWER,
+  API_WIN_SELECTOR_ERASER,
+  API_WIN_SELECTOR_TOGGLE,
 } from '@lib/msgapi/api-types';
 
 import { LEECH_INDEX_PATH, LEECH_ADDOR_PATH } from '@lib/messages/fox/extension-info';
@@ -63,13 +65,13 @@ function startupTopJetMessageListener(controller) {
   window.addEventListener('message', (evt) => {
     const recMessage = evt.data;
 
-    if (!recMessage && !recMessage.apiType) {
+    if (!recMessage || !recMessage.apiType) {
       /** only handle BPassword Message. */
       return;
     }
 
     const { apiType, data } = recMessage;
-    logger.debug('FJS:topInjet received Message.>>>>>>>>>>>>>>>>>>', data);
+    logger.debug('FJS:topInjet received Message.>>>>>>>>>>>>>>>>>>', apiType, data);
 
     switch (apiType) {
       case API_WIN_FINDED_LOGIN:
@@ -90,8 +92,15 @@ function startupTopJetMessageListener(controller) {
         break;
       case API_WIN_SELECTOR_DRAWER:
         /** */
-        // logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_DRAWER>>>>', data, controller);
+
         controller.drawingSelector(data);
+        break;
+      case API_WIN_SELECTOR_ERASER:
+        controller.eraseSelectorBox();
+        break;
+      case API_WIN_SELECTOR_TOGGLE:
+        logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_TOGGLE>>>>', data, controller);
+        controller.toggleSelectorBox(data);
         break;
 
       default:
