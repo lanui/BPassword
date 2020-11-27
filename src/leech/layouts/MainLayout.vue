@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main class="leech-main-border">
     <locked-component v-if="!isUnlocked" />
 
     <v-card elevation="0" class="mx-0 my-0" id="LeeMainContent" v-if="isUnlocked">
@@ -125,11 +125,12 @@ export default {
 </script>
 <style lang="css" scope>
 .leech-main-border {
-  border-left: 1px solid rgba(218, 220, 224, 1);
-  border-right: 1px solid rgba(218, 220, 224, 1);
+  background-color: rgba(218, 220, 224, 1);
+  border-left: 0px solid rgba(218, 220, 224, 1);
+  border-right: 0px solid rgba(218, 220, 224, 1);
   border-top: 1px solid rgba(218, 220, 224, 1);
-  border-bottom: 1px solid rgba(218, 220, 224, 1);
-  border-radius: 4px;
+  border-bottom: 0px solid rgba(218, 220, 224, 1);
+  /* border-radius: 4px; */
 }
 
 footer.layout-footer > div {
