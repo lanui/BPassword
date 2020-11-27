@@ -6,15 +6,39 @@ import { API_FETCH_EXT_STATE } from '@lib/msgapi/api-types';
 const browser = require('webextension-polyfill');
 
 if (shouldActivedJet()) {
-  fetchInitTopConfig();
+  // logger.debug('Inject source content:\n',source)
+  // startup();
+}
 
-  // logger.debug("webextension-polyfill>>>>>>>>>>>>>>>>>.",browser.runtime.id)
+async function startup() {
+  await domIsReady();
+  const content = `
+    /* BPassword Inject Source.*/ \n
+  `;
+  injetSource(content);
+}
 
-  // const topSrc = browser.runtime.getURL('inpage/top-injet.js')
-  // injectEntryJs(topSrc,true)
+function injetSource(content) {
+  logger.debug('BPassword Source start injecting....', content);
+  try {
+    const domContainer = document.head || document.documentElement;
 
-  // const subSrc = browser.runtime.getURL('inpage/sub-injet.js')
-  // injectEntryJs(subSrc, false)
+    const scriptEl = document.createElement('script');
+    scriptEl.setAttribute('async', 'false');
+    scriptEl.setAttribute('defer', 'defer');
+    scriptEl.textContent = content;
+
+    scriptEl.onload = function () {
+      if (LOG_LEVEL !== 'DEBUG') {
+        // this.parentNode.removeChild(this);
+      }
+    };
+
+    domContainer.appendChild(scriptEl);
+    logger.debug('BPassword Source inject completed.');
+  } catch (error) {
+    logger.debug('BPassword Source inject failed.', error);
+  }
 }
 
 function fetchInitTopConfig() {
@@ -24,98 +48,11 @@ function fetchInitTopConfig() {
       reqData: { fetch: 'InjetExtInfo' },
     })
     .then((configState) => {
-      injetExtInfo(configState);
+      logger.debug('fetchInitTopConfig  >>>>>>', configState);
     })
     .catch((err) => {
       logger.warn('BPassword failed.', err);
     });
-}
-
-function injetExtInfo(configState) {
-  const serialize = JSON.stringify(configState);
-  const bpConfigInjetContent = `
-      (function(configSerialize){
-        if(configSerialize){
-          const config = JSON.parse(configSerialize)
-          window.__bp_extconfig = config
-        }
-      })('${serialize}')
-    `;
-  try {
-    const domContainer = document.head || document.documentElement;
-
-    const scriptEl = document.createElement('script');
-    scriptEl.setAttribute('async', 'false');
-    scriptEl.setAttribute('defer', 'defer');
-    scriptEl.textContent = bpConfigInjetContent;
-
-    scriptEl.onload = function () {
-      if (LOG_LEVEL !== 'DEBUG') {
-        // this.parentNode.removeChild(this);
-      }
-    };
-
-    domContainer.appendChild(scriptEl);
-    logger.debug('inject ext message success.');
-  } catch (error) {
-    logger.debug('inject ext message failed.', error);
-  }
-}
-
-/**
- *
- * @param {*} injectSrc
- * @param {*} isTop
- */
-function injectEntryJs(injectSrc, isTop) {
-  if (isTop) {
-    if (window.top !== window.self) {
-      logger.debug('Inner window unnneed injet top controller js');
-      return;
-    }
-  }
-  try {
-    logger.debug(`injet ${isTop ? 'top' : 'sub'} controller js starting...`, injectSrc);
-    const container = document.head || document.documentElement;
-
-    const commonSrc = browser.runtime.getURL('commons.js');
-
-    let lookup = container.querySelector('script[src="${commonSrc}"]');
-    if (!lookup) {
-      const libEl = document.createElement('script');
-      libEl.setAttribute('async', 'false');
-      libEl.setAttribute('defer', 'defer');
-      libEl.src = injectSrc;
-
-      libEl.onload = function () {
-        // this.parentNode.removeChild(this);
-      };
-      libEl.appendChild(scriptEl);
-    }
-
-    const scriptEl = document.createElement('script');
-    scriptEl.setAttribute('async', 'false');
-    scriptEl.setAttribute('defer', 'defer');
-    scriptEl.src = injectSrc;
-
-    scriptEl.onload = function () {
-      // this.parentNode.removeChild(this);
-    };
-    container.appendChild(scriptEl);
-
-    logger.debug(`injet ${isTop ? 'top' : 'sub'} controller js completed.`);
-  } catch (err) {
-    logger.warn(
-      `injet ${isTop ? 'top' : 'sub'} controller js failed.BPassword Features Maybe can not used.`,
-      err
-    );
-  }
-}
-
-async function startup() {
-  await domIsReady();
-
-  global.BPassword = 'ok';
 }
 
 async function domIsReady() {

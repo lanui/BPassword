@@ -9,7 +9,7 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "css": ["share/css/injet.css"],
-      "js": ["commons.js", "inpage/cape7.js"],
+      "js": ["commons.js", "inpage/chanel5.js", "inpage/cape7.js"],
       "match_about_blank": false,
       "run_at": "document_idle",
       "all_frames": true

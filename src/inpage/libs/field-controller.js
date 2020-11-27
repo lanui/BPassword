@@ -18,7 +18,7 @@ import {
 } from '@lib/msgapi/api-types';
 import { ENV_TYPE_INJET } from '@lib/enums';
 
-import { BPASS_BUTTON_TAG } from './bpass-button';
+import { BPASS_BUTTON_TAG, BpassButton } from './bpass-button';
 
 /*********************************************************************
  * AircraftClass ::
@@ -197,10 +197,11 @@ class FieldController extends BaseController {
 
     const drawMessageData = {
       ...activedValtState,
+      atHref: window.location.href,
       isInner: window.self !== window.top,
       levelNum: this.getLevelNum(),
       position: JSON.parse(JSON.stringify(activedDomRect)), //firefox domRect permission
-      iHeight,
+      ifrHeight: iHeight,
     };
 
     this._sendMessageToTop(API_WIN_SELECTOR_DRAWER, drawMessageData);
@@ -326,7 +327,7 @@ function BindingFocusEvents() {
       //TODO disabled:input:valtChanged
       ctx.emit('disabled:input:valtChanged', e.target);
 
-      document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
+      // document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
 
       //TODO send selector
     });
@@ -334,7 +335,23 @@ function BindingFocusEvents() {
 }
 
 function drawBPassButtonRoot(e) {
-  const domRect = e.target.getBoundingClientRect();
+  let domRect = e.target.getBoundingClientRect();
+  domRect = JSON.parse(JSON.stringify(domRect));
+
+  logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', domRect);
+
+  logger.debug(
+    'drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
+    window.customElements.get(BPASS_BUTTON_TAG)
+  );
+  if (!window.customElements.get(BPASS_BUTTON_TAG)) {
+    try {
+      window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
+    } catch (error) {
+      logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>', error.message);
+    }
+    logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>', window.customElements.get(BPASS_BUTTON_TAG));
+  }
 
   let passRoot = document.querySelector(BPASS_BUTTON_TAG);
   if (passRoot) {

@@ -88,15 +88,10 @@ class TopController extends BaseController {
 
   drawingSelector(data) {
     logger.debug('TopController:drawingSelector>>>', data);
-    const { position, isInner, levelNum = 0, iHeight } = data;
     const ifrSrc = this.getLeechSrc();
+    _drawingSelectorBox.call(this, ifrSrc, data);
 
-    if (levelNum === 0) {
-    } else if (levelNum === 1) {
-    } else {
-    }
-
-    _drawingBpassSelectorZeroLayer.call(this, ifrSrc, { ...position, iHeight });
+    //_drawingBpassSelectorZeroLayer.call(this, ifrSrc, { ...position, ifrHeight: iHeight, isInner});
   }
 
   /* ********************* Commons Methods Begin **************************** */
@@ -124,18 +119,50 @@ class TopController extends BaseController {
  * TODO multi layers
  * can not get window posiChains
  * @param {string} src iframe src
- * @param {object} options [position,isInner]
+ * @param {object} options [left,top,height,width,x,y,isInner,ifrHeight,atHref]
  */
-function _drawingBpassSelector(src, options) {
-  logger.debug('TopController::_drawingBpassSelector-->>>>', src, options);
-  const topPosiChains = window.__bpTopPosiChains;
-
-  logger.debug('TopController::_drawingBpassSelector-->>>>', topPosiChains);
+function _drawingSelectorBox(src, options) {
+  logger.debug('TopController::_drawingSelectorBox-->>>>', src, options);
+  createSelectorBox(src, options);
 }
 
 function _drawingBpassSelectorZeroLayer(src, position) {
   logger.debug('TopController:_drawingBpassSelectorZeroLayer>>>', position);
-  createSelectorElement(src, position);
+  // createSelectorElement(src, position);
+  createSelectorBox(src, position);
+}
+
+function createSelectorBox(src, position) {
+  if (!position || !position.ifrHeight || !position.width) {
+    logger.warn('Params miss>>>', position);
+  }
+  const { left = 0, top = 0, width = 0, height, ifrHeight, isInner, atHref = '' } = position;
+  let box = document.querySelector('selector-box');
+  logger.debug('createSelectorBox>>>', box, position);
+  const exists = !!box;
+  if (!exists) {
+    box = document.createElement('selector-box');
+  }
+  box.setAttribute('uts', new Date().getTime());
+  box.setAttribute('src', src);
+  box.setAttribute('at-width', width);
+  box.setAttribute('at-height', height);
+  box.setAttribute('at-left', left);
+  box.setAttribute('at-top', top);
+  box.setAttribute('ifr-height', ifrHeight);
+  if (isInner) {
+    box.setAttribute('is-inner', isInner);
+  } else {
+    box.hasAttribute('is-inner') && box.removeAttribute('is-inner');
+  }
+
+  if (atHref) {
+    box.setAttribute('at-href', atHref);
+  }
+
+  if (!exists) {
+    document.body.insertAdjacentElement('beforeend', box);
+  }
 }
 
 function createSelectorElement(src, { width = 0, height = 0, left = 0, top = 0, iHeight = 0 }) {

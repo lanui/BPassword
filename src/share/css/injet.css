@@ -1,6 +1,7 @@
 bp-feilds-button,
 bpass-button,
 bp-selector-options,
+selector-box,
 bpass-selector {
   all: initial !important;
   position: fixed !important;
@@ -8,6 +9,7 @@ bpass-selector {
 }
 
 bp-selector-options,
+selector-box,
 bpass-selector {
   top: 0px !important;
   left: 0px !important;

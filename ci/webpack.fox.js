@@ -43,6 +43,7 @@ let foxConfig = merge(baseConfig, {
   mode: providerEnv.NODE_ENV,
   entry: {
     contentscript: R(src, 'inpage/index.js'),
+    'inpage/chanel5': R(src, 'inpage/chanel-five.js'),
     'inpage/cape7': R(src, 'inpage/cape-seven.js'),
     'inpage/top-injet': R(src, 'inpage/fox/top-injet.js'),
     'inpage/sub-injet': R(src, 'inpage/fox/sub-injet.js'),

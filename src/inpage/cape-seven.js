@@ -4,6 +4,7 @@ import { shouldActivedJet } from './injet-helper';
 import { API_FETCH_EXT_STATE } from '@lib/msgapi/api-types';
 const browser = require('webextension-polyfill');
 import logger from '@lib/logger';
+import { LOG_LEVEL } from '@lib/code-settings';
 /*********************************************************************
  * AircraftClass ::
  *    @description:
@@ -32,18 +33,11 @@ function fetchExtensionConfig() {
   // logger.debug('Cape7>>>>>>>', window.location.href, browser.runtime.getURL('leech/leech.html'));
   inJectNo7(uuid, extid, leechSrc);
 }
-/**
- * inject Top bpass-selector
- * @param {*} extid
- * @param {*} leechSrc
- * @param {*} leechAddorSrc
- */
-function injectChannel5(extid, leechSrc, leechAddorSrc) {}
 
 function inJectNo7(uuid, extid, leechSrc) {
   const jetContent = `
-    (function(uuid,extid,leechSrc){
-      console.log("Starting BPListenerChain:",uuid,extid,leechSrc)
+    (function(uuid,extid,leechSrc,logLevel){
+      console.log("Starting BPListenerChain:",uuid,extid,leechSrc,logLevel)
       function BPListenerChain(){
         this.uuid = uuid;
         this.extid = extid;
@@ -88,7 +82,7 @@ function inJectNo7(uuid, extid, leechSrc) {
             };
 
             if(domRect) {/** find iframe */
-              ifrPosi.domRect = domRect;
+              ifrPosi.domRect = JSON.parse(JSON.stringify(domRect));
               transportMessage.domRects.push(ifrPosi);
 
               _this.domRects = Object.assign([],transportMessage.domRects);
@@ -111,7 +105,7 @@ function inJectNo7(uuid, extid, leechSrc) {
 
       window.__bPListenerChain = new BPListenerChain();
       window.__bPListenerChain.startListener();
-    })(\"${uuid}\",\"${extid}\",\"${leechSrc}\");
+    })("${uuid}","${extid}","${leechSrc}","${LOG_LEVEL}");
   `;
 
   // Inject
@@ -135,6 +129,8 @@ function inJectNo7(uuid, extid, leechSrc) {
     logger.warn('inject cape 7 message failed.', error);
   }
 }
+
+function injectBpassIcon(extid, leechSrc) {}
 
 async function domIsReady() {
   if (['interactive', 'complete'].includes(document.readyState)) {

@@ -23,6 +23,7 @@ const browser = require('webextension-polyfill');
 if (window.top === window.self) {
   try {
     window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
+    logger.warn('Sub Registing custom elements.', window.customElements.get(BPASS_BUTTON_TAG));
   } catch (err) {
     logger.warn('Sub Registing custom elements.', err);
   }

@@ -1,29 +1,21 @@
-import logger from '@lib/logger';
-/*********************************************************************
- * AircraftClass ::
- *    @description:
- *    @description:
- * WARNINGS:
- *
- * HISTORY:
- *    @author: lanbery@gmail.com
- *    @created:  2020-11-25
- *    @comments:
- **********************************************************************/
-
-export class BpassButton extends HTMLElement {
+class BpassButton extends HTMLElement {
   constructor() {
     super();
-
-    this.drawElements = _drawInnerElements.bind(this);
-    this.updateStyles = _updateStyles.bind(this);
 
     let shadow = this.shadowRoot;
     if (!shadow) {
       shadow = this.attachShadow({ mode: 'open' });
     }
-    console.log('&&&&&&&%%%%%%%%%%%%%%%%%%%%%%------------------------------------');
-    this.drawElements();
+
+    // this.drawStyle = _drawInnerStyle.bind(this);
+    // this.drawButton = _drawInnerButton.bind(this);
+    this.drawInnerElement = _drawInnerElements.bind(this);
+
+    this.drawInnerElement();
+    this.updateStyles = _updateStyles.bind(this);
+
+    // this.drawStyle();
+    // this.drawButton();
   }
 
   setActivedRect(domRect) {
@@ -60,28 +52,28 @@ BpassButton.calcIconSize = (h) => {
   return BpassButton.small;
 };
 
-function _drawInnerStyle() {
-  const shadow = this.shadowRoot;
-  let style = shadow.querySelector('style');
+// function _drawInnerStyle(){
+//   const shadow = this.shadowRoot;
+//   let style = shadow.querySelector('style');
 
-  if (!style) {
-    style = document.createElement('style');
-    shadow.insertBefore(style, shadow.firstChild);
-  }
-}
+//   if(!style){
+//     style = document.createElement('style');
+//     shadow.insertBefore(style, shadow.firstChild);
+//   }
+// }
 
-function _drawInnerButton() {
-  const shadow = this.shadowRoot;
-  let btn = shadow.querySelector('button');
+// function _drawInnerButton(){
+//   const shadow = this.shadowRoot;
+//   let btn = shadow.querySelector('button');
 
-  if (!btn) {
-    btn = document.createElement('button');
-    shadow.insertAfter(btn, shadow.lastChild);
-  }
-}
+//   if (!btn) {
+//     btn = document.createElement('button');
+//     shadow.insertAfter(btn, shadow.lastChild);
+//   }
+// }
 
 function _drawInnerElements() {
-  logger.debug('BpassButton>>>> drawing inner.');
+  console.log('BpassButton>>>> drawing inner.');
   const shadow = this.shadowRoot;
   const styEl = document.createElement('style');
   const btnEl = document.createElement('button');
@@ -95,9 +87,10 @@ function _drawInnerElements() {
     e.preventDefault();
   });
 
+  let ctx = this;
   shadow.addEventListener('click', (e) => {
-    let onClickFn = this.onClick;
-    logger.debug(e.target, onClickFn);
+    let onClickFn = ctx.onClick;
+    console.log(e.target, onClickFn);
     if (e.target && onClickFn) {
       onClickFn.call(e.target);
     }
@@ -138,6 +131,3 @@ function _updateStyles() {
     }
   `;
 }
-
-export const BPASS_BUTTON_TAG = 'bpass-button';
-export default BpassButton;
