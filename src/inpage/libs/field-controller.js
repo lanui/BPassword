@@ -340,17 +340,17 @@ function drawBPassButtonRoot(e) {
 
   logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', domRect);
 
-  logger.debug(
-    'drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
-    window.customElements.get(BPASS_BUTTON_TAG)
-  );
+  // logger.debug(
+  //   'drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
+  //   window.customElements.get(BPASS_BUTTON_TAG)
+  // );
+  /** window pointer to target window */
   if (!window.customElements.get(BPASS_BUTTON_TAG)) {
     try {
       window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
     } catch (error) {
-      logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>', error.message);
+      logger.warn('drawBPassButtonRoot>>>>>>>>>>>>>>', error.message);
     }
-    logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>', window.customElements.get(BPASS_BUTTON_TAG));
   }
 
   let passRoot = document.querySelector(BPASS_BUTTON_TAG);
