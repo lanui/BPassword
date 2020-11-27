@@ -14,6 +14,7 @@
  *    @description:isUnlocked
  *                 username && password --> show
  *                 (username || !password) -->erase
+ *    @description: add ifrHeight property
  * WARNINGS:
  *
  * HISTORY:
@@ -59,7 +60,8 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
           isUnlocked,
           rows: matchedNum,
           items,
-          iHeight: IFR_CONF.lockedHeight,
+          iHeight: IFR_CONF.lockedHeight, // will remove at version 2.1.x
+          ifrHeight: IFR_CONF.lockedHeight,
           elemType: 'drawing',
           tag: 'show locked page',
         };
@@ -69,6 +71,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
           rows: matchedNum,
           items,
           iHeight: IFR_CONF.lockedHeight,
+          ifrHeight: IFR_CONF.lockedHeight,
           elemType: 'erase',
           tag: 'hidden locked page',
         };
@@ -79,6 +82,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
         rows: matchedNum,
         items,
         iHeight: IFR_CONF.lockedHeight,
+        ifrHeight: IFR_CONF.lockedHeight,
         elemType: 'erase',
         tag: 'hidden page',
       };
@@ -93,6 +97,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
           rows: 1,
           items: [matchItem],
           iHeight: IFR_CONF.addBtnHeight,
+          ifrHeight: IFR_CONF.addBtnHeight,
           elemType: 'erase',
           tag: 'hidden page,exactMatched',
         };
@@ -104,6 +109,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
             rows: 2,
             items: [nameMatched],
             iHeight: calcRowHeight(2), // 增加一行修改密码
+            ifrHeight: calcRowHeight(2),
             elemType: 'drawing',
             tag: 'show update button page,active password field',
           };
@@ -114,6 +120,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
             rows: 0,
             items: [],
             iHeight: IFR_CONF.addBtnHeight,
+            ifrHeight: IFR_CONF.addBtnHeight,
             elemType: 'drawing',
             tag: 'show page,no matched name and password',
           };
@@ -127,6 +134,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
             rows: _actUnameFilters.length,
             items: [..._actUnameFilters],
             iHeight: calcRowHeight(_actUnameFilters.length), // 增加一行修改密码
+            ifrHeight: calcRowHeight(_actUnameFilters.length),
             elemType: 'drawing',
             tag: 'show selector filter list page,active username field',
           };
@@ -137,6 +145,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
             rows: 0,
             items: [],
             iHeight: IFR_CONF.addBtnHeight,
+            ifrHeight: IFR_CONF.addBtnHeight,
             elemType: 'erase',
             tag: 'hidden page,no matched name and password',
           };
@@ -148,6 +157,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
           rows: 0,
           items: [],
           iHeight: IFR_CONF.addBtnHeight,
+          ifrHeight: IFR_CONF.addBtnHeight,
           elemType: 'erase',
           tag: 'hidden page,active username field',
         };
@@ -165,6 +175,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
           rows: 0,
           items: [],
           iHeight: calcRowHeight(matchedNum), //预存
+          ifrHeight: calcRowHeight(matchedNum), //预存
           elemType: 'erase',
           tag: 'hidden page,no match filter',
         };
@@ -175,6 +186,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
           rows,
           items: [..._filters],
           iHeight: calcRowHeight(rows), //预存
+          ifrHeight: calcRowHeight(rows), //预存
           elemType: 'drawing',
           tag: 'show filter page',
         };
@@ -188,6 +200,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
         rows: matchedNum,
         items,
         iHeight: calcRowHeight(matchedNum), //预存
+        ifrHeight: calcRowHeight(matchedNum), //预存
         elemType: 'drawing',
         tag: 'show host matched page',
       };
@@ -198,6 +211,7 @@ export function ifrSizeCalcWhenValtChanged(options = {}) {
         rows: matchedNum,
         items,
         iHeight: calcRowHeight(matchedNum), //预存
+        ifrHeight: calcRowHeight(matchedNum), //预存
         elemType: 'erase',
         tag: 'hidden no items',
       };

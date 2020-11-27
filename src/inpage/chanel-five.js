@@ -240,7 +240,7 @@ function chanel5builder(jetid) {
         }
 
         let posiState = (posiChains||[]).reduce((state,posi) => {
-          console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&---->>",posi)
+          if(logLevel==='DEBUG'){console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&---->>",posi);}
           if(posi && posi.domRect){
             state.enabled = true;
             let left = (posi.domRect.left||0),top = (posi.domRect.top||0);

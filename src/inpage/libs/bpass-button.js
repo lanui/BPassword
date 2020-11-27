@@ -22,7 +22,7 @@ export class BpassButton extends HTMLElement {
     if (!shadow) {
       shadow = this.attachShadow({ mode: 'open' });
     }
-    console.log('&&&&&&&%%%%%%%%%%%%%%%%%%%%%%------------------------------------');
+
     this.drawElements();
   }
 
@@ -31,7 +31,6 @@ export class BpassButton extends HTMLElement {
   }
 
   connectedCallback() {
-    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
     this.updateStyles();
   }
 

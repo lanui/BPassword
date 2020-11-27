@@ -179,7 +179,7 @@ class FieldController extends BaseController {
    */
   iconClickHandler(activedTarget) {
     if (!activedTarget) {
-      logger.debug('iconClickHandler::return;>>>>>>>>>>>>>>>>', this, activedTarget);
+      logger.debug('iconClickHandler::return;>>>>>>>>>>>>>>>>', activedTarget);
       return;
     }
 
@@ -349,7 +349,7 @@ function drawBPassButtonRoot(e) {
     try {
       window.customElements.define(BPASS_BUTTON_TAG, BpassButton);
     } catch (error) {
-      logger.warn('drawBPassButtonRoot>>>>>>>>>>>>>>', error.message);
+      logger.warn('Registed Bpass-button failed.', error.message);
     }
   }
 

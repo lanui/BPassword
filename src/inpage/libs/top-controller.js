@@ -6,7 +6,6 @@ import logger from '@lib/logger';
 import Zombie from '@lib/messages/corpse-chaser';
 import BaseController from './base-controller';
 import { ENV_TYPE_INJET_TOP } from '@lib/enums';
-import { BPASS_SELECTOR_TAG } from './bpass-selector';
 
 /*********************************************************************
  * AircraftClass ::
@@ -48,6 +47,9 @@ class TopController extends BaseController {
 
     /** ---------  ---------- */
     this.once('actived:zombie-communication', this.createAndStartupZombieCommunication.bind(this));
+
+    /** Bind Box Method begin */
+    this.createSelectorBox = _createSelectorBox.bind(this);
   }
 
   /* +++++++++++++++++++++++++ Events & Listeners begin +++++++++++++++++++++++++++++ */
@@ -89,9 +91,7 @@ class TopController extends BaseController {
   drawingSelector(data) {
     logger.debug('TopController:drawingSelector>>>', data);
     const ifrSrc = this.getLeechSrc();
-    _drawingSelectorBox.call(this, ifrSrc, data);
-
-    //_drawingBpassSelectorZeroLayer.call(this, ifrSrc, { ...position, ifrHeight: iHeight, isInner});
+    this.createSelectorBox(ifrSrc, data);
   }
 
   /* ********************* Commons Methods Begin **************************** */
@@ -116,29 +116,17 @@ class TopController extends BaseController {
 /** ----------------------------- Private Functions Begin --------------------------------- */
 
 /**
- * TODO multi layers
- * can not get window posiChains
- * @param {string} src iframe src
- * @param {object} options [left,top,height,width,x,y,isInner,ifrHeight,atHref]
+ *
+ * @param {string} src
+ * @param {Object} position
  */
-function _drawingSelectorBox(src, options) {
-  logger.debug('TopController::_drawingSelectorBox-->>>>', src, options);
-  createSelectorBox(src, options);
-}
-
-function _drawingBpassSelectorZeroLayer(src, position) {
-  logger.debug('TopController:_drawingBpassSelectorZeroLayer>>>', position);
-  // createSelectorElement(src, position);
-  createSelectorBox(src, position);
-}
-
-function createSelectorBox(src, position) {
+function _createSelectorBox(src, position) {
   if (!position || !position.ifrHeight || !position.width) {
     logger.warn('Params miss>>>', position);
   }
   const { left = 0, top = 0, width = 0, height, ifrHeight, isInner, atHref = '' } = position;
   let box = document.querySelector('selector-box');
-  logger.debug('createSelectorBox>>>', box, position);
+  logger.debug('ToopController::_createSelectorBox->>>', box, position);
   const exists = !!box;
   if (!exists) {
     box = document.createElement('selector-box');
@@ -162,25 +150,6 @@ function createSelectorBox(src, position) {
 
   if (!exists) {
     document.body.insertAdjacentElement('beforeend', box);
-  }
-}
-
-function createSelectorElement(src, { width = 0, height = 0, left = 0, top = 0, iHeight = 0 }) {
-  let selector = document.querySelector(BPASS_SELECTOR_TAG);
-
-  const exists = !!selector;
-  if (!exists) {
-    selector = document.createElement(BPASS_SELECTOR_TAG);
-  }
-  selector.setAttribute('i-width', width);
-  selector.setAttribute('i-height', height);
-  selector.setAttribute('ifr-height', iHeight);
-  selector.setAttribute('i-left', left);
-  selector.setAttribute('i-top', top);
-  selector.setAttribute('src', src);
-
-  if (!exists) {
-    document.body.insertAdjacentElement('beforeend', selector);
   }
 }
 
