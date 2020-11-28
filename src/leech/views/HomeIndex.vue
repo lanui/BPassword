@@ -59,6 +59,7 @@ import {
   API_RT_FILL_FEILDS,
   API_WIN_SELECTOR_UP_HEIGHT,
   API_RT_EDIT_WEB_ITEM,
+  API_WIN_SELECTOR_ERASER,
 } from '@/libs/msgapi/api-types';
 import { IFR_CONF } from '@/libs/controllers/size-calculator';
 import WhispererController from '@/libs/messages/whisperer-controller';
@@ -77,11 +78,16 @@ export default {
   },
   methods: {
     sendFillItemMessage(item) {
+      console.log('leech:>>sendFillItemMessage>>>>', item);
       const whisperer = new WhispererController();
       whisperer
         .sendSimpleMessage(API_RT_FILL_FEILDS, item)
         .then(async (response) => {
-          console.log('Filled>>>>', response);
+          //send earse
+          window.top.postMessage(
+            { apiType: API_WIN_SELECTOR_ERASER, data: { form: 'leech filled success.' } },
+            '*'
+          );
         })
         .catch((err) => {
           this.error = err;
@@ -93,8 +99,11 @@ export default {
     gotoAddItemHandle() {
       const message = {
         apiType: API_WIN_SELECTOR_UP_HEIGHT,
-        page: 'addPassPage',
-        iHeight: IFR_CONF.addorHeight,
+        data: {
+          page: 'addPassPage',
+          isAddor: true,
+          ifrHeight: IFR_CONF.addorHeight,
+        },
       };
       window.top.postMessage(message, '*');
       this.$store.dispatch('updateViewPath', 'addor');

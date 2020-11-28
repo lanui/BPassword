@@ -145,6 +145,17 @@ class WhisperperListener {
 
     return respData;
   }
+
+  async filledFieldValt(reqData, sender) {
+    // logger.debug(`WhisperListener Received Data>filledFieldValt>>`, reqData, sender);
+    if (sender && sender.tab) {
+      const tabId = sender.tab.id;
+      this.controller.filledLoginFeilds(tabId, reqData);
+      return true;
+    } else {
+      throw new BizError('Miss tab id for filledFieldValt');
+    }
+  }
 }
 
 async function HandleCypherApi(message, sender, sendResp) {
@@ -156,9 +167,9 @@ async function HandleCypherApi(message, sender, sendResp) {
 
   try {
     let reqData = message.reqData;
+    logger.debug(`WhisperListener Received Data>>>`, apiType, sender);
     switch (apiType) {
       case API_FETCH_EXT_STATE:
-        logger.debug('API_FETCH_EXT_STATE>>>>>>>>>>>>>>>>>>>>>>>>>>', sender, extension.runtime.id);
         return this.getExtInfo(reqData, sender);
       case API_RT_CREATE_WALLET:
         return this.createWallet(reqData);
@@ -180,7 +191,9 @@ async function HandleCypherApi(message, sender, sendResp) {
         return this.updateMobileItem(reqData);
       case API_RT_DELETE_MOB_ITEM:
         return this.deleteMobileItem(reqData);
-
+      case API_RT_FILL_FEILDS:
+        logger.debug(`WhisperListener Received Data>>>`, apiType, reqData);
+        return this.filledFieldValt(reqData, sender);
       default:
         throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
     }

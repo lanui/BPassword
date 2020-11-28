@@ -87,10 +87,12 @@ import {
 } from '@/libs/msgapi/api-types';
 import WhispererController from '@/libs/messages/whisperer-controller';
 
+import extension from '@/libs/extensionizer';
+
 export default {
   name: 'AddPassbook',
   computed: {
-    ...mapGetters(['hostname']),
+    ...mapGetters(['hostname', 'valtState']),
   },
   data() {
     return {
@@ -153,28 +155,56 @@ export default {
     fetchFieldsVol(hostname) {
       const that = this;
       this.item.hostname = hostname;
-      browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        const tabId = tabs[0].id;
+      logger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', extension, extension.tabs);
+      if (browser.tabs) {
+        //firefox no tabs permission
+        browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+          const tabId = tabs[0].id;
 
-        const reqData = {
-          tabId,
-          hostname: hostname,
-          favIconUrl: tabs[0].favIconUrl,
-        };
+          const reqData = {
+            tabId,
+            hostname: hostname,
+            favIconUrl: tabs[0].favIconUrl,
+          };
 
-        browser.tabs.sendMessage(tabId, reqData, {}, function (data) {
-          logger.debug('Received fetch input data>>>>', data);
-          if (typeof data === 'object') {
-            if (!data.hostname) reqData.hostname = hostname;
-            that.item = Object.assign({}, data);
-          }
+          browser.tabs.sendMessage(tabId, reqData, {}, function (data) {
+            logger.debug('Received fetch input data>>>>', data);
+            if (typeof data === 'object') {
+              if (!data.hostname) reqData.hostname = hostname;
+              that.item = Object.assign({}, data);
+            }
+          });
         });
-      });
+      } else if (browser.runtime) {
+      } else {
+      }
     },
   },
   mounted() {
     const hostname = this.$store.state.hostname || '';
     this.fetchFieldsVol(hostname);
+  },
+  watch: {
+    'valtState.hostname': {
+      immediate: true,
+      handler(newVal, oldVal) {
+        if (Boolean(newVal)) {
+          this.item.hostname = newVal;
+        }
+      },
+    },
+    'valtState.username': {
+      immediate: true,
+      handler(newVal, oldVal) {
+        this.item.username = newVal;
+      },
+    },
+    'valtState.password': {
+      immediate: true,
+      handler(newVal, oldVal) {
+        this.item.password = newVal;
+      },
+    },
   },
 };
 </script>

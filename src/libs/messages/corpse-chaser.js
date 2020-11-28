@@ -78,7 +78,10 @@ class CorpseChaser extends EventEmitter {
   remoteCommandsListener(message) {
     if (message && message.name && message.data) {
       const { apiType, respData } = message.data;
-      logger.debug(`CorpseChaser Received corpse commands : ${apiType}>>>`, respData);
+      logger.debug(
+        `CorpseChaser Received corpse commands [${this.portName}]: ${apiType}>>>`,
+        respData
+      );
 
       switch (apiType) {
         case API_JET_INIT_STATE:

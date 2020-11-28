@@ -309,6 +309,10 @@ class BackMainController extends EventEmitter {
           case API_RT_FIELDS_VALT_CHANGED:
             this.websiteController.updateActieTabValtState(tabId, message.data);
             break;
+
+            //send
+
+            break;
           default:
             break;
         }
@@ -400,8 +404,8 @@ class BackMainController extends EventEmitter {
    * @param {*} item
    */
   filledLoginFeilds(tabId, item) {
-    //
-    logger.debug('BackMainController:filledLoginFeilds >>>>>', tabId, item);
+    // logger.debug('BackMainController:filledLoginFeilds >>>>>', tabId, item);
+    // logger.debug(`BackMainController:WhisperListener Received Data>filledFieldValt>>`, tabId, item);
     const muxStream = this.getInjetOriginConnectionByTab(tabId);
 
     muxStream.write({ apiType: API_RT_FILL_FEILDS, respData: item });

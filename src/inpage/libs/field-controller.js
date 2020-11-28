@@ -16,6 +16,7 @@ import {
   API_WIN_SELECTOR_UP_VALT,
   API_WIN_SELECTOR_UP_DRAWER,
   API_PORT_FIELDS_VALT_CHANGED,
+  API_RT_FIELDS_VALT_CHANGED,
 } from '@lib/msgapi/api-types';
 import { ENV_TYPE_INJET } from '@lib/enums';
 
@@ -52,7 +53,6 @@ class FieldController extends BaseController {
     this.once('actived:zombie-communication', this.activedZombieCommunication.bind(this));
 
     /* ------------ bind ------- */
-    this.toggleIconClick = _bpassButtonClick.bind(this);
   }
 
   /** =========================== Event Methods Start ============================== */
@@ -94,8 +94,35 @@ class FieldController extends BaseController {
    */
   inputFieldValtChangedHandler(target) {
     const valtState = this.getValtState(target);
-    // logger.debug('inputFieldValtChangedHandler>>>', target, valtState);
+
     this._sendMessageToTop(API_WIN_SELECTOR_UP_VALT, valtState);
+    logger.debug('inputFieldValtChangedHandler>>>', target, valtState);
+    // send to backend
+    if (this.zombie) {
+      this.zombie.postMessage(API_RT_FIELDS_VALT_CHANGED, valtState);
+    }
+
+    /** API_WIN_SELECTOR_UP_DRAWER */
+    let activedDomRect = target.getBoundingClientRect();
+    let serializeDomRect = JSON.parse(JSON.stringify(activedDomRect));
+
+    // logger.debug('iconClickHandler::toggler>>>>>>>>>>>>>>>>', JSON.stringify(serializeDomRect));
+
+    const paramState = this._comboParams(target);
+    const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
+
+    const { elemType, ifrHeight, tag } = ifrSizeState;
+    const drawMessageData = this.comboSelectorBoxSendData(ifrHeight, serializeDomRect);
+
+    if (target === this.targetPassword) {
+      if (elemType === 'drawing') {
+        logger.debug('inputFieldValtChangedHandler>>>', elemType, tag, drawMessageData);
+        this._sendMessageToTop(API_WIN_SELECTOR_UP_DRAWER, drawMessageData);
+      } else {
+        this._sendMessageToTop(API_WIN_SELECTOR_ERASER, { from: 'input:fields:changed' });
+      }
+    } else if (target === this.targetUsername) {
+    }
   }
 
   /** =========================== Methods Start ============================== */
@@ -110,10 +137,11 @@ class FieldController extends BaseController {
     if (typeof valtState !== 'object') {
       return;
     }
+    // logger.debug(`WhisperListener Received Data>filledFieldValt>>`, valtState, this.targetUsername, this.targetPassword);
     const { username = '', password = '' } = valtState;
 
     this.targetUsername && (this.targetUsername.value = username);
-    this.targetPassword && (this.targetPassword.vaule = password);
+    this.targetPassword && (this.targetPassword.value = password);
   }
 
   /**
@@ -325,7 +353,6 @@ class FieldController extends BaseController {
 }
 
 /** ++++++++++++++++++++++++++ Functions Start ++++++++++++++++++++++++++++++ */
-function _bpassButtonClick() {}
 
 function BindingFocusEvents() {
   const ctx = this;
@@ -393,7 +420,7 @@ function BindingFocusEvents() {
       document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
 
       // send selector box display
-      ctx.sendEraseSelectorBoxMessage(false);
+      // ctx.sendEraseSelectorBoxMessage(false);
 
       ctx.setActivedTarget(null);
     });

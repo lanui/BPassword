@@ -12,7 +12,10 @@ import {
   API_WIN_SELECTOR_UP_VALT,
   API_WIN_SELECTOR_DRAWER,
   API_WIN_SELECTOR_ERASER,
+  API_WIN_SELECTOR_ERASER_FORCE,
   API_WIN_SELECTOR_TOGGLE,
+  API_WIN_SELECTOR_UP_HEIGHT,
+  API_WIN_SELECTOR_UP_DRAWER,
 } from '@lib/msgapi/api-types';
 
 import { LEECH_INDEX_PATH, LEECH_ADDOR_PATH } from '@lib/messages/fox/extension-info';
@@ -92,15 +95,23 @@ function startupTopJetMessageListener(controller) {
         break;
       case API_WIN_SELECTOR_DRAWER:
         /** */
-
         controller.drawingSelector(data);
         break;
       case API_WIN_SELECTOR_ERASER:
         controller.eraseSelectorBox();
         break;
+      case API_WIN_SELECTOR_ERASER_FORCE:
+        controller.eraseSelectorBox(true);
+        break;
       case API_WIN_SELECTOR_TOGGLE:
-        logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_TOGGLE>>>>', data, controller);
         controller.toggleSelectorBox(data);
+        break;
+      case API_WIN_SELECTOR_UP_HEIGHT:
+        controller.updateSelectorBoxIfrHeight(data);
+        break;
+      case API_WIN_SELECTOR_UP_DRAWER:
+        logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_UP_DRAWER>>>>', data);
+        controller.drawOrUpdateSelectorBoxIframeHeight(data);
         break;
 
       default:

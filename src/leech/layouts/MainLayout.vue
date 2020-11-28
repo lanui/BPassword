@@ -104,7 +104,9 @@ export default {
     removeSelector() {
       let message = {
         apiType: API_WIN_SELECTOR_ERASER_FORCE,
-        isInner: window.top !== window.self,
+        data: {
+          isInner: window.top !== window.self,
+        },
       };
 
       window.top.postMessage(message, '*');
@@ -112,8 +114,11 @@ export default {
     gotoAddItemHandle() {
       const message = {
         apiType: API_WIN_SELECTOR_UP_HEIGHT,
-        page: 'addPassPage',
-        iHeight: IFR_CONF.addorHeight,
+        data: {
+          page: 'addPassPage',
+          isAddor: true,
+          ifrHeight: IFR_CONF.addorHeight,
+        },
       };
       window.top.postMessage(message, '*');
 
@@ -125,7 +130,6 @@ export default {
 </script>
 <style lang="css" scope>
 .leech-main-border {
-  background-color: rgba(218, 220, 224, 1);
   border-left: 0px solid rgba(218, 220, 224, 1);
   border-right: 0px solid rgba(218, 220, 224, 1);
   border-top: 1px solid rgba(218, 220, 224, 1);

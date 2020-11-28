@@ -47,7 +47,7 @@ async function foxSendMessage(message) {
   );
   try {
     const respData = await extension.runtime.sendMessage(this.extid, message);
-    logger.debug('WhispererController:sendSimpleMessage:received -fox>>>', respData);
+    // logger.debug('WhispererController:sendSimpleMessage:received -fox>>>', respData);
     return respData;
   } catch (err) {
     logger.debug('WhispererController:sendSimpleMessage:received -fox>>>', err);

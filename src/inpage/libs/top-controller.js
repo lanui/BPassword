@@ -52,7 +52,7 @@ class TopController extends BaseController {
     /** Bind Box Method begin */
     this.createSelectorBox = _createSelectorBox.bind(this);
     this.updateBoxIfrHeight = _updateSelectorBoxIfrHeight.bind(this);
-    this.eraseSelectorBox = _removeSelectorBox.bind(this);
+    // this.eraseSelectorBox = _removeSelectorBox.bind(this);
   }
 
   /* +++++++++++++++++++++++++ Events & Listeners begin +++++++++++++++++++++++++++++ */
@@ -94,7 +94,12 @@ class TopController extends BaseController {
   drawingSelector(data) {
     logger.debug('TopController:drawingSelector>>>', data);
     const ifrSrc = this.getLeechSrc();
-    this.createSelectorBox(ifrSrc, data);
+    _createSelectorBox.call(this, ifrSrc, data);
+    // this.createSelectorBox(ifrSrc, data);
+  }
+
+  eraseSelectorBox(force = false) {
+    _removeSelectorBox.call(this, force);
   }
 
   toggleSelectorBox(data) {
@@ -102,6 +107,33 @@ class TopController extends BaseController {
     logger.debug('toggleSelectorBox-->>>>>>>>>..', !!box, data);
 
     !box ? this.drawingSelector(data) : this.eraseSelectorBox(false);
+  }
+
+  /**
+   * 负责创建或更新高度
+   * @param {object} data
+   */
+  drawOrUpdateSelectorBoxIframeHeight(data) {
+    logger.debug('TopController::drawOrUpdateSelectorBoxIframeHeight ->>', data);
+
+    const exists = !!document.querySelector(SELECTOR_BOX_TAG);
+
+    if (exists) {
+      const { ifrHeight } = data;
+      _updateSelectorBoxIfrHeight.call(this, { ifrHeight, isAddor: false });
+    } else {
+      const ifrSrc = this.getLeechSrc();
+      _createSelectorBox.call(this, ifrSrc, data);
+    }
+  }
+
+  /**
+   *
+   * @param {*} param0
+   */
+  updateSelectorBoxIfrHeight({ ifrHeight, isAddor = false }) {
+    // logger.debug('updateSelectorBoxIfrHeight',ifrHeight)
+    _updateSelectorBoxIfrHeight.call(this, { ifrHeight, isAddor });
   }
 
   /* ********************* Commons Methods Begin **************************** */
@@ -138,11 +170,19 @@ function _createSelectorBox(src, position) {
   let box = document.querySelector(SELECTOR_BOX_TAG);
   logger.debug('ToopController::_createSelectorBox->>>', box, position);
   const exists = !!box;
+
+  if (exists && box.hasAttribute('is-addor')) {
+    box.setAttribute('uts', new Date().getTime());
+    return;
+  }
+
   if (!exists) {
     box = document.createElement(SELECTOR_BOX_TAG);
   }
   box.setAttribute('uts', new Date().getTime());
-  box.setAttribute('src', src);
+  if (!exists) {
+    box.setAttribute('src', src);
+  }
   box.setAttribute('at-width', width);
   box.setAttribute('at-height', height);
   box.setAttribute('at-left', left);
@@ -164,6 +204,7 @@ function _createSelectorBox(src, position) {
 }
 
 function _updateSelectorBoxIfrHeight({ ifrHeight, isAddor = false }) {
+  logger.debug('_updateSelectorBoxIfrHeight>>>>>>>>>>>>', ifrHeight);
   if (!ifrHeight) {
     return;
   }
@@ -172,6 +213,8 @@ function _updateSelectorBoxIfrHeight({ ifrHeight, isAddor = false }) {
     box.setAttribute('ifr-height', parseInt(ifrHeight));
     if (isAddor) {
       box.setAttribute('is-addor', true);
+    } else {
+      box.removeAttribute('is-addor');
     }
   }
 }

@@ -510,6 +510,8 @@ function BindingFocusEvents() {
         password: ctx.targetPassword ? ctx.targetPassword.value : '',
       };
 
+      //send back
+      logger.debug('zombieSendValtToBack:@focusin>>>', ctx);
       ctx.zombieSendValtToBack(activeValtState);
 
       const valtState = {

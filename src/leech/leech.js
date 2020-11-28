@@ -9,6 +9,8 @@ import router from './router';
 import LivedManager from '@lib/messages/leech-lived-manager';
 import logger from '@lib/logger';
 
+global.browser = require('webextension-polyfill');
+
 // communicate backend
 import { ENV_TYPE_LEECH } from '@lib/enums';
 const livedManager = new LivedManager({

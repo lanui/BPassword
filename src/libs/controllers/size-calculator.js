@@ -227,5 +227,8 @@ function calcRowHeight(rows) {
   if (rows == 0) return IFR_CONF.addBtnHeight;
   let _showRows = rows > IFR_CONF.maxRows ? IFR_CONF.maxRows : rows;
 
-  return IFR_CONF.baseHeight + _showRows * IFR_CONF.rowHeight;
+  const diff = rows === 1 ? 2 : 0;
+  let ifrHeight = IFR_CONF.baseHeight + _showRows * IFR_CONF.rowHeight + diff;
+
+  return ifrHeight;
 }
