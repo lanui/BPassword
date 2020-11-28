@@ -78,7 +78,7 @@ function chanel5builder(jetid) {
         }
 
         static get observedAttributes() {
-          return ['src', 'at-width', 'at-height', 'at-left', 'at-top', 'ifr-height','is-inner','at-href'];
+          return ['src', 'at-width', 'at-height', 'at-left', 'at-top', 'ifr-height','is-inner','at-href','uts'];
         }
 
         attributeChangedCallback(name, oldValue, newValue){

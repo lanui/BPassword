@@ -36,8 +36,9 @@ function fetchExtensionConfig() {
 
 function inJectNo7(uuid, extid, leechSrc) {
   const jetContent = `
-    (function(uuid,extid,leechSrc,logLevel){
-      console.log("Starting BPListenerChain:",uuid,extid,leechSrc,logLevel)
+    (function(uuid,extid,leechSrc,ll){
+      if(ll==='DEBUG'){console.log("Starting BPListenerChain:",uuid,extid,leechSrc,ll);}
+
       function BPListenerChain(){
         this.uuid = uuid;
         this.extid = extid;
@@ -56,7 +57,7 @@ function inJectNo7(uuid, extid, leechSrc) {
 
           const recData = evt.data
           if(recData && recData.extid && recData.extid === _this.extid){
-            console.log('No Seven Received data:',recData);
+            (ll==='DEBUG')&&console.log('No Seven Received data:',recData);
             const findHref = recData.nodeRootHref;
             const recPosterId = recData.posterId;
 
@@ -97,6 +98,8 @@ function inJectNo7(uuid, extid, leechSrc) {
               _this.domRects = Object.assign([],transportMessage.domRects);
               window.__bpTopPosiChains = transportMessage.domRects;
             }
+            /**/
+            (window.self===window.top) && document.querySelector('selector-box') && document.querySelector('selector-box').setAttribute('uts',new Date());
           }else {
             /** not BP system Message */
           }

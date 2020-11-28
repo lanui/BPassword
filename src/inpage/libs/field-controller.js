@@ -1,4 +1,4 @@
-import { debounce, clone } from 'lodash';
+import { debounce } from 'lodash';
 import ObservableStore from 'obs-store';
 
 import logger from '@lib/logger';
@@ -27,6 +27,7 @@ import { BPASS_BUTTON_TAG, BpassButton } from './bpass-button';
  *    @description:
  *    @description:
  * WARNINGS:
+ *    ResizeObserve Firefox must >= 69 & Chrome >= 64 & Edge >=79
  *
  * HISTORY:
  *    @author: lanbery@gmail.com
@@ -46,16 +47,68 @@ class FieldController extends BaseController {
     this.backendStore = new ObservableStore({ isUnlocked: false, items: [], matchedNum: 0 });
 
     /** ------- event -------- */
+
     this.on('lookup:login:fields', this.checkLoginForm.bind(this));
     this.on('enabled:input:valtChanged', this.enabledInputFieldValtChangedListener.bind(this));
     this.on('disabled:input:valtChanged', this.disabledInputFieldValtChangedListener.bind(this));
 
     this.once('actived:zombie-communication', this.activedZombieCommunication.bind(this));
+    this.once('enabled:resize:obs', this.enabledPositionResizeObserve.bind(this));
 
+    this.on('enabled:private:msg-listener', this.enabledSelfPrivateMsgListener.bind(this));
     /* ------------ bind ------- */
   }
 
   /** =========================== Event Methods Start ============================== */
+
+  /**
+   *
+   */
+  enabledSelfPrivateMsgListener() {
+    const selfId = this.getId();
+    window.addEventListener('message', (evt) => {
+      if (!evt.data || (evt.data.token !== selfId && !evt.data.command)) {
+        return;
+      }
+      const target = this.activedTarget || this.targetUsername || this.targetPassword;
+      const { command } = evt.data;
+      switch (command) {
+        case 'resize':
+          target && this.sendTargetPosition(target);
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
+  /**
+   * 开启热size 监控
+   */
+  enabledPositionResizeObserve() {
+    // logger.debug('activedPositionResizeObserve>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    this.resizeObserver = new ResizeObserver(debounce(this.resizePisitonHandler.bind(this), 100));
+    this.resizeObserver.observe(document.body);
+  }
+
+  /**
+   * Firefox :
+   * @param {*} entries
+   */
+  resizePisitonHandler(entries) {
+    // logger.debug('activedPositionResizeObserve>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', entries,this)
+
+    let target = this.activedTarget || this.targetUsername || this.targetPassword;
+
+    if (!target) {
+      return;
+    }
+    // logger.debug('activedPositionResizeObserve>>>>>>>>>after>>>>>>>>>>>>>>>>>>>>>>>>>>>', target)
+
+    //update icon position
+    _updateBpassButtonPoistion.call(this, target);
+    this.sendTargetPosition(target);
+  }
 
   /**
    *
@@ -156,6 +209,12 @@ class FieldController extends BaseController {
 
     if (hasFinded) {
       const hostname = this.getHost();
+
+      if (window.self !== window.top) {
+        //enabled listening message from top
+        this.emit('enabled:private:msg-listener');
+      }
+
       /**
        *
        * 0.bind focus events
@@ -166,7 +225,11 @@ class FieldController extends BaseController {
        * 5.emit scroll:obs
        *
        */
+
       BindingFocusEvents.call(this);
+
+      // actived resize observe
+      this.emit('enabled:resize:obs');
 
       // send API_WIN_FINDED_LOGIN Message
       const findedData = {
@@ -184,6 +247,14 @@ class FieldController extends BaseController {
   }
 
   _sendMessageToTop(apiType, data) {
+    const sendMessage = {
+      apiType,
+      data,
+    };
+    window.top.postMessage(sendMessage, '*');
+  }
+
+  _sendTrustedMessageToTop(apiType, data) {
     const sendMessage = {
       apiType,
       data,
@@ -260,6 +331,7 @@ class FieldController extends BaseController {
 
   /**
    * actived the first Position chain message
+   * or position changed
    * @param {element} activedTarget
    */
   sendTargetPosition(activedTarget) {
@@ -285,7 +357,11 @@ class FieldController extends BaseController {
         },
       ],
     };
-    logger.debug('actived the first Position chain message*****>>>', transportMsg, activedTarget);
+    logger.debug(
+      'sendTargetPosition:actived or changed Position chain message*****>>>',
+      transportMsg,
+      activedTarget
+    );
     window.parent.postMessage(transportMsg, '*');
   }
 
@@ -420,7 +496,7 @@ function BindingFocusEvents() {
       document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
 
       // send selector box display
-      // ctx.sendEraseSelectorBoxMessage(false);
+      ctx.sendEraseSelectorBoxMessage(false);
 
       ctx.setActivedTarget(null);
     });
@@ -431,12 +507,8 @@ function drawBPassButtonRoot(e) {
   let domRect = e.target.getBoundingClientRect();
   domRect = JSON.parse(JSON.stringify(domRect));
 
-  logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', domRect);
+  // logger.debug('drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', domRect);
 
-  // logger.debug(
-  //   'drawBPassButtonRoot>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
-  //   window.customElements.get(BPASS_BUTTON_TAG)
-  // );
   /** window pointer to target window */
   if (!window.customElements.get(BPASS_BUTTON_TAG)) {
     try {
@@ -459,8 +531,18 @@ function drawBPassButtonRoot(e) {
   return passRoot;
 }
 
+function _updateBpassButtonPoistion(target) {
+  const bpassButton = document.querySelector(BPASS_BUTTON_TAG);
+  logger.debug('activedPositionResizeObserve>>_updateBpassButtonPoistion>>>>>', bpassButton);
+  if (target && bpassButton) {
+    let domRect = JSON.parse(JSON.stringify(target.getBoundingClientRect()));
+    setDomRect(bpassButton, domRect);
+  }
+}
+
 function setDomRect(elem, domRect) {
   const { left = 0, top = 0, width = 0, height = 0 } = domRect;
+
   elem.setAttribute('target-width', width);
   elem.setAttribute('target-height', height);
   elem.setAttribute('target-left', left);

@@ -46,7 +46,7 @@ if (shouldActivedJet()) {
     leechSrc: browser.runtime.getURL(LEECH_INDEX_PATH),
     leechAddorSrc: browser.runtime.getURL(LEECH_ADDOR_PATH),
   };
-  logger.debug('BPassword Top initConfig:', JSON.stringify(initConfig));
+  // logger.debug('BPassword Top initConfig:', JSON.stringify(initConfig));
   const topCtx = new TopController({ initConfig });
 
   if (LOG_LEVEL === 'DEBUG') {
@@ -74,12 +74,11 @@ function startupTopJetMessageListener(controller) {
     }
 
     const { apiType, data } = recMessage;
-    logger.debug('FJS:topInjet received Message.>>>>>>>>>>>>>>>>>>', apiType, data);
+    logger.debug('FJS:topInjet received Message.>>>>>', apiType, data);
 
     switch (apiType) {
       case API_WIN_FINDED_LOGIN:
-        controller.updatefindedMessageHandler(data);
-        logger.debug('TopInjet:Message Listener->API_WIN_FINDED_LOGIN>>>>', controller);
+        controller.updatefindedMessageHandler(data, evt);
         break;
       case API_WIN_SELECTOR_UP_VALT:
         /**
@@ -88,10 +87,10 @@ function startupTopJetMessageListener(controller) {
          * because the iframe height calculation completed at inner iframe.
          */
         controller.updateFieldValtStoreHandler(data);
-        logger.debug(
-          'TopInjet:Message Listener->API_WIN_SELECTOR_UP_VALT>>>>',
-          controller.fieldValtState.getState()
-        );
+        // logger.debug(
+        //   'TopInjet:Message Listener->API_WIN_SELECTOR_UP_VALT>>>>',
+        //   controller.fieldValtState.getState()
+        // );
         break;
       case API_WIN_SELECTOR_DRAWER:
         /** */
@@ -110,7 +109,7 @@ function startupTopJetMessageListener(controller) {
         controller.updateSelectorBoxIfrHeight(data);
         break;
       case API_WIN_SELECTOR_UP_DRAWER:
-        logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_UP_DRAWER>>>>', data);
+        // logger.debug('TopInjet:Message Listener->API_WIN_SELECTOR_UP_DRAWER>>>>', data);
         controller.drawOrUpdateSelectorBoxIframeHeight(data);
         break;
 
@@ -130,8 +129,4 @@ async function fetchInitTopConfig() {
   } catch (error) {
     logger.debug('top script injected.error>>>>>>>>>>>>>>>>>>', error);
   }
-}
-
-function startupInjet() {
-  logger.debug('top script injected.>>>>>>>>>>>>>>>>>>');
 }

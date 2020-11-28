@@ -48,6 +48,7 @@ class TopController extends BaseController {
 
     /** ---------  ---------- */
     this.once('actived:zombie-communication', this.createAndStartupZombieCommunication.bind(this));
+    this.once('actived:resize:obs', this.activedTopBodyResizeObserve.bind(this));
 
     /** Bind Box Method begin */
     this.createSelectorBox = _createSelectorBox.bind(this);
@@ -67,28 +68,63 @@ class TopController extends BaseController {
   }
 
   /**
+   * 开启热size监控,multi layer need top notify login
+   */
+  activedTopBodyResizeObserve() {
+    this.resizeObserver = new ResizeObserver(debounce(this.topBodyResizeHandle.bind(this), 100));
+    this.resizeObserver.observe(document.body);
+  }
+
+  topBodyResizeHandle(entries) {
+    if (this.isInner && this.loginSource && this.loginOrigin && this.loginUUID) {
+      logger.debug('FJS:topInjet TopController::topBodyResizeHandle>>>>>>>>>>', this.loginOrigin);
+      const message = {
+        token: this.loginUUID,
+        command: 'resize',
+        form: this.getId(),
+        data: { ts: new Date().getTime() },
+      };
+      logger.debug(
+        'FJS:topInjet TopController::topBodyResizeHandle>>>>>>>>>>',
+        message,
+        this.loginSource
+      );
+      this.loginSource.postMessage(message, this.loginOrigin);
+    }
+  }
+
+  /**
    * 更新backend data
    *
    */
   updateBackendStoreHandler(state) {
     this.backendStore.updateState({ ...state });
-    logger.debug('updateBackendStoreHandler:>>>>>>>>>>>>>>>>>>>>>>>', state);
+    // logger.debug('updateBackendStoreHandler:>>>>>>>>>>>>>>>>>>>>>>>', state);
   }
 
   updateFieldValtStoreHandler(valtState) {
     this.fieldValtState.updateState(valtState);
-    logger.debug('updateFieldValtStoreHandler:>>>>>>>>>>>>>>>>>>>>>>>', valtState);
   }
 
   /* ####################### Handle Top Message Starting ######################### */
-  updatefindedMessageHandler(data) {
-    const { hostname = '', isInner = false, href = '' } = data;
+  updatefindedMessageHandler(data, evt) {
+    // logger.debug('FJS:topInjet updatefindedMessageHandler@sendMessage>>>>>>>>>>>>>>>>>>>>>>>', evt);
+    const { hostname = '', isInner = false, href = '', senderId } = data;
     this.loginHostname = hostname;
     this.loginHref = href;
     this.isInner = isInner;
 
     //startup communication
     this.emit('actived:zombie-communication', hostname);
+
+    // actived:resize:obs
+    if (isInner && senderId) {
+      this.loginSource = evt.source;
+      this.loginOrigin = evt.origin;
+      this.loginUUID = senderId;
+      this.emit('actived:resize:obs');
+      // logger.debug('FJS:topInjet updatefindedMessageHandler@sendMessage>>>>>>>>>>>>>>>>>>>>>>>', senderId, this.loginOrigin);
+    }
   }
 
   drawingSelector(data) {
@@ -104,8 +140,7 @@ class TopController extends BaseController {
 
   toggleSelectorBox(data) {
     const box = document.querySelector(SELECTOR_BOX_TAG);
-    logger.debug('toggleSelectorBox-->>>>>>>>>..', !!box, data);
-
+    // logger.debug('toggleSelectorBox-->>>>>>>>>..', !!box, data);
     !box ? this.drawingSelector(data) : this.eraseSelectorBox(false);
   }
 
@@ -114,8 +149,7 @@ class TopController extends BaseController {
    * @param {object} data
    */
   drawOrUpdateSelectorBoxIframeHeight(data) {
-    logger.debug('TopController::drawOrUpdateSelectorBoxIframeHeight ->>', data);
-
+    // logger.debug('TopController::drawOrUpdateSelectorBoxIframeHeight ->>', data);
     const exists = !!document.querySelector(SELECTOR_BOX_TAG);
 
     if (exists) {
@@ -225,5 +259,7 @@ function _removeSelectorBox(force = false) {
     force ? box.remove() : !box.hasAttribute('is-addor') && box.remove();
   }
 }
+
+function _updateSelectorBoxPositionOnly(domRect) {}
 
 export default TopController;
