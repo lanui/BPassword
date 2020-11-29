@@ -75,7 +75,7 @@ let baseConfig = {
         'ui-vuetify': {
           test: (module) => {
             // console.log("Chunks ------------------>",module)
-            return /vuetify/.test(module.context);
+            return /vuetify|@mdi/.test(module.context);
           },
           chunks: 'initial',
           name: 'ui-vuetify',
