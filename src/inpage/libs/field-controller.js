@@ -67,10 +67,23 @@ class FieldController extends BaseController {
     this.once('enabled:resize:obs', this.enabledPositionResizeObserve.bind(this));
 
     this.once('enabled:private:msg-listener', this.enabledSelfPrivateMsgListener.bind(this));
+    this.once('actived:login:window:scroll-obs', this.activedLoginWindowScrollObs.bind(this));
     /* ------------ bind ------- */
   }
 
   /** =========================== Event Methods Start ============================== */
+
+  activedLoginWindowScrollObs() {
+    window.addEventListener('scroll', debounce(this.loginWindowScrollHandler.bind(this), 100));
+  }
+
+  loginWindowScrollHandler(el) {
+    const target = this.activedTarget || this.targetUsername || this.targetPassword;
+    if (target) {
+      this.sendTargetPosition(target);
+      _updateBpassButtonPoistion.call(this, target);
+    }
+  }
 
   mutationObserverListener(records) {
     if (!this.targetPassword || !this.targetUsername) {
@@ -79,6 +92,7 @@ class FieldController extends BaseController {
       this.targetUsername = targetUsername;
 
       if (targetPassword && targetUsername) {
+        this.emit('actived:login:window:scroll-obs');
         const hostname = this.getHost();
         if (window.self !== window.top) {
           this.emit('enabled:private:msg-listener');
@@ -110,10 +124,12 @@ class FieldController extends BaseController {
       if (!evt.data || (evt.data.token !== selfId && !evt.data.command)) {
         return;
       }
+      logger.debug('FieldController::enabledSelfPrivateMsgListener>>>', evt.data);
       const target = this.activedTarget || this.targetUsername || this.targetPassword;
       const { command } = evt.data;
       switch (command) {
         case 'resize':
+        case 'scroll':
           target && this.sendTargetPosition(target);
           break;
         default:
@@ -178,8 +194,7 @@ class FieldController extends BaseController {
   }
 
   disabledInputFieldValtChangedListener(el) {
-    el && el.removeAllListeners('input');
-    //el.removeEventListener('input', this.inputFieldValtChangedHandler.bind(this), true);
+    el && el.removeEventListener('input', this.inputFieldValtChangedHandler.bind(this), true);
   }
 
   /**
@@ -251,6 +266,7 @@ class FieldController extends BaseController {
     if (hasFinded) {
       const hostname = this.getHost();
       logger.debug('checkLoginForm>>>>>>>>>>>>>>', this.targetUsername, this.targetUsername);
+      this.emit('actived:login:window:scroll-obs');
       if (window.self !== window.top) {
         //enabled listening message from top
         this.emit('enabled:private:msg-listener');
@@ -530,6 +546,7 @@ function BindingFocusEvents() {
     });
 
     elem.addEventListener('focusout', (e) => {
+      logger.debug('FieldController@focusout>>>', e);
       // disabled:input:valtChanged
       ctx.emit('disabled:input:valtChanged', e.target);
 

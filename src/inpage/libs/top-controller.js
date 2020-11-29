@@ -49,6 +49,7 @@ class TopController extends BaseController {
     /** ---------  ---------- */
     this.once('actived:zombie-communication', this.createAndStartupZombieCommunication.bind(this));
     this.once('actived:resize:obs', this.activedTopBodyResizeObserve.bind(this));
+    this.once('actived:window:srcoll:obs', this.activedMultiLayerScrollObserver.bind(this));
 
     /** Bind Box Method begin */
     this.createSelectorBox = _createSelectorBox.bind(this);
@@ -57,7 +58,6 @@ class TopController extends BaseController {
   }
 
   /* +++++++++++++++++++++++++ Events & Listeners begin +++++++++++++++++++++++++++++ */
-
   createAndStartupZombieCommunication(hostname) {
     this.zombie = new Zombie({
       portName: ENV_TYPE_INJET_TOP,
@@ -93,6 +93,30 @@ class TopController extends BaseController {
     }
   }
 
+  activedMultiLayerScrollObserver() {
+    window.addEventListener('scroll', debounce(this.topLayerWindowScrollHandler.bind(this), 100));
+  }
+
+  topLayerWindowScrollHandler() {
+    if (this.isInner && this.loginSource && this.loginOrigin && this.loginUUID) {
+      logger.debug(
+        'FJS:topInjet TopController::topLayerWindowScrollHandler>>>>>>>>>>',
+        this.loginOrigin
+      );
+      const message = {
+        token: this.loginUUID,
+        command: 'scroll',
+        form: this.getId(),
+        data: { ts: new Date().getTime() },
+      };
+      logger.debug(
+        'FJS:topInjet TopController::topLayerWindowScrollHandler>>>>>>>>>>',
+        message,
+        this.loginSource
+      );
+      this.loginSource.postMessage(message, this.loginOrigin);
+    }
+  }
   /**
    * 更新backend data
    *
@@ -123,6 +147,7 @@ class TopController extends BaseController {
       this.loginOrigin = evt.origin;
       this.loginUUID = senderId;
       this.emit('actived:resize:obs');
+      this.emit('actived:window:srcoll:obs');
       // logger.debug('FJS:topInjet updatefindedMessageHandler@sendMessage>>>>>>>>>>>>>>>>>>>>>>>', senderId, this.loginOrigin);
     }
   }
