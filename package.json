@@ -24,7 +24,7 @@
     "build:fox": "cross-env EXT_TARGET=firefox APP_VERSION=0.5.0 webpack --config ci/webpack.fox.js --hide-modules",
     "watch:fox": "cross-env HMR=true NODE_ENV=development LOG_LEVEL=DEBUG npm run build:fox -- --watch",
     "zip-fox": "cross-env node ci/zip-fox.js",
-    "sign": "web-ext sign --config ci/webext-config.js ",
+    "sign": "cross-env EXT_TARGET=firefox TASK_COMMAND=sign node ci/fox-webext.js",
     "analyz": "webpack-bundle-analyzer dist/stats.json --port 8899"
   },
   "husky": {
