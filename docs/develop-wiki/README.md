@@ -18,3 +18,4 @@ yarn build:fox
 - Nodejs > 10.0
 - Firefox > 69
 - yarn > 1.19
+- webpack >= 4
