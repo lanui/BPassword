@@ -48,6 +48,17 @@ class FieldController extends BaseController {
 
     /** ------- event -------- */
 
+    this.mutationObserver = new MutationObserver(
+      debounce(this.mutationObserverListener.bind(this), 15)
+    );
+    if (window.document.body && window.document.body.childElementCount > 0) {
+      this.mutationObserver.observe(document.body, {
+        childList: true, //
+        subtree: true, //
+        attributes: true, //
+      });
+    }
+
     this.on('lookup:login:fields', this.checkLoginForm.bind(this));
     this.on('enabled:input:valtChanged', this.enabledInputFieldValtChangedListener.bind(this));
     this.on('disabled:input:valtChanged', this.disabledInputFieldValtChangedListener.bind(this));
@@ -55,12 +66,41 @@ class FieldController extends BaseController {
     this.once('actived:zombie-communication', this.activedZombieCommunication.bind(this));
     this.once('enabled:resize:obs', this.enabledPositionResizeObserve.bind(this));
 
-    this.on('enabled:private:msg-listener', this.enabledSelfPrivateMsgListener.bind(this));
+    this.once('enabled:private:msg-listener', this.enabledSelfPrivateMsgListener.bind(this));
     /* ------------ bind ------- */
   }
 
   /** =========================== Event Methods Start ============================== */
 
+  mutationObserverListener(records) {
+    if (!this.targetPassword || !this.targetUsername) {
+      const { targetPassword, targetUsername } = lookupLoginFeildsInDom();
+      this.targetPassword = targetPassword;
+      this.targetUsername = targetUsername;
+
+      if (targetPassword && targetUsername) {
+        const hostname = this.getHost();
+        if (window.self !== window.top) {
+          this.emit('enabled:private:msg-listener');
+        }
+
+        BindingFocusEvents.call(this);
+        this.emit('enabled:resize:obs');
+        // send API_WIN_FINDED_LOGIN Message
+        const findedData = {
+          isInner: window.self !== window.top,
+          senderId: this.getId(),
+          href: window.location.href,
+          hostname: hostname,
+        };
+
+        this._sendMessageToTop(API_WIN_FINDED_LOGIN, findedData);
+
+        // emit active Long connect background
+        this.emit('actived:zombie-communication', hostname);
+      }
+    }
+  }
   /**
    *
    */
@@ -138,7 +178,8 @@ class FieldController extends BaseController {
   }
 
   disabledInputFieldValtChangedListener(el) {
-    el && el.removeEventListener('input', this.inputFieldValtChangedHandler.bind(this), true);
+    el && el.removeAllListeners('input');
+    //el.removeEventListener('input', this.inputFieldValtChangedHandler.bind(this), true);
   }
 
   /**
@@ -209,7 +250,7 @@ class FieldController extends BaseController {
 
     if (hasFinded) {
       const hostname = this.getHost();
-
+      logger.debug('checkLoginForm>>>>>>>>>>>>>>', this.targetUsername, this.targetUsername);
       if (window.self !== window.top) {
         //enabled listening message from top
         this.emit('enabled:private:msg-listener');

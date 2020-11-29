@@ -181,7 +181,7 @@ export default {
     },
   },
   mounted() {
-    const hostname = this.$store.state.hostname || '';
+    const hostname = this.valtState.hostname;
     this.fetchFieldsVol(hostname);
   },
   watch: {
