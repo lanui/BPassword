@@ -660,6 +660,7 @@ function lookupLoginFeildsInDom() {
     );
   }
 
+  logger.debug('Lookup login fields:', _password, _username);
   if (!_password || !_username) {
     return ret;
   }
