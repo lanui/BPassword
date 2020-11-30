@@ -70,7 +70,7 @@ class WebsiteController extends EventEmitter {
   notifyLeechPageValtStateListener(activeTabState) {
     logger.debug('notifyLeechPageValtStateListener>>>>>>>>>>>>>>>>>>', activeTabState);
     if (typeof activeTabState === 'object') {
-      const { items } = this.memStore.getState();
+      const { items = [] } = this.memStore.getState();
 
       //
       const tabId = Object.keys(activeTabState)[0];

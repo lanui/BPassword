@@ -114,6 +114,15 @@ class FieldController extends BaseController {
         this.emit('actived:zombie-communication', hostname);
       }
     }
+
+    if (
+      this.targetPassword &&
+      this.targetPassword.getBoundingClientRect() &&
+      this.targetPassword.getBoundingClientRect().width === 0
+    ) {
+      // send selector box display
+      this.sendEraseSelectorBoxMessage(true);
+    }
   }
   /**
    *
@@ -547,7 +556,7 @@ function BindingFocusEvents() {
       document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
 
       // send selector box display
-      // ctx.sendEraseSelectorBoxMessage(false);
+      ctx.sendEraseSelectorBoxMessage(false);
 
       ctx.setActivedTarget(null);
     });

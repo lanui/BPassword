@@ -63,6 +63,7 @@ import {
 } from '@/libs/msgapi/api-types';
 import { IFR_CONF } from '@/libs/controllers/size-calculator';
 import WhispererController from '@/libs/messages/whisperer-controller';
+import logger from '@lib/logger';
 
 export default {
   name: 'LeechIndex',
@@ -78,7 +79,7 @@ export default {
   },
   methods: {
     sendFillItemMessage(item) {
-      console.log('leech:>>sendFillItemMessage>>>>', item);
+      logger.debug('leech:>>sendFillItemMessage>>>>', item);
       const whisperer = new WhispererController();
       whisperer
         .sendSimpleMessage(API_RT_FILL_FEILDS, item)
@@ -120,9 +121,7 @@ export default {
         .catch((err) => {});
     },
   },
-  mounted() {
-    console.log('Filled>>>>', JSON.stringify(this.filterItems));
-  },
+  mounted() {},
 };
 </script>
 <style lang="css" scope>
