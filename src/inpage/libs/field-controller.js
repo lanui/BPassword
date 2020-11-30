@@ -221,7 +221,7 @@ class FieldController extends BaseController {
     const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState, true);
 
     logger.debug(
-      'inputFieldValtChangedHandler::>ifrSizeState>>>>>>>>>>>>>>>',
+      'inputFieldValtChangedHandler::>ifrSizeCalcWhenValtChanged>>>>>>>>>>>>>>>',
       JSON.stringify(ifrSizeState)
     );
 
@@ -231,7 +231,7 @@ class FieldController extends BaseController {
     if (elemType === 'drawing') {
       logger.debug('inputFieldValtChangedHandler>>>', elemType, tag, drawMessageData);
       this._sendMessageToTop(API_WIN_SELECTOR_UP_DRAWER, drawMessageData);
-    } else {
+    } else if (elemType === 'erase') {
       this._sendMessageToTop(API_WIN_SELECTOR_ERASER, { from: 'input:fields:changed' });
     }
   }
@@ -335,19 +335,6 @@ class FieldController extends BaseController {
     this.activedTarget = target || null;
   }
 
-  sendDrawerSelectorBoxMessage(activedTarget) {
-    if (!activedTarget) {
-      logger.debug('FieldController::sendDrawerSelectorBoxMessage>>>>>>>>>>>>>>>>', activedTarget);
-      return;
-    }
-
-    let activedDomRect = activedTarget.getBoundingClientRect();
-    if (activedDomRect) activedDomRect = JSON.parse(JSON.stringify(activedDomRect));
-    const activedValtState = this.getValtState(activedTarget);
-    const paramState = this._comboParams(activedTarget);
-    const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
-  }
-
   /**
    *
    * @param {boolean} force
@@ -376,13 +363,16 @@ class FieldController extends BaseController {
     let activedDomRect = activedTarget.getBoundingClientRect();
     let serializeDomRect = JSON.parse(JSON.stringify(activedDomRect));
 
-    // logger.debug('iconClickHandler::toggler>>>>>>>>>>>>>>>>', JSON.stringify(serializeDomRect));
-    const activedValtState = this.getValtState(activedTarget);
+    // const activedValtState = this.getValtState(activedTarget);
 
     const paramState = this._comboParams(activedTarget);
     const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
 
     const { elemType, ifrHeight, tag } = ifrSizeState;
+    logger.debug(
+      'iconClickHandler::toggler>ifrSizeCalcWhenValtChanged>>>>>>>>>>>>>>>',
+      JSON.stringify(ifrSizeState)
+    );
     const drawMessageData = this.comboSelectorBoxSendData(ifrHeight, serializeDomRect);
 
     this._sendMessageToTop(API_WIN_SELECTOR_TOGGLE, drawMessageData);
@@ -515,7 +505,10 @@ function BindingFocusEvents() {
 
       const activedValtState = ctx.getValtState(e.target);
 
-      //TODO send valtState to background
+      // send valtState to background
+      if (ctx.zombie) {
+        ctx.zombie.postMessage(API_RT_FIELDS_VALT_CHANGED, activedValtState);
+      }
 
       // enabled:input:valtChanged event
       ctx.emit('enabled:input:valtChanged', e.target);
@@ -530,7 +523,7 @@ function BindingFocusEvents() {
       const activedDomRect = e.target.getBoundingClientRect();
 
       logger.debug(
-        'FieldController::bindingActivedFocusEvents@focusin-->>',
+        'FieldController::bindingActivedFocusEvents@focusin--ifrSizeCalcWhenValtChanged>>',
         tag,
         elemType,
         ifrSizeState
@@ -538,12 +531,10 @@ function BindingFocusEvents() {
       if (elemType === 'drawing') {
         const drawMessageData = ctx.comboSelectorBoxSendData(ifrHeight, activedDomRect);
         ctx._sendMessageToTop(API_WIN_SELECTOR_DRAWER, drawMessageData);
+      } else if (elemType === 'erase') {
+        ctx.sendEraseSelectorBoxMessage(false);
       } else {
         /** do nothing. */
-      }
-
-      if (e.target === ctx.targetPassword) {
-      } else if (e.target === ctx.targetUsername) {
       }
     });
 
@@ -556,7 +547,7 @@ function BindingFocusEvents() {
       document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
 
       // send selector box display
-      ctx.sendEraseSelectorBoxMessage(false);
+      // ctx.sendEraseSelectorBoxMessage(false);
 
       ctx.setActivedTarget(null);
     });

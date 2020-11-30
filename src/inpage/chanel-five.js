@@ -172,7 +172,7 @@ function chanel5builder(jetid) {
 
         if(window.__bpTopPosiChains){
           posiState = sizeReducer(window.__bpTopPosiChains,posiState);
-          console.log('sizeCalcultor result:',posiState);
+          if(logLevel==='DEBUG'){console.log('sizeCalcultor result:',posiState);}
         }
         const hasAtleft = this.hasAttribute('at-left');
         const hasAtTop = this.hasAttribute('at-left');

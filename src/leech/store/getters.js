@@ -30,18 +30,11 @@ export const filterItems = (state) => {
     exactMatchItem;
   //exactMatched
   if (username && password && items.length) {
-    exactMatchItem = items.find((it) => it.username === username && it.password === password);
-
-    if (exactMatchItem) {
-      console.log('TSelector:>>>', [exactMatchItem]);
-      return [exactMatchItem];
-    } else {
-      exactMatchItem = items.find((it) => it.username === username && it.password !== password);
-      if (exactMatchItem !== null && exactMatchItem) {
-        return [exactMatchItem, { ...exactMatchItem, password, ctype: 'update' }];
-      } else {
-        return [];
-      }
+    exactMatchItem = items.find((it) => it.username === username);
+    if (exactMatchItem && exactMatchItem.password !== password) {
+      return [exactMatchItem, { ...exactMatchItem, password, ctype: 'update' }];
+    } else if (!exactMatchItem) {
+      return []; // add items
     }
   }
 

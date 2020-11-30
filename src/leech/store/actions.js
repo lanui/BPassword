@@ -12,7 +12,7 @@ export const initState = async (
   { commit },
   { items = [], isUnlocked = false, hostname = '', feildValues = {}, valtState = {} }
 ) => {
-  logger.debug('store>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', items);
+  logger.debug('store>envLeech- remoteMessageListener>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', items);
 
   commit(types.UPDATE_IS_UNLOCKED, isUnlocked);
   commit(types.UPDATE_ITEMS, items);
@@ -27,7 +27,7 @@ export const updateViewPath = async ({ commit }, viewPath = 'index') => {
 };
 
 export const updateValtState = async ({ commit }, valtState) => {
-  console.log('Update Leech valtState', valtState);
+  logger.debug('Update Leech valtState>>>envLeech- remoteMessageListener>>> ', valtState);
   commit(types.UPDATE_ACTIVED_VALT_STATE, valtState);
 };
 

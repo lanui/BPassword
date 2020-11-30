@@ -1,4 +1,4 @@
-import { size } from 'lodash';
+import logger from '@lib/logger';
 
 /*********************************************************************
  * AircraftClass ::
@@ -43,178 +43,16 @@ export const IFR_CONF = {
  * @param {*} options
  */
 export function ifrSizeCalcWhenValtChanged(options = {}, isChanged = false) {
-  const {
-    items = [],
-    isUnlocked = false,
-    username = '',
-    password = '',
-    hostname = '',
-    activedField = '',
-  } = options;
-
-  let rows = 0,
-    matchedNum = items.length;
+  // logger.debug('ifrSizeCalcWhenValtChanged>>',options,isChanged)
+  const { isUnlocked = false } = options;
 
   if (!isUnlocked) {
     return lockedSizeState(options);
   } else {
-  }
-
-  if (!isUnlocked) {
-    if ((username && password) || matchedNum) {
-      if (activedField === 'password') {
-        return {
-          isUnlocked,
-          rows: matchedNum,
-          items,
-          iHeight: IFR_CONF.lockedHeight, // will remove at version 2.1.x
-          ifrHeight: IFR_CONF.lockedHeight,
-          elemType: 'drawing',
-          tag: 'show locked page',
-        };
-      } else {
-        return {
-          isUnlocked,
-          rows: matchedNum,
-          items,
-          iHeight: IFR_CONF.lockedHeight,
-          ifrHeight: IFR_CONF.lockedHeight,
-          elemType: 'erase',
-          tag: 'hidden locked page',
-        };
-      }
+    if (isChanged) {
+      return unlockedSizeStateWithValtChanged(options);
     } else {
-      return {
-        isUnlocked,
-        rows: matchedNum,
-        items,
-        iHeight: IFR_CONF.lockedHeight,
-        ifrHeight: IFR_CONF.lockedHeight,
-        elemType: 'erase',
-        tag: 'hidden page',
-      };
-    }
-  } else {
-    if (username && password) {
-      const matchItem = items.find((it) => it.username === username && it.password === password);
-      if (matchItem) {
-        return {
-          isUnlocked,
-          exactMatched: true,
-          rows: 1,
-          items: [matchItem],
-          iHeight: IFR_CONF.addBtnHeight,
-          ifrHeight: IFR_CONF.addBtnHeight,
-          elemType: 'erase',
-          tag: 'hidden page,exactMatched',
-        };
-      } else if (activedField === 'password') {
-        const nameMatched = items.find((it) => it.username === username);
-        if (nameMatched) {
-          return {
-            isUnlocked,
-            rows: 2,
-            items: [nameMatched],
-            iHeight: calcRowHeight(2), // 增加一行修改密码
-            ifrHeight: calcRowHeight(2),
-            elemType: 'drawing',
-            tag: 'show update button page,active password field',
-          };
-        } else {
-          return {
-            isUnlocked,
-            exactMatched: false,
-            rows: 0,
-            items: [],
-            iHeight: IFR_CONF.addBtnHeight,
-            ifrHeight: IFR_CONF.addBtnHeight,
-            elemType: 'drawing',
-            tag: 'show page,no matched name and password',
-          };
-        }
-      } else if (activedField === 'username') {
-        //聚焦username
-        const _actUnameFilters = items.filter((it) => it.username.startsWith(username));
-        if (_actUnameFilters.length > 0) {
-          return {
-            isUnlocked,
-            rows: _actUnameFilters.length,
-            items: [..._actUnameFilters],
-            ifrHeight: calcRowHeight(_actUnameFilters.length),
-            elemType: 'drawing',
-            tag: 'show selector filter list page,active username field',
-          };
-        } else {
-          return {
-            isUnlocked,
-            exactMatched: false,
-            rows: 0,
-            items: [],
-            ifrHeight: IFR_CONF.addBtnHeight,
-            elemType: 'erase',
-            tag: 'hidden page,no matched name and password',
-          };
-        }
-      } else {
-        return {
-          isUnlocked,
-          exactMatched: false,
-          rows: 0,
-          items: [],
-          ifrHeight: IFR_CONF.addBtnHeight,
-          elemType: 'erase',
-          tag: 'hidden page,active username field',
-        };
-      }
-    }
-
-    if (username) {
-      const _filters = items.filter((it) => it.username.startsWith(username));
-      rows = _filters.length;
-
-      if (rows == 0) {
-        return {
-          isUnlocked,
-          exactMatched: false,
-          rows: 0,
-          items: [],
-          ifrHeight: calcRowHeight(matchedNum), //预存
-          elemType: 'erase',
-          tag: 'hidden page,no match filter',
-        };
-      } else {
-        return {
-          isUnlocked,
-          exactMatched: false,
-          rows,
-          items: [..._filters],
-          ifrHeight: calcRowHeight(rows), //预存
-          elemType: 'drawing',
-          tag: 'show filter page',
-        };
-      }
-    }
-
-    if (matchedNum > 0) {
-      return {
-        isUnlocked,
-        exactMatched: false,
-        rows: matchedNum,
-        items,
-        ifrHeight: calcRowHeight(matchedNum), //预存
-        elemType: 'drawing',
-        tag: 'show host matched page',
-      };
-    } else {
-      return {
-        isUnlocked,
-        exactMatched: false,
-        rows: matchedNum,
-        items,
-        ifrHeight: calcRowHeight(matchedNum), //预存
-        elemType: 'erase',
-        tag: 'hidden no items',
-      };
+      return unlockedSizeState(options);
     }
   }
 }
@@ -312,7 +150,7 @@ function unlockedSizeState(options = {}) {
     }
 
     if (hostMatchesNum > 0 && username && !password) {
-      sizeItems = items.filter((it) => it.name.startsWith(username));
+      sizeItems = items.filter((it) => it.username.startsWith(username));
       rows = sizeItems.length;
 
       if (rows > 0) {
@@ -378,6 +216,7 @@ function unlockedSizeState(options = {}) {
  * @param {*} options
  */
 function unlockedSizeStateWithValtChanged(options = {}) {
+  logger.debug('entry ifrSizeCalcWhenValtChanged-->>>>', options);
   const {
     items = [],
     isUnlocked = false,
@@ -440,6 +279,31 @@ function unlockedSizeStateWithValtChanged(options = {}) {
       };
     }
 
+    if (hostMatchesNum > 0 && username && !password) {
+      sizeItems = items.filter((it) => it.username.startsWith(username));
+      rows = sizeItems.length;
+
+      if (rows > 0) {
+        return {
+          isUnlocked,
+          items: sizeItems,
+          rows,
+          ifrHeight: calcRowHeight(rows),
+          elemType: 'drawing',
+          tag: 'Changed Event Username,show filter items pop.',
+        };
+      } else {
+        return {
+          isUnlocked,
+          items: [],
+          rows: 0,
+          ifrHeight: 0,
+          elemType: 'erase',
+          tag: 'Changed Event Username no filter matches hidden pop.',
+        };
+      }
+    }
+
     if (hostMatchesNum === 0) {
       return {
         isUnlocked,
@@ -450,21 +314,45 @@ function unlockedSizeStateWithValtChanged(options = {}) {
         tag: 'Changed Event Username no host matches hidden pop.',
       };
     }
+
+    sizeState.tag = 'Changed Events username, unhandle pop';
+    return sizeState;
   } else if (activedField === 'password') {
     if (hostMatchesNum > 0 && username && password) {
-      const extactItem = items.find((it) => it.name === username && it.password !== password);
-      const updateItem = JSON.parse(JSON.stringify(exactItem));
-      updateItem.password = password;
+      const exactItem = items.find((it) => it.username === username);
+      logger.debug('entry ifrSizeCalcWhenValtChanged-->>>>', exactItem, options);
+      if (exactItem && exactItem.password !== password) {
+        const updateItem = JSON.parse(JSON.stringify(exactItem));
+        updateItem.password = password;
 
-      rows = 2;
-      return {
-        isUnlocked,
-        items: [extactItem, updateItem],
-        rows,
-        ifrHeight: calcRowHeight(rows),
-        elemType: 'drawing',
-        tag: 'Changed Event Password show update password pop.',
-      };
+        rows = 2;
+        return {
+          isUnlocked,
+          items: [exactItem, updateItem],
+          rows,
+          ifrHeight: calcRowHeight(rows),
+          elemType: 'drawing',
+          tag: 'Changed Event Password show update password pop.',
+        };
+      }
+
+      if (!exactItem) {
+        const addItem = {
+          hostname,
+          title: hostname,
+          username,
+          password,
+          suffix: '',
+        };
+        return {
+          isUnlocked,
+          items: [addItem],
+          rows: 1,
+          ifrHeight: IFR_CONF.addBtnHeight,
+          elemType: 'drawing',
+          tag: 'Changed Event Password show add item pop.',
+        };
+      }
     }
 
     if (hostMatchesNum > 0 && username && !password) {
@@ -483,7 +371,7 @@ function unlockedSizeStateWithValtChanged(options = {}) {
       }
     }
 
-    if (hostMatchesNum === 0 && !username && !password) {
+    if (hostMatchesNum === 0 && username && password) {
       const addItem = {
         hostname,
         title: hostname,
@@ -501,7 +389,7 @@ function unlockedSizeStateWithValtChanged(options = {}) {
       };
     }
 
-    if (hostMatchesNum === 0 && (!username || !password)) {
+    if (!username || !password) {
       return {
         isUnlocked,
         items: [],
@@ -511,6 +399,9 @@ function unlockedSizeStateWithValtChanged(options = {}) {
         tag: 'Changed Event Password miss completed fields valt,hidden pop.',
       };
     }
+
+    sizeState.tag = 'Changed Events password, unhandle pop';
+    return sizeState;
   } else {
     return sizeState;
   }

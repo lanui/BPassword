@@ -58,7 +58,8 @@
             v-ripple="{ class: 'primary--text' }"
             class="btn-footerbar ps-0 pe-1"
           >
-            {{ isAddor ? $t('btn.close') : $t('btn.add') }}
+            <!-- {{ (isAddor ||filterItems.length ===0) ? $t('btn.close') : $t('btn.add') }} -->
+            {{ $t('btn.close') }}
           </v-btn>
         </div>
       </div>
@@ -84,7 +85,7 @@ export default {
     BpassIcon,
   },
   computed: {
-    ...mapGetters(['showColse', 'isAddor', 'isUnlocked']),
+    ...mapGetters(['showColse', 'isAddor', 'isUnlocked', 'filterItems']),
     getCommandType() {
       const detectName = appRuntime.detectOS();
       return detectName.includes('Mac') ? 'mac' : 'window';
@@ -95,11 +96,22 @@ export default {
   },
   methods: {
     addOrCloseBtnHandle() {
-      if (this.isAddor) {
-        this.removeSelector();
-      } else {
-        this.gotoAddItemHandle();
-      }
+      this.removeSelector();
+      // if (this.isAddor || this.filterItems.length ===0) {
+      //   this.removeSelector();
+      // } else {
+      //   this.gotoAddItemHandle();
+      // }
+    },
+    closeBtnHandle() {
+      let message = {
+        apiType: API_WIN_SELECTOR_ERASER_FORCE,
+        data: {
+          isInner: window.top !== window.self,
+        },
+      };
+
+      window.top.postMessage(message, '*');
     },
     removeSelector() {
       let message = {
