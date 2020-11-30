@@ -215,22 +215,24 @@ class FieldController extends BaseController {
     let activedDomRect = target.getBoundingClientRect();
     let serializeDomRect = JSON.parse(JSON.stringify(activedDomRect));
 
-    // logger.debug('iconClickHandler::toggler>>>>>>>>>>>>>>>>', JSON.stringify(serializeDomRect));
+    //
 
     const paramState = this._comboParams(target);
-    const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState);
+    const ifrSizeState = ifrSizeCalcWhenValtChanged(paramState, true);
+
+    logger.debug(
+      'inputFieldValtChangedHandler::>ifrSizeState>>>>>>>>>>>>>>>',
+      JSON.stringify(ifrSizeState)
+    );
 
     const { elemType, ifrHeight, tag } = ifrSizeState;
     const drawMessageData = this.comboSelectorBoxSendData(ifrHeight, serializeDomRect);
 
-    if (target === this.targetPassword) {
-      if (elemType === 'drawing') {
-        logger.debug('inputFieldValtChangedHandler>>>', elemType, tag, drawMessageData);
-        this._sendMessageToTop(API_WIN_SELECTOR_UP_DRAWER, drawMessageData);
-      } else {
-        this._sendMessageToTop(API_WIN_SELECTOR_ERASER, { from: 'input:fields:changed' });
-      }
-    } else if (target === this.targetUsername) {
+    if (elemType === 'drawing') {
+      logger.debug('inputFieldValtChangedHandler>>>', elemType, tag, drawMessageData);
+      this._sendMessageToTop(API_WIN_SELECTOR_UP_DRAWER, drawMessageData);
+    } else {
+      this._sendMessageToTop(API_WIN_SELECTOR_ERASER, { from: 'input:fields:changed' });
     }
   }
 
