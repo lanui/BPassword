@@ -1,0 +1,8 @@
+- [**Used BPasword Extension**](versions/production_links.md)
+- [**Future Features**](versions/phases.md)
+- [**FAQ**](issues/faq.md)
+- [**Release versions**](versions/README.md)
+  - [Chrome Release](versions/CHANGELOG_CRX.md)
+  - [Firefox Release](versions/CHANGELOG_FOX.md)
+- [**Contributing**](wiki/CONTRIBUTING.md)
+- [**Run & Test With Development Mode**](wiki/rat.md)
