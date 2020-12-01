@@ -18,12 +18,20 @@ const COMM_PATTERNS = [
   { from: R(src, 'share'), to: R(dist, 'share') },
   { from: R(src, 'popup/popup.html'), to: R(dist, 'popup/popup.html'), transform: transformHtml },
   { from: R(src, 'leech/leech.html'), to: R(dist, 'leech/leech.html'), transform: transformHtml },
+  {
+    from: R(src, 'options/options.html'),
+    to: R(dist, 'options/options.html'),
+    transform: transformHtml,
+  },
 ];
 
 function transformHtml(content) {
   return ejs.render(content.toString(), Object.assign({}, { ...providerEnv.env }, providerEnv));
 }
 
+/**
+ * @deprecated
+ */
 module.exports = {
   COMM_PATTERNS,
   transformHtml,
