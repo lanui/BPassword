@@ -9,11 +9,12 @@
 - nodejs >= 10 npm >=6
 - if use yarn : yarn >= 1.19.0
 - webpack-cli 3.x
+- webpack4
 
 ## Fork project
 
 ```bash
-git clone https://github.com/lanui/BPassword.git BPassword
+git clone https://github.com/lanui/BPassword.git#dev-fox BPassword
 ```
 
 ### Setting locale config files
@@ -52,5 +53,5 @@ yarn install
 ## Run at development mode
 
 ```bash
-yarn watch:fox
+yarn watch:fox # or used yarn build:fox
 ```
