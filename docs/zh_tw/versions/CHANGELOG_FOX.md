@@ -7,9 +7,9 @@
 - [x] Fixed css font signed removed by AMO,so will used html link.
 - [x] Fixed Dynamic generator login fields.like [站酷](https://passport.zcool.com.cn/loginApp.do?appId=1006&cback=https://www.zcool.com.cn/u/19233031)
 
-## v0.5.1 (**FeedBack**)
+## v0.5.1 (**Revoke version**)
 
-> 11-29 submmit to AMO
+> 11-27 submmit to AMO
 
 - [x] Optimization wether popup selector box calcuator logic.
 - [x] Add Hot key (Ctrl+Shift+9 : toggle popup page)
