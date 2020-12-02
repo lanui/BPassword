@@ -8,6 +8,8 @@
 
 > 通过 [Github](https://github.com/lanui/BPassword/releases/download/v2.0.0/BPassword-2.0.0.crx.zip) 下载安装.
 
+**[下载文件安装帮助](zh_cn/user_guide.md)**
+
 ## 火狐浏览器
 
 **当前版本:0.7.0**
