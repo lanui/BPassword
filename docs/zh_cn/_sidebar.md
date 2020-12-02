@@ -1,4 +1,4 @@
-- [**如何使用插件**](zh_cn/versions/production_links.md)
+- [**关于密码宝**](zh_cn/versions/production_links.md)
   - [**帮助文档**](zh_cn/user_guide.md)
 - [**功能介绍**](zh_cn/versions/phases.md)
 - [**版本发布**](zh_cn/versions/README.md)

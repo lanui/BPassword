@@ -1,4 +1,4 @@
-- [**使用密碼寶**](zh_tw/versions/production_links.md)
+- [**關於密碼寶**](zh_tw/versions/production_links.md)
   - [**幫助文檔**](zh_tw/user_guide.md)
 - [**程式功能介紹**](zh_tw/versions/phases.md)
 - [**版本**](zh_tw/versions/README.md)
