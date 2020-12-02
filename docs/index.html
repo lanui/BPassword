@@ -10,20 +10,28 @@
     <link rel="stylesheet" href="./assets/css/main.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">Loading...</div>
     <script>
       window.$docsify = {
         name: 'BPassword Extension',
         repo: 'https://github.com/lanui/BPassword.git',
         themeColor: 'rgba(69, 138, 249, 1)',
-        coverpage: 'coverpage.md',
-        homepage: 'introduction.md',
-        loadSidebar: 'sidebar.md',
-        loadNavbar: 'navbar.md',
+        coverpage: '_coverpage.md',
+        homepage: '_introduction.md',
+        loadSidebar: '_sidebar.md',
+        loadNavbar: '_navbar.md',
         auto2top: true,
         maxLevel: 3,
         subMaxLevel: 2,
         executeScript: true,
+        nameLink: {
+          '/cn/': '#/cn/',
+          '/': '#/',
+        },
+        alias: {
+          '/.*/_navbar.md': '/_navbar.md',
+          '/cn/': 'zh_cn/introduction.md',
+        },
       };
     </script>
     <!-- Docsify v4 -->

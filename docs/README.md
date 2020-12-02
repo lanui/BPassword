@@ -8,6 +8,8 @@
 
 ## Chrome Distribute History
 
+> Current version
+
 ## Firefox Distribute History
 
 ### Version 0.7.0
@@ -25,11 +27,3 @@
 - [ ] Add Website pass item on website login page.
 - [ ] Filled pass item to website login fields(username&password).
 - [ ] inject contentscript into website page.
-
-### Version 0.1.0
-
-> Future Features
-
-- [x] Add Website pass item on website login page.
-- [x] Filled pass item to website login fields(username&password).
-- [x] inject contentscript into website page.

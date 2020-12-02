@@ -1,22 +1,14 @@
-# Change logs
+# 版本说明
 
-> BPassword Distribution & Publish with Official Channel.
+> BPassword 官方渠道.
 
-> Chrome use [chrome web store](https://chrome.google.com/webstore/detail/bpassword/bacldcokcfmemiljlckpeokehiloamcj?hl=en-US&authuser=0)
+- 谷歌浏览器或 Edge 浏览器访问 [插件商店](https://chrome.google.com/webstore/detail/bpassword/bacldcokcfmemiljlckpeokehiloamcj?hl=zh-CN&authuser=0)
 
-> Firefox use [AMO](https://addons.mozilla.org/en-US/firefox/addon/bpassword/versions/)
+- 火狐浏览器访问 [AMO](https://addons.mozilla.org/zh-CN/firefox/addon/bpassword/versions/)
 
-### Upgrade Distribution Or Version Manament Standard
+### BPassword 谷歌浏览器版
 
-> The version used three number like 0.1.2.
-
-- The last number used internal test version.like 0.1.2 -->internal test find more than one middel bug so need fixed can upgrade to 0.1.3.
-
-- the second number upgrade with chrome web store or firefox AMO.
-
-### Chrome extension
-
-> Current Version Features(**2.0.0**)
+> 当前最新版本(**2.0.0**)
 
 - [x] Base on ethereum Account generate,import&export
 - [x] Website pass item CURD functions management by popup UI.
@@ -32,9 +24,9 @@
 
 **[See Details](versions/CHANGELOG_CRX.md)**
 
-### Firefox add-on
+### BPassword 火狐浏览器版
 
-> Current Version Features (**v0.7.0**)
+> 当前最新版本 (**v0.7.0**)
 
 - [x] Base on ethereum Account generate,import&export
 - [x] Website pass item CURD functions management by popup UI.
