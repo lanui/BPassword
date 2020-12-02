@@ -14,6 +14,18 @@
     <div id="app">Loading...</div>
     <script>
       window.$docsify = {
+        search: {
+          maxAge: 86400000,
+          placeholder: {
+            '/cn/': '检索...',
+            '/': 'Type to Search...',
+          },
+          noData: {
+            '/cn/': '找不到结果',
+            '/': 'No Results',
+          },
+          depth: 5,
+        },
         name: 'BPassword Extension',
         repo: 'https://github.com/lanui/BPassword.git',
         themeColor: 'rgba(69, 138, 249, 1)',
@@ -26,6 +38,7 @@
         subMaxLevel: 2,
         executeScript: true,
         nameLink: {
+          '/tw/': '#/tw/',
           '/cn/': '#/cn/',
           '/': '#/',
         },
@@ -35,10 +48,15 @@
           '/cn/_sidebar.md': 'zh_cn/_sidebar.md',
           '/cn/assets/svg/': '/assets/svg/',
           '/cn/': 'zh_cn/introduction.md',
+          '/tw/_sidebar.md': 'zh_tw/_sidebar.md',
+          '/tw/assets/svg/': '/assets/svg/',
+          '/tw/': 'zh_tw/',
         },
       };
     </script>
     <!-- Docsify v4 -->
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
   </body>
 </html>
