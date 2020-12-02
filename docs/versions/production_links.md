@@ -12,4 +12,4 @@
 
 **Current Versioon:0.7.0**
 
-> Click this link [AMO Download](https://addons.mozilla.org/zh-CN/developers/addon/bpassword/versions/5142518)
+> Click this link [AMO Download](https://addons.mozilla.org/cn-ZH/firefox/addon/bpassword/)

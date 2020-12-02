@@ -4,7 +4,7 @@
 
 > Chrome use [chrome web store](https://chrome.google.com/webstore/detail/bpassword/bacldcokcfmemiljlckpeokehiloamcj?hl=en-US&authuser=0)
 
-> Firefox use [AMO](https://addons.mozilla.org/en-US/firefox/addon/bpassword/versions/)
+> Firefox use [AMO](https://addons.mozilla.org/en-US/firefox/addon/bpassword/)
 
 ### Upgrade Distribution Or Version Manament Standard
 
