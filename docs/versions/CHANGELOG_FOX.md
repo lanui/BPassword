@@ -2,13 +2,13 @@
 
 ## v0.7.0 (**Release**)
 
-> 11-30 submmit to AMO (**Awaiting Approve**)
+> 11-30 submmit to AMO (**Status Approved**)
 
 - [x] Fixed css font signed removed by AMO,so will used html link.
 
-## v0.6.0 (**FeedBack**)
+## v0.5.1 (**FeedBack**)
 
-> 11-28 submmit to AMO
+> 11-29 submmit to AMO
 
 - [x] Optimization wether popup selector box calcuator logic.
 - [x] Add Hot key (Ctrl+Shift+9 : toggle popup page)
@@ -18,7 +18,7 @@
 
 > 11-26
 
-- [x] Design Position report chains for multi layers.like [阿里云](account.taobao.com)
+- [x] Design Position report chains for multi layers.like [阿里云](https://account.aliyun.com/login/qr_login.htm)
 - [x] Fixed Contentscript can't access inject script Object.[make all inject & communication with window postMessage chains]
 
 ### v0.3.0 (Self Signed Version)

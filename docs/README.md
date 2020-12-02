@@ -10,7 +10,7 @@
 
 ## Firefox Distribute History
 
-### Version 1.0.0
+### Version 0.7.0
 
 > fork from chrome v2.0.0, no inject content scripts
 
@@ -26,10 +26,10 @@
 - [ ] Filled pass item to website login fields(username&password).
 - [ ] inject contentscript into website page.
 
-### Version 1.0.1
+### Version 0.1.0
 
 > Future Features
 
-- [ ] Add Website pass item on website login page.
-- [ ] Filled pass item to website login fields(username&password).
-- [ ] inject contentscript into website page.
+- [x] Add Website pass item on website login page.
+- [x] Filled pass item to website login fields(username&password).
+- [x] inject contentscript into website page.

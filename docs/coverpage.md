@@ -4,6 +4,5 @@
 
 > <span style="line-height:1.8rem;font-weight:400;font-size:1.3rem">Using Block Chain Technology<span>
 
-[For Chrome](https://chrome.google.com/webstore/detail/bpassword/bacldcokcfmemiljlckpeokehiloamcj)
-[For Firefox](https://lanui.github.io/BPassword)
+[Install Extension](versions/production_links.md)
 [Get Started](#BPassword)
