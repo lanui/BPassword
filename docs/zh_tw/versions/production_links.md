@@ -6,7 +6,7 @@
 
 > 訪問谷歌程式商店,請點擊 [[BPassword For Chrome](https://chrome.google.com/webstore/detail/bpassword/bacldcokcfmemiljlckpeokehiloamcj)]安裝.
 
-> 通過 [Github](https://github.com/lanui/BPassword/releases/download/v2.0.0/BPassword-2.0.0.crx.zip) 下載安裝.
+> 通過 [Github](https://github.com/lanui/BPassword/releases/download/v2.0.0/BPassword-2.0.0.crx) 下載安裝.
 
 ## Firefox 瀏覽器
 

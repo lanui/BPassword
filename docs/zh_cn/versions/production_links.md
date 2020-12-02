@@ -6,7 +6,7 @@
 
 > 如果您可以访问谷歌插件商店,请点击 [[BPassword For Chrome](https://chrome.google.com/webstore/detail/bpassword/bacldcokcfmemiljlckpeokehiloamcj)]安装.
 
-> 通过 [Github]() 下载安装.
+> 通过 [Github](https://github.com/lanui/BPassword/releases/download/v2.0.0/BPassword-2.0.0.crx.zip) 下载安装.
 
 ## 火狐浏览器
 
