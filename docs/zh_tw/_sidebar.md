@@ -1,0 +1,6 @@
+- [**使用密碼寶**](zh_cn/versions/production_links.md)
+- [**程式功能介紹**](zh_cn/versions/phases.md)
+- [**版本**](zh_cn/versions/README.md)
+  - [Chrome 適用](zh_cn/versions/CHANGELOG_CRX.md)
+  - [Firefox 适用](zh_cn/versions/CHANGELOG_FOX.md)
+- [**FAQ**](issues/faq.md)
