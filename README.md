@@ -1,6 +1,6 @@
 # BPassword extension
 
-[![BPassword Extension](/docs/assets/icons/bpass_git_logo.jpg?raw=true 'BPassword Extension')](https://lanui.github.io/BPassword/)
+:point_right: [![BPassword Extension](/docs/assets/icons/bpass_git_logo.jpg?raw=true 'BPassword Extension')](https://lanui.github.io/BPassword/) :point_left:
 
 > Bpassword extension for chrome &amp; firefox
 
