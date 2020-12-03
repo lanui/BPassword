@@ -43,6 +43,7 @@ let foxConfig = merge(baseConfig, {
   mode: providerEnv.NODE_ENV,
   entry: {
     contentscript: R(src, 'inpage/index.js'),
+    'leech/leech': R(src, 'leechfox/leech.js'),
     'inpage/chanel5': R(src, 'inpage/chanel-five.js'),
     'inpage/cape7': R(src, 'inpage/cape-seven.js'),
     'inpage/top-injet': R(src, 'inpage/fox/top-injet.js'),
@@ -65,13 +66,14 @@ let foxConfig = merge(baseConfig, {
             console.log('jsonContent.version:', chalk.red(jsonContent.version));
             jsonContent.author = providerEnv.APP_AUTHOR || '';
 
+            jsonContent = { ...jsonContent, ...foxManifest };
+
             if (isDev) {
               jsonContent['content_security_policy'] =
                 "script-src 'self' 'unsafe-eval'; object-src 'self';";
             } else {
             }
 
-            jsonContent = { ...jsonContent, ...foxManifest };
             return JSON.stringify(jsonContent, null, 2);
           },
         },

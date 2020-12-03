@@ -9,7 +9,7 @@ const mixinProperty = (key, defaultValue = '') => {
   return process.env[key] || localEnv[key] || defaultValue;
 };
 
-const PKG_VERSION = pkgJson.version || '2.0.0';
+let PKG_VERSION = pkgJson.version;
 
 /**
  *

@@ -34,7 +34,6 @@ let baseConfig = {
   entry: {
     background: R(src, './background.js'),
     'popup/popup': R(src, './popup/popup.js'),
-    'leech/leech': R(src, './leech/leech.js'),
     'options/options': R(src, './options/options.js'),
   },
   output: {

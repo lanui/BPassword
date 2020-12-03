@@ -15,7 +15,31 @@
       }
     }
   },
-  "content_scripts": [],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "css": ["share/css/injet.css"],
+      "js": ["commons.js", "inpage/chanel5.js", "inpage/cape7.js"],
+      "match_about_blank": false,
+      "run_at": "document_idle",
+      "all_frames": true
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["contentscript.js", "inpage/top-injet.js"],
+      "match_about_blank": false,
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["inpage/sub-injet.js"],
+      "match_about_blank": false,
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "content_security_policy": "script-src 'self'; object-src 'self';",
   "externally_connectable": {
     "ids": ["*"],
     "matches": ["*://extensions/*"],
