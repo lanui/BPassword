@@ -7,7 +7,7 @@
     <!-- Load some resources only in development environment -->
     <% } %>
     <link rel="stylesheet" href="../share/mdi/css/materialdesignicons.css" />
-    <link rel="stylesheet" href="../commons.css" />
+    <!-- <link rel="stylesheet" href="../commons.css" /> -->
     <link rel="stylesheet" href="popup.css" />
 
     <script src="/share/js/lodash.min.js"></script>
@@ -24,7 +24,7 @@
     <script src="/ui-vues.js"></script>
     <script src="/ui-vuetify.js"></script>
     <% if (NODE_ENV === 'development') { %>
-    <script src="/vendors~popup/popup.js"></script>
+    <script src="/vendors_popup/popup.js"></script>
     <% } %>
     <script src="popup.js"></script>
   </body>

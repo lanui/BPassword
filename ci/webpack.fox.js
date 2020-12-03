@@ -6,6 +6,7 @@ const merge = require('webpack-merge');
 const webpack = require('webpack');
 
 const { context, dist, src, manifest, R, ROOT_PATH } = require('./paths');
+const { CheckVersion } = require('./copy-utils');
 
 /**
  * Make sure build on Firefox
@@ -17,6 +18,9 @@ const providerEnv = require('../config/wrapper.env');
 const baseConfig = require('./webpack.base');
 
 const config = require('../config');
+
+CheckVersion(providerEnv.EXT_TARGET);
+
 const isDev = providerEnv.NODE_ENV === 'development';
 
 // controller manifest import js

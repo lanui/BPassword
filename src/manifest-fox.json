@@ -37,12 +37,11 @@
       "all_frames": true
     }
   ],
-  "content_security_policy": "script-src 'self'; object-src 'self';",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
   "web_accessible_resources": [
     "commons.js",
     "contentscript.js",
     "leech/*",
-    "vendors~leech/*",
     "inpage/*.js",
     "p2/*",
     "share/*",

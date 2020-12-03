@@ -53,6 +53,7 @@ let baseConfig = {
     minimize: true,
     splitChunks: {
       chunks: 'all',
+      automaticNameDelimiter: '_',
       name: true,
       cacheGroups: {
         vendors: {

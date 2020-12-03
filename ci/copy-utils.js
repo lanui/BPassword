@@ -1,6 +1,7 @@
 const ejs = require('ejs');
 const providerEnv = require('../config/wrapper.env');
 const { R, src, dist } = require('./paths');
+const { isValidSemVer, compareSemVer } = require('semver-parser');
 
 /*********************************************************************
  * AircraftClass :: Copy Utils
@@ -13,10 +14,29 @@ const { R, src, dist } = require('./paths');
  *    @created:  2020-11-23
  *    @comments:
  **********************************************************************/
-
 const targetPath = () => {
   let tp = providerEnv.EXT_TARGET === 'firefox' ? 'fox' : 'fox';
   return `leech${tp}`;
+};
+
+const CheckVersion = (target) => {
+  let envVersion = process.env.APP_VERSION;
+
+  if (target === 'chrome' && envVersion) {
+    if (!isValidSemVer(envVersion, true) || compareSemVer(envVersion, '2.0.0') < 0) {
+      throw 'Chrome version must > 2.0.0';
+    }
+  }
+
+  if (target === 'firefox' && envVersion) {
+    if (
+      !isValidSemVer(envVersion, true) ||
+      compareSemVer(envVersion, '2.0.0') > 0 ||
+      compareSemVer(envVersion, '0.7.0')
+    ) {
+      throw 'Firefox version must <= 2.0.0 and > 0.7.0';
+    }
+  }
 };
 
 const COMM_PATTERNS = [
@@ -45,4 +65,5 @@ function transformHtml(content) {
 module.exports = {
   COMM_PATTERNS,
   transformHtml,
+  CheckVersion,
 };

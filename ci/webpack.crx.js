@@ -5,6 +5,8 @@ const chalk = require('chalk');
 const merge = require('webpack-merge');
 const webpack = require('webpack');
 
+const { CheckVersion } = require('./copy-utils');
+
 const { context, dist, src, manifest, R, ROOT_PATH } = require('./paths');
 
 /**
@@ -19,13 +21,18 @@ const baseConfig = require('./webpack.base');
 const config = require('../config');
 const isDev = providerEnv.NODE_ENV === 'development';
 
+CheckVersion(providerEnv.EXT_TARGET);
+
 // controller manifest import js
 const isProd = providerEnv.NODE_ENV === 'production';
 
 const { COMM_PATTERNS } = require('./copy-utils');
 const crxManifest = require('../src/manifest-chrome.json');
 
-console.log('Build locale env>>>>>', JSON.stringify(providerEnv, '/n', 2));
+console.log(
+  chalk.blueBright('Build locale env>>>>>\n'),
+  chalk.greenBright(JSON.stringify(providerEnv, '/n', 2))
+);
 
 /*********************************************************************
  * AircraftClass ::
@@ -38,7 +45,7 @@ console.log('Build locale env>>>>>', JSON.stringify(providerEnv, '/n', 2));
  *    @created:  2020-11-20
  *    @comments:
  **********************************************************************/
-let foxConfig = merge(baseConfig, {
+let crxConfig = merge(baseConfig, {
   target: 'web',
   mode: providerEnv.NODE_ENV,
   entry: {
@@ -81,7 +88,7 @@ let foxConfig = merge(baseConfig, {
 });
 
 if (process.env.HMR === 'true') {
-  foxConfig.plugins = (foxConfig.plugins || []).concat([
+  crxConfig.plugins = (crxConfig.plugins || []).concat([
     new ExtensionReloader({
       port: 9528,
       manifest: manifest,
@@ -96,4 +103,4 @@ if (process.env.HMR === 'true') {
 }
 
 // module.exports = [foxConfig, foxjetConfig];
-module.exports = foxConfig;
+module.exports = crxConfig;
