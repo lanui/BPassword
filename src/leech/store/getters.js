@@ -42,7 +42,7 @@ export const filterItems = (state) => {
     if (!username) return items;
     retItems = items.filter((it) => it.username.startsWith(username.trim()));
   }
-  console.log('TSelector:>>>', retItems);
+
   return retItems;
 };
 
