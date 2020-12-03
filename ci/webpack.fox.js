@@ -1,7 +1,7 @@
 'use strict';
 const CopyPlugin = require('copy-webpack-plugin');
 const ExtensionReloader = require('webpack-extension-reloader');
-
+const chalk = require('chalk');
 const merge = require('webpack-merge');
 const webpack = require('webpack');
 
@@ -60,7 +60,9 @@ let foxConfig = merge(baseConfig, {
           transform: (content) => {
             let jsonContent = JSON.parse(content);
             jsonContent.name = providerEnv.APP_NAME;
+
             jsonContent.version = providerEnv.APP_VERSION;
+            console.log('jsonContent.version:', chalk.red(jsonContent.version));
             jsonContent.author = providerEnv.APP_AUTHOR || '';
 
             if (isDev) {

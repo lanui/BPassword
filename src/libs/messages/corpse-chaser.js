@@ -4,7 +4,11 @@ import logger from '../logger';
 import extension from '../extensionizer';
 
 import { ENV_TYPE_INJET } from '../enums';
-import { API_JET_INIT_STATE, API_RT_FILL_FEILDS } from '@/libs/msgapi/api-types';
+import {
+  API_JET_INIT_STATE,
+  API_RT_FILL_FEILDS,
+  API_RT_VALT_CHANGED_TRANS_NOTIFY,
+} from '@/libs/msgapi/api-types';
 
 /*********************************************************************
  * AircraftClass ::
@@ -27,6 +31,7 @@ class CorpseChaser extends EventEmitter {
     // updateMatchedState update initState to feildsPage and topPage
     this.updateMatchedState = opts.updateMatchedState;
     this.filledInputFeilds = opts.filledInputFeilds;
+    this.valtChangedHandler = opts.valtChangedHandler;
 
     // this.once('startup:zombie',this.startupZombie.bind(this))
   }
@@ -89,6 +94,9 @@ class CorpseChaser extends EventEmitter {
           break;
         case API_RT_FILL_FEILDS:
           this.filledInputFeilds && this.filledInputFeilds(respData);
+          break;
+        case API_RT_VALT_CHANGED_TRANS_NOTIFY:
+          this.valtChangedHandler && this.valtChangedHandler(respData);
           break;
         default:
           break;

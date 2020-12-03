@@ -21,7 +21,7 @@ if (!signParams.JWT_ID || !signParams.JWT_SECRET) {
   process.env.$WEB_EXT_API_KEY = signParams.JWT_ID;
   process.env.$WEB_EXT_API_SECRET = signParams.JWT_SECRET;
   if (!process.env.$WEB_EXT_CHANNEL) {
-    process.env.$WEB_EXT_CHANNEL = 'listed';
+    process.env.$WEB_EXT_CHANNEL = 'unlisted';
 
     console.log(chalk.red(process.env.$WEB_EXT_CHANNEL));
   }

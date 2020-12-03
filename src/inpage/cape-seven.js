@@ -37,7 +37,7 @@ function fetchExtensionConfig() {
 function inJectNo7(uuid, extid, leechSrc) {
   const jetContent = `
     (function(uuid,extid,leechSrc,ll){
-      if(ll==='DEBUG'){console.log("Starting BPListenerChain:",uuid,extid,leechSrc,ll);}
+      /*if(ll==='DEBUG'){console.log("Starting BPListenerChain:",uuid,extid,leechSrc,ll);}*/
 
       function BPListenerChain(){
         this.uuid = uuid;
@@ -54,7 +54,7 @@ function inJectNo7(uuid, extid, leechSrc) {
         const _this = this;
         window.addEventListener('message',(evt)=>{
           /**console.log('No Seven Received :',evt); */
-
+          
           const recData = evt.data
           if(recData && recData.extid && recData.extid === _this.extid){
             (ll==='DEBUG')&&console.log('No Seven Received data:',recData);

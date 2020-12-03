@@ -178,8 +178,12 @@ class TopController extends BaseController {
     const exists = !!document.querySelector(SELECTOR_BOX_TAG);
 
     if (exists) {
-      const { ifrHeight } = data;
-      _updateSelectorBoxIfrHeight.call(this, { ifrHeight, isAddor: false });
+      if (document.querySelector(SELECTOR_BOX_TAG).hasAttribute('is-addor')) {
+        /** addor status no update styles */
+      } else {
+        const { ifrHeight } = data;
+        _updateSelectorBoxIfrHeight.call(this, { ifrHeight, isAddor: false });
+      }
     } else {
       const ifrSrc = this.getLeechSrc();
       _createSelectorBox.call(this, ifrSrc, data);

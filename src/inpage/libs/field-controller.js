@@ -43,6 +43,7 @@ class FieldController extends BaseController {
   constructor({ extid }) {
     super({ type: '__bpfield_' });
     this.extid = extid;
+    this.enabledFocusout = true;
 
     this.backendStore = new ObservableStore({ isUnlocked: false, items: [], matchedNum: 0 });
 
@@ -193,7 +194,7 @@ class FieldController extends BaseController {
   }
 
   enabledInputFieldValtChangedListener(el) {
-    logger.debug('FieldController:enabledInputFieldValtChangedListener#on>>>>>>', el);
+    // logger.debug('FieldController:enabledInputFieldValtChangedListener#on>>>>>>', el);
     el &&
       el.addEventListener(
         'input',
@@ -552,11 +553,14 @@ function BindingFocusEvents() {
       // disabled:input:valtChanged
       ctx.emit('disabled:input:valtChanged', e.target);
 
-      //remove icon when focusout
-      document.querySelector(BPASS_BUTTON_TAG) && document.querySelector(BPASS_BUTTON_TAG).remove();
+      if (ctx.enabledFocusout) {
+        //remove icon when focusout
+        document.querySelector(BPASS_BUTTON_TAG) &&
+          document.querySelector(BPASS_BUTTON_TAG).remove();
 
-      // send selector box display
-      ctx.sendEraseSelectorBoxMessage(false);
+        // send selector box display
+        ctx.sendEraseSelectorBoxMessage(false);
+      }
 
       ctx.setActivedTarget(null);
     });

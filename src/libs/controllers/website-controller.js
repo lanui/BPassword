@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
+import RemoveableObserverStore from '../observestore/removeable-obs-store';
 
 import logger from '@/libs/logger';
 import { transferTerms, getDiff } from '../utils/item-transfer';
@@ -46,9 +47,10 @@ class WebsiteController extends EventEmitter {
     /**
      * tabId : {hostname,username,password}
      */
-    this.activeValtStore = new ObservableStore();
+    this.activeValtStore = new RemoveableObserverStore();
     this.activeValtStore.subscribe(this.notifyLeechPageValtStateListener.bind(this));
 
+    //item changed notify same host tabs
     this.on('notify:injet:client', _.debounce(this.callNotifiedInjetClient.bind(this), 500));
   }
 
@@ -58,12 +60,19 @@ class WebsiteController extends EventEmitter {
    * @param {*} valtState
    */
   updateActieTabValtState(tabId, valtState) {
+    logger.debug('Website :updateActieTabValtState>>>>>>>>', tabId, valtState);
     if (tabId !== undefined && valtState) {
       valtState.ctype = 'inputChanged';
       const activeState = {
         [tabId]: valtState,
       };
       this.activeValtStore.updateState(activeState);
+    }
+  }
+
+  removeTabValtState(tabId) {
+    if (tabId) {
+      this.activeValtStore.removeKeyState(tabId);
     }
   }
 

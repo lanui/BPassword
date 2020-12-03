@@ -27,7 +27,7 @@
     "zip-fox": "cross-env node ci/zip-fox.js",
     "ext:build": "cross-env TASK_COMMAND=build node ci/webext-distribution.js",
     "ext:sign-pre": "cross-env TASK_COMMAND=sign node ci/webext-distribution.js",
-    "ext:sign-rel": "cross-env TASK_COMMAND=sign WEB_EXT_CHANNEL=listed node ci/webext-distribution.js",
+    "ext:sign-rel": "cross-env TASK_COMMAND=sign $WEB_EXT_CHANNEL=listed node ci/webext-distribution.js",
     "analyz": "webpack-bundle-analyzer dist/stats.json --port 8899",
     "docs": "docsify serve docs"
   },

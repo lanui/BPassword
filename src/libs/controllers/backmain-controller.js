@@ -22,6 +22,7 @@ import {
   API_RT_FILL_FEILDS,
   API_RT_FIELDS_VALT_CHANGED,
   API_RT_FIELDS_MATCHED_STATE,
+  API_RT_VALT_CHANGED_TRANS_NOTIFY,
 } from '../msgapi/api-types';
 
 /*********************************************************************
@@ -325,7 +326,8 @@ class BackMainController extends EventEmitter {
     endOfStream(portStream, (err) => {
       logger.debug('BackMainController:setupInjetSubCommunication disconnect.', err, muxId, tabId);
       this.deleteInjetOriginConnections(tabId);
-
+      this.websiteController.removeTabValtState(tabId);
+      //remove TabValtState
       // this.websiteController.resetActiveTabValtState(tabId)
     });
 
@@ -515,11 +517,38 @@ class BackMainController extends EventEmitter {
     if (feildConnections.length > 0) {
       feildConnections.forEach((muxStream) => {
         try {
+          logger.debug('updateActieTabValtState>>>', hostname, respData);
           muxStream.write({ apiType: API_JET_INIT_STATE, respData });
         } catch (err) {
           logger.warn('Inject connection send state to FeildsPage failed.', err);
         }
       });
+    }
+  }
+
+  /**
+   * 规划中功能,未使用
+   * @param {number |string} tabId
+   * @param {object} valtState
+   */
+  async notifiedActivedTabConnection(tabId, valtState) {
+    if (tabId === undefined || !valtState) {
+      return;
+    }
+
+    const sendData = {
+      apiType: API_RT_VALT_CHANGED_TRANS_NOTIFY,
+      respData: valtState,
+    };
+
+    const topMuxStream = this.getActiveTopInjetConnection(tabId);
+    if (topMuxStream) {
+      topMuxStream.write(sendData);
+    }
+
+    const leechMuxStream = this.getLeechConnection(tabId);
+    if (leechMuxStream) {
+      leechMuxStream.write(sendData);
     }
   }
 
