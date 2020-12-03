@@ -1,8 +1,14 @@
 # Firefox
 
-## v0.7.1 (**self signed**)
+## v0.7.2 (**self signed**)
 
->
+> 12-3
+
+-
+
+## v0.7.1 (**Release Awaiting Approve**)
+
+> 12-3 submmit
 
 - [x] Fixed input field value changed redraw addor popup height.
 
