@@ -1,5 +1,13 @@
 # Chrome
 
+## v2.1.0 (RELEASE )
+
+> 12-7 发布
+
+- [x] 增加解锁 Inject 状态更新
+- [x] 增加锁定 Inject 状态更新
+- [x] Fixed [阿里云](https://account.aliyun.com/login/qr_login.htm) 多层 iframe 嵌套位置计算 BUG.
+
 ## v2.0.0 (RELEASE)
 
 > 11-9 发布 2.0.0
