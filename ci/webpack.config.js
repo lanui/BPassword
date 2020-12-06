@@ -40,7 +40,6 @@ const config = {
     alias: {
       '@': src,
       '@lib': R(src, 'libs'),
-      '@p2': R(src, 'pager'),
       '@p3': R(src, 'popup'),
       '@ui': R(src, 'ui'),
     },
