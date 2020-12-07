@@ -12,10 +12,12 @@ const DEST_ZIP_DIR = path.resolve(__dirname, '../dist-zip', 'firefox');
 
 const ManifestJson = require(R(DEST_DIR, 'manifest.json'));
 
+const APP_VERSION = process.env.APP_VERSION || '';
+
 const extractExtensionData = () => {
   return {
     name: WrapperEnv.APP_NAME,
-    version: ManifestJson ? ManifestJson.version : WrapperEnv.APP_VERSION,
+    version: APP_VERSION || (ManifestJson ? ManifestJson.version : WrapperEnv.APP_VERSION),
   };
 };
 
