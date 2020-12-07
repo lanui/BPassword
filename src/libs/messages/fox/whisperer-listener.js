@@ -81,13 +81,17 @@ class WhisperperListener {
     const { password } = reqData;
     const dev3 = await this.controller.accountController.unlock(password);
     const initState = this.controller.getState();
-
+    await this.controller.unlockedNotifyCommunications();
     return initState;
   }
 
   async logout() {
     const ret = await this.controller.accountController.lock();
     const initState = this.controller.getState();
+
+    if (this.controller.lockingNotifyAllCommunications) {
+      await this.controller.lockingNotifyAllCommunications();
+    }
 
     return initState;
   }

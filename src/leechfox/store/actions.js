@@ -10,14 +10,14 @@ export const initHostname = async ({ commit }, hostname) => {};
  */
 export const initState = async (
   { commit },
-  { items = [], isUnlocked = false, hostname = '', feildValues = {}, valtState = {} }
+  { items = [], isUnlocked = false, hostname = '', valtState = {} }
 ) => {
   logger.debug('store>envLeech- remoteMessageListener>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', items);
 
   commit(types.UPDATE_IS_UNLOCKED, isUnlocked);
   commit(types.UPDATE_ITEMS, items);
   commit(types.UPDATE_HOSTNAME, hostname);
-  commit(types.UPDATE_FEILD_VOLUME, feildValues);
+  // commit(types.UPDATE_FEILD_VOLUME, feildValues);
   commit(types.UPDATE_ACTIVED_VALT_STATE, valtState);
   logger.debug('store>>>>valtState>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', JSON.stringify(valtState));
 };

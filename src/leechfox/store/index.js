@@ -24,7 +24,7 @@ const store = new Vuex.Store({
     items: [],
     isUnlocked: false,
     feildVolume: {
-      username: 'jack',
+      username: '',
       password: '',
     },
     trash: [],

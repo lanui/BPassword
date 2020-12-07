@@ -15,6 +15,7 @@ import AccountController from './account-controller';
 import WebsiteController from './website-controller';
 import MobileController from './mobile-controller';
 import { setupMultiplex } from '../helpers/pipe-helper.js';
+import extension from '../extensionizer';
 
 import {
   API_RT_INIT_STATE,
@@ -161,8 +162,103 @@ class BackMainController extends EventEmitter {
    */
   async lockingNotifyAllCommunications() {
     const conns = [];
+    if (this.topInjetConnections) {
+      Object.values(this.topInjetConnections).forEach((conn) => {
+        conns.push(conn);
+      });
+    }
+
+    if (this.injetOriginConnections) {
+      Object.values(this.injetOriginConnections).forEach((conn) => {
+        conns.push(conn);
+      });
+    }
+    if (conns.length > 0) {
+      const inistState = {
+        apiType: API_JET_INIT_STATE,
+        respData: { isUnlocked: false, items: [], matchedNum: 0 },
+      };
+      conns.forEach((conn) => {
+        logger.debug('BackMainController::Locking notify>>>>', conn.muxId);
+        if (conn.muxStream) {
+          conn.muxStream.write(inistState);
+        }
+      });
+    }
+
+    await this.notifyCurrentActivedLeech();
   }
 
+  async unlockedNotifyCommunications() {
+    let communications = [];
+    if (this.topInjetConnections) {
+      Object.values(this.topInjetConnections).forEach((conn) => {
+        communications.push(conn);
+      });
+    }
+
+    if (this.injetOriginConnections) {
+      Object.values(this.injetOriginConnections).forEach((conn) => {
+        communications.push(conn);
+      });
+    }
+
+    if (communications.length > 0) {
+      communications.forEach(async (comm) => {
+        const { hostname, muxStream } = comm;
+        if (hostname && muxStream) {
+          const sendData = await this.getSendZombieState(hostname);
+          logger.debug('BunlockedNotifyCommunications--Notify Message', sendData, hostname);
+          muxStream.write({ apiType: API_JET_INIT_STATE, respData: sendData });
+        }
+      });
+    }
+
+    await this.notifyCurrentActivedLeech();
+  }
+
+  /**
+   *
+   */
+  async notifyCurrentActivedLeech() {
+    const jetCommunications = this.injetOriginConnections;
+    const leechCommunications = this.leechTabConnections;
+    extension.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      if (tabs && tabs.length && tabs[0]) {
+        const tabId = tabs[0].id;
+        const _conn = jetCommunications[tabId];
+        const hostname = _conn ? _conn.hostname : '';
+
+        const leechMuxStream = leechCommunications[tabId];
+        if (hostname && leechMuxStream) {
+          const data = await this.getLeechSendState(tabId, hostname);
+          logger.debug(
+            'notifyCurrentActivedLeech>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
+            tabId,
+            hostname,
+            data
+          );
+          leechMuxStream.write(data);
+        }
+      }
+    });
+  }
+
+  async getCurrentActivedTabJetInfo() {
+    const jetCommunications = this.injetOriginConnections;
+    return new Promise((resolve, reject) => {
+      extension.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs.length && tabs[0]) {
+          const tabId = tabs[0].id;
+          const _conn = jetCommunications[tabId];
+          const hostname = _conn ? _conn.hostname : '';
+          return resolve({ tabId, hostname });
+        } else {
+          return resolve(false);
+        }
+      });
+    });
+  }
   /** =============================== Top injet communication code start ====================================== */
   async setupInjetTopCommunication(port) {
     const sender = port.sender;
@@ -486,8 +582,8 @@ class BackMainController extends EventEmitter {
    */
   getTabLoginHostname(tabId) {
     if (tabId === undefined) return false;
-    return this.topInjetConnections && this.topInjetConnections[tabId]
-      ? this.topInjetConnections[tabId].hostname
+    return this.injetOriginConnections && this.injetOriginConnections[tabId]
+      ? this.injetOriginConnections[tabId].hostname
       : false;
   }
 
@@ -566,11 +662,11 @@ class BackMainController extends EventEmitter {
 
   /**
    *
-   * @param {*} tabId
-   * @param {*} feildValues
+   * @param {number} tabId
+   * @param {string} hostname
    */
-  async getLeechSendState(tabId, feildValues = {}) {
-    const hostname = this.getTabLoginHostname(tabId);
+  async getLeechSendState(tabId, hostname) {
+    if (!hostname) hostname = this.getTabLoginHostname(tabId);
     const valtState = this.websiteController.getActiveTabState(tabId, hostname);
     const { isUnlocked } = this.accountController.memStore.getState();
     let { items = [] } = await this.websiteController.memStore.getState();
@@ -585,7 +681,6 @@ class BackMainController extends EventEmitter {
       isUnlocked,
       hostname,
       items,
-      feildValues,
       valtState,
     };
   }
