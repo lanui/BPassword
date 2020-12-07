@@ -21,7 +21,6 @@ import {
   API_JET_INIT_STATE,
   API_RT_FILL_FEILDS,
   API_RT_FIELDS_VALT_CHANGED,
-  API_RT_FIELDS_MATCHED_STATE,
   API_RT_VALT_CHANGED_TRANS_NOTIFY,
 } from '../msgapi/api-types';
 
@@ -125,10 +124,6 @@ class BackMainController extends EventEmitter {
     this.activeLoginStore = new ObservableStore({ operType: 'init', password: '', username: '' });
   }
 
-  async lockMemStoreHandle() {
-    this.passbokController.lock();
-  }
-
   memStoreWatch(state) {
     logger.debug('BackMainController:memStoreWatch>>>>', state, this);
   }
@@ -159,6 +154,13 @@ class BackMainController extends EventEmitter {
     const stream = mux.createStream(API_RT_INIT_STATE);
     const data = this.getState();
     stream.write(data);
+  }
+
+  /**
+   * logout notify all communications
+   */
+  async lockingNotifyAllCommunications() {
+    const conns = [];
   }
 
   /** =============================== Top injet communication code start ====================================== */

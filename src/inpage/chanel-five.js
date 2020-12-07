@@ -44,7 +44,7 @@ function chanel5builder(jetid) {
   /* use strict */
   let jetOne = `
     /**BPassword inject ${jetid} */\n
-    !(function(jetid,serializeConfig,logLevel){
+    (function(jetid,serializeConfig,logLevel){
       const BP_CONFIG = JSON.parse(serializeConfig);
       class SelectorBox extends HTMLElement {
         constructor(){
@@ -74,7 +74,6 @@ function chanel5builder(jetid) {
         }
 
         disconnectedCallback(){
-
         }
 
         static get observedAttributes() {
@@ -262,11 +261,12 @@ function chanel5builder(jetid) {
       }
 
       /* registing */
+
       window.__SelectorBox = SelectorBox;
       try {
         window.customElements.define('selector-box', SelectorBox);
       } catch (err) {
-        console.warn('Registing custom element.', err);
+        console.warn('Registing custom element failed', err.message);
       }
     })('${jetid}','${serializeConfig}','${LOG_LEVEL}');
   `;
@@ -289,14 +289,6 @@ function getExtInfo(jetid) {
   return serializeParams;
 }
 
-function closerJet(uuid, fns) {
-  const closerBegin = '(function (';
-  const closerAgrsBegin = '){';
-  const closerMainEnd = '})(';
-
-  const closerEnd = ')';
-}
-
 function injectSourceIntoDom(content, tag) {
   if (!content) {
     return;
@@ -306,12 +298,13 @@ function injectSourceIntoDom(content, tag) {
     const domContainer = document.head || document.documentElement;
     const scriptEl = document.createElement('script');
     scriptEl.setAttribute('async', 'false');
-    scriptEl.setAttribute('charet', 'UTF-8');
+    scriptEl.setAttribute('charset', 'UTF-8');
     scriptEl.textContent = content;
 
     scriptEl.onload = function () {
       if (LOG_LEVEL !== 'DEBUG') {
         //this.parentNode.removeChild(this);
+        console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>');
       }
     };
 

@@ -43,7 +43,7 @@ class FieldController extends BaseController {
   constructor({ extid }) {
     super({ type: '__bpfield_' });
     this.extid = extid;
-    this.enabledFocusout = true;
+    this.enabledFocusout = false;
 
     this.backendStore = new ObservableStore({ isUnlocked: false, items: [], matchedNum: 0 });
 

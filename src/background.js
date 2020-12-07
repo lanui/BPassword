@@ -146,57 +146,6 @@ async function setupController(initState) {
         remotePort.sender
       );
     }
-
-    // if (isBPassInternalProcess) {
-    //   const portStream = new PortStream(remotePort);
-
-    //   if (proccessName === ENV_TYPE_POPUP) {
-    //     controller.setupTrustedCommunication(portStream, remotePort.sender);
-    //     //popup
-    //     // popupIsOpen = true;
-    //     // controller.hasClientsOpened = true;
-    //     //移到自己的controller 里处理
-    //     // endOfStream(portStream, (err) => {
-    //     //   logger.debug(`remote disconnected fail: ${proccessName}>>>`, err);
-    //     //   popupIsOpen = false;
-    //     //   controller.hasClientsOpened = isClientOpenStatus();
-    //     // });
-    //   }
-
-    //   if (proccessName === ENV_TYPE_LEECH) {
-    //     //open tabs app page or options page
-    //     //Tabs sendMessage
-    //     const tabId = remotePort.sender.tab.id;
-    //     logger.debug(`remote connected: ${proccessName}>>>`, remotePort.sender);
-    //     openBpassTabsIds[tabId] = true; //maybe save remotePort
-
-    //     //移到自己的controller 里处理
-    //     endOfStream(portStream, () => {
-    //       delete openBpassTabsIds[tabId];
-    //       logger.debug(`remote disconnected: ${proccessName}>>>`, openBpassTabsIds);
-    //       controller.hasClientsOpened = isClientOpenStatus();
-    //     });
-    //   }
-
-    //   if (proccessName === ENV_TYPE_INJET_TOP) {
-    //     controller.setupInjetTopCommunication(portStream, remotePort.sender)
-    //   }
-
-    //   if (proccessName === ENV_TYPE_INJET) {
-    //     injet++
-    //     logger.debug(`remote ENV_TYPE_INJET: ${proccessName}>>>>>>>>>>`, remotePort,injet);
-    //     controller.setupInjetCommunication(portStream, remotePort.sender)
-    //   }
-
-    //   //resp
-    //   // const sendState = controller.getState();
-    // } else {
-    //   //TODO external connections injet
-    //   logger.debug(
-    //     `Backend Root listen external connected: ${proccessName} >>>`,
-    //     remotePort.sender
-    //   );
-    // }
   }
 
   /** handle latest version data store */

@@ -32,13 +32,13 @@ import browser from 'webextension-polyfill';
  *    @created:  2020-11-24
  *    @comments:
  **********************************************************************/
-if (window.top === window.self) {
-  try {
-    window.customElements.define(BPASS_SELECTOR_TAG, BpassSelector);
-  } catch (err) {
-    logger.warn('Top Registing custom.', err);
-  }
-}
+// if (window.top === window.self) {
+//   try {
+//     window.customElements.define(BPASS_SELECTOR_TAG, BpassSelector);
+//   } catch (err) {
+//     logger.warn('Top Registing custom.', err);
+//   }
+// }
 
 if (shouldActivedJet()) {
   const initConfig = {
