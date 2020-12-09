@@ -24,6 +24,7 @@ import {
   API_RT_FIELDS_VALT_CHANGED,
   API_RT_VALT_CHANGED_TRANS_NOTIFY,
 } from '../msgapi/api-types';
+import NetworkController from '../network/index.js';
 
 /*********************************************************************
  * AircraftClass ::
@@ -98,12 +99,18 @@ class BackMainController extends EventEmitter {
       lockedMobilePlain: this.mobileController.locked.bind(this.mobileController),
     });
 
+    // network
+    this.networkController = new NetworkController({
+      initState: initState.NetworkController,
+    });
+
     /** binding store state changed subscribe to update store value */
     // when key
     this.store.updateStructure({
       AccountController: this.accountController.store,
       WebsiteController: this.websiteController.store,
       MobileController: this.mobileController.store,
+      NetworkController: this.networkController.store,
     });
 
     /**

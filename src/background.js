@@ -5,6 +5,9 @@ import asStream from 'obs-store/lib/asStream';
 import PortStream from 'extension-port-stream';
 import pump from 'pump';
 
+import { providers } from 'web3';
+import { buildRpcUrl, buildTSLRpcURL } from '@lib/network/infura-helper.js';
+
 import logger from './libs/logger';
 import extension from './libs/extensionizer';
 import LocalStore from './libs/storage/local-store';
@@ -12,6 +15,7 @@ import BackgroundController from './libs/controllers/backmain-controller';
 import createStreamSink from './libs/helpers/create-stream-sink';
 
 import { buildExtVersion, buildExtAppName, LOG_LEVEL } from './libs/code-settings';
+
 import {
   EXTENSION_INTERNAL_PROCESS,
   EXTENSION_CC_PROCESS,
@@ -187,6 +191,19 @@ async function setupController(initState) {
       }, 1000);
     }
   }
+
+  function createWeb3Instance() {
+    try {
+      const rpcUrl = buildTSLRpcURL({ network: 'ropsten' });
+      logger.debug('RPCUrl:>>>', rpcUrl);
+      const web3 = new Web3(rpcUrl);
+      global.web3 = web3;
+    } catch (error) {
+      console.log('Create web3 fail', error.message);
+    }
+  }
+
+  createWeb3Instance();
   /** ======== setupController:internal functions end =============== */
 }
 

@@ -107,7 +107,7 @@ let baseConfig = {
     //   amd: "lodash",
     //   root: "_" // 指向全局变量
     // },
-    // web3: "Web3",
+    web3: 'Web3',
   },
   module: {
     rules: [
@@ -189,6 +189,8 @@ let baseConfig = {
       __EXT_TARGET__: JSON.stringify(providerEnv.EXT_TARGET),
       __EXT_NAME__: JSON.stringify(providerEnv.APP_NAME),
       __EXT_VERION__: JSON.stringify(providerEnv.APP_VERSION),
+      __INFURA_PRO_ID__: JSON.stringify(providerEnv.INFURA_PROJECTID || ''),
+      __INFURA_PRO_SECRET__: JSON.stringify(providerEnv.INFURA_SECRET || ''),
       'process.env.APP_NAME': JSON.stringify(providerEnv.APP_NAME),
     }),
     new webpack.IgnorePlugin(/^\.\/wordlists\/(?!english)/, /bip39\/src$/),
