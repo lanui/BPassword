@@ -69,7 +69,7 @@ class NetworkController extends EventEmitter {
     });
 
     setTimeout(async () => {
-      // this.pingNetwork();
+      this.pingNetwork();
     }, 1000);
   }
 

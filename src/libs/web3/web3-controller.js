@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
 
 import { ROPSTEN, NETWORK_TYPE_NAME_KV } from '../network/enums';
+import CustomSmartJson from './contracts/custom_address.json';
 
 /*********************************************************************
  * AircraftClass ::
@@ -26,6 +27,10 @@ class Web3Controller extends EventEmitter {
     this.store = new ObservableStore(initState);
 
     this.on('reloadBalances', this.reloadBalances.bind(this));
+
+    if (!opts.initState) {
+      this.store.updateState(initState);
+    }
   }
 
   reloadBalances() {}
@@ -35,10 +40,33 @@ class Web3Controller extends EventEmitter {
  *
  */
 function _initStateStruct() {
-  return {
+  const initState = {
     tokens: {},
     txs: [],
+    smarts: {},
   };
+
+  let smarts = {
+    1: [],
+    3: [],
+  };
+  if (typeof CustomSmartJson === 'object' && Object.values(CustomSmartJson).length === 1) {
+    const keyString = Object.keys(CustomSmartJson)[0];
+    const smartsValts = CustomSmartJson[keyString] || [];
+    smarts[parseInt(keyString)] = smartsValts;
+
+    for (let i in smartsValts) {
+      const smart = smartsValts[i];
+      const skey = Object.keys(smart)[0];
+      const newSmart = { [skey]: '' };
+      smarts[1].push(newSmart);
+      smarts[3].push(newSmart);
+    }
+  }
+
+  initState.smarts = smarts;
+
+  return initState;
 }
 
 export default Web3Controller;
