@@ -18,12 +18,14 @@ export default {
     selectedSubKey: '',
     networks: [
       {
-        text: 'Ropsten',
+        type: 'ropsten',
+        nickname: 'Ropsten',
         chainId: 3,
         color: 'rgba(233, 21, 80, 0.7)',
       },
       {
-        text: 'Mainnet',
+        type: 'mainnet',
+        nickname: 'Main Ethereum Network',
         chainId: 1,
         color: 'rgba(3, 135, 137, 0.7)',
       },

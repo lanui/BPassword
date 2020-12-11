@@ -1,0 +1,102 @@
+<template>
+  <div class="CustToast cust-toast" :class="'toast-' + type" v-if="showToast">
+    <div class="toast-flex">
+      <span class="icon">
+        <img :src="iconSrc" />
+      </span>
+    </div>
+
+    {{ message }}
+  </div>
+</template>
+<script>
+import messageIcon from '@ui/assets/icons/tips.svg';
+import successIcon from '@ui/assets/icons/success.svg';
+import failIcon from '@ui/assets/icons/fail.svg';
+import warnIcon from '@ui/assets/icons/warning.svg';
+export default {
+  name: 'CustToast',
+  computed: {
+    iconSrc() {
+      const type = this.type;
+      switch (type) {
+        case 'success':
+          return this.icons.success;
+        case 'warn':
+          return this.icons.warn;
+        case 'fail':
+          return this.icons.fail;
+        default:
+          return this.icons.message;
+      }
+    },
+  },
+  data() {
+    return {
+      icons: {
+        message: messageIcon,
+        fail: failIcon,
+        warn: warnIcon,
+        success: successIcon,
+      },
+      showToast: true,
+      type: 'normal',
+      message: '',
+      duration: 3000,
+    };
+  },
+};
+</script>
+<style scoped>
+.cust-toast {
+  position: fixed;
+  min-width: calc(100% - 77px);
+  max-width: calc(100% - 37px);
+  left: 50%;
+  top: 50%;
+  background: rgb(233, 233, 235);
+  padding: 10px;
+  border-radius: 5px;
+  transform: translate(-50%, -50%);
+  animation: show-toast 0.2s;
+  color: #909399;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+@keyframes show-toast {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.icon img {
+  width: 20px;
+  height: 20px;
+  margin-top: 3px;
+  margin-right: 4px;
+}
+.toast-message {
+  color: white;
+  background: linear-gradient(217deg, #7917d3 0%, #0362c3 100%);
+}
+
+.toast-success {
+  color: rgba(0, 202, 155, 1);
+  background: rgba(0, 202, 155, 0.2);
+}
+
+.toast-warn {
+  color: #e6a23c;
+  background: rgb(250, 236, 216);
+}
+
+.toast-fail {
+  color: #f56c6c;
+  background: rgb(253, 226, 226);
+}
+</style>

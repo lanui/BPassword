@@ -3,7 +3,7 @@
     <div>
       <v-img :src="logo" width="32" height="32"></v-img>
     </div>
-    <network-selector />
+    <network-selector v-if="isUnlocked" />
     <v-btn v-if="isUnlocked" icon small class="ms-2" @click="togglerDrawer">
       <v-icon color="light-blue accent-4">mdi-menu</v-icon>
     </v-btn>

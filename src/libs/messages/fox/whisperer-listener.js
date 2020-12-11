@@ -17,6 +17,7 @@ import {
   API_RT_DELETE_MOB_ITEM,
   API_RT_FILL_FEILDS,
   API_FETCH_EXT_STATE,
+  API_RT_CHANGED_NETWORK,
 } from '../../msgapi/api-types';
 
 import { checkApiType } from '../../msgapi';
@@ -160,6 +161,10 @@ class WhisperperListener {
       throw new BizError('Miss tab id for filledFieldValt');
     }
   }
+
+  async changedNetworkState(reqData) {
+    return this.networkController.changedNetwork(reqData);
+  }
 }
 
 async function HandleCypherApi(message, sender, sendResp) {
@@ -198,6 +203,8 @@ async function HandleCypherApi(message, sender, sendResp) {
       case API_RT_FILL_FEILDS:
         logger.debug(`WhisperListener Received Data>>>`, apiType, reqData);
         return this.filledFieldValt(reqData, sender);
+      case API_RT_CHANGED_NETWORK:
+        return this.changedNetworkState(reqData);
       default:
         throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
     }

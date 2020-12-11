@@ -162,7 +162,7 @@ let baseConfig = {
         ],
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg|ico)$/,
+        test: /\.(png|jpg|jpeg|gif|ico)$/,
         loader: 'file-loader',
         options: {
           name: '[path][name].[ext]',
@@ -171,6 +171,13 @@ let baseConfig = {
           esModule: false,
         },
       },
+      // {
+      //   test:/\.svg$/,
+      //   use:[
+      //     'babel-loader',
+      //     'vue-svg-loader'
+      //   ]
+      // },
       {
         test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
         loader: 'file-loader',

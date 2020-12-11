@@ -7,7 +7,7 @@
       <template v-slot:activator="{ attrs, on }">
         <v-chip v-bind="attrs" v-on="on" small filter pill class="network-chiper">
           <v-icon size="8" :color="currentNetwork.color"> mdi-checkbox-blank-circle </v-icon>
-          <span class="ms-2 pe-4">{{ currentNetwork.text }}</span>
+          <span class="ms-2 pe-4">{{ currentNetwork.type }}</span>
         </v-chip>
       </template>
       <v-list item-height="16" v-for="(nw, idx) in networks" :key="idx" class="py-0">
@@ -15,7 +15,7 @@
           <v-list-item-content>
             <div>
               <v-icon size="14" :color="nw.color"> mdi-checkbox-blank-circle </v-icon>
-              <span class="ms-1">{{ nw.text }}</span>
+              <span class="ms-1">{{ nw.nickname }}</span>
             </div>
           </v-list-item-content>
         </v-list-item>
@@ -29,6 +29,9 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import WhispererController from '@lib/messages/whisperer-controller';
+import { API_RT_CHANGED_NETWORK } from '@lib/msgapi/api-types';
+
 export default {
   name: 'NetworkSelector',
   computed: {
@@ -36,11 +39,35 @@ export default {
     ...mapGetters('web3', ['networks', 'chainId', 'currentNetwork']),
   },
   data() {
-    return {};
+    return {
+      loading: false,
+    };
   },
   methods: {
     async networkChanged(chainId) {
-      await this.$store.dispatch('web3/updateCurrentNetwork', chainId);
+      const nws = this.$store.state.web3.networks;
+      const network = nws.find((n) => parseInt(n.chainId) === parseInt(chainId));
+      if (!network) {
+        console.error('no network matched.', chainId);
+        return;
+      }
+      console.log('>>>>>>>>>>>>>', network);
+      this.$toast('OK');
+      // const whisperer = new WhispererController();
+      // whisperer
+      //   .sendSimpleMessage(API_RT_CHANGED_NETWORK, data)
+      //   .then(async (websiteState) => {
+      //     await this.$store.dispatch('passbook/subInitState4Site', websiteState);
+      //     this.gobackHandle();
+      //   })
+      //   .catch((err) => {
+      //     this.ctrl.loading = false;
+      //     this.error = err.message;
+      //     setTimeout(() => {
+      //       this.error = '';
+      //     }, 6000);
+      //   });
+      // await this.$store.dispatch('web3/updateCurrentNetwork', chainId);
     },
   },
   mounted() {},

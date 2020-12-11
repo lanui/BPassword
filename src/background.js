@@ -192,18 +192,6 @@ async function setupController(initState) {
     }
   }
 
-  function createWeb3Instance() {
-    try {
-      const rpcUrl = buildTSLRpcURL({ network: 'ropsten' });
-      logger.debug('RPCUrl:>>>', rpcUrl);
-      const web3 = new Web3(rpcUrl);
-      global.web3 = web3;
-    } catch (error) {
-      console.log('Create web3 fail', error.message);
-    }
-  }
-
-  createWeb3Instance();
   /** ======== setupController:internal functions end =============== */
 }
 

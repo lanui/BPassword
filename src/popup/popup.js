@@ -8,6 +8,7 @@ import store from '../store';
 import router from './router';
 
 import i18n from '@/locale';
+import Toast from '../ui/toast/index';
 
 import LivedManager from '@/libs/messages/lived-manager';
 /** Styles */
@@ -18,6 +19,8 @@ global.browser = require('webextension-polyfill');
 
 // communicate backend
 import { ENV_TYPE_POPUP } from '@/libs/enums';
+
+Vue.use(Toast);
 const livedManager = new LivedManager({
   portName: ENV_TYPE_POPUP,
   store,

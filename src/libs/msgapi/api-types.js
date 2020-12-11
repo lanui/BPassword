@@ -23,6 +23,7 @@ export const API_RT_LEECH_WHOLE_STATE = 'bpInjetLeechState';
 export const API_RT_FIELDS_VALT_CHANGED = 'bpInjetFieldValtChanged';
 export const API_RT_FIELDS_MATCHED_STATE = 'bpBackCalcValtMatchedState';
 export const API_RT_VALT_CHANGED_TRANS_NOTIFY = 'bpValtChangedTransNotifiedInjetAndLeech';
+export const API_RT_CHANGED_NETWORK = 'bpChangedNetwork';
 
 /** leech */
 export const API_RT_FILL_FEILDS = 'bpLeechFillFeilds';

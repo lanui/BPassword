@@ -20,4 +20,8 @@ export const VEX_ITEM_EXIST = '710002';
 export const VEX_ITEM_EDIT = '710003';
 export const VEX_ITEM_DELETE = '710004';
 
+//network
+export const NETWORK_TIMEOUT = '504504';
+export const NETWORK_UNAVAILABLE = '500500';
+
 /** UI Start */

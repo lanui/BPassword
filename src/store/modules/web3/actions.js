@@ -1,5 +1,18 @@
 import * as types from './mutation-types';
 
+/**
+ *
+ * @param {*} param0
+ * @param {*} networkState
+ */
+export const subInitNetworkState = async ({ commit }, networkState) => {
+  if (networkState) {
+    const { chainId, networks, networkType, enabledCustomize } = networkState;
+    commit(types.UPDATE_NETWORK_LIST, networks);
+    commit(types.UPDATE_CHAINID, chainId);
+  }
+};
+
 export const updateCurrentNetwork = async ({ commit }, chainId) => {
   //TODO send to backend
 

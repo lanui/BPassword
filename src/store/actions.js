@@ -10,12 +10,23 @@ import logger from '@/libs/logger';
  * @param {Object} initState
  */
 export const initState = async ({ commit, dispatch }, initState = {}) => {
-  const { isUnlocked, AccountController, MobileController, WebsiteController, env3 } = initState;
+  const {
+    isUnlocked,
+    AccountController,
+    MobileController,
+    WebsiteController,
+    env3,
+    NetworkController,
+  } = initState;
 
   commit(types.UPDATE_ISUNLOCKED, isUnlocked);
   if (env3) {
     //import has
     commit(types.UPDATE_ENV3, env3);
+  }
+
+  if (NetworkController) {
+    await dispatch('web3/subInitNetworkState', NetworkController);
   }
 
   if (isUnlocked) {
