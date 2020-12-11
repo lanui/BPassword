@@ -69,7 +69,7 @@ class NetworkController extends EventEmitter {
     });
 
     setTimeout(async () => {
-      this.pingNetwork();
+      // this.pingNetwork();
     }, 1000);
   }
 
@@ -153,7 +153,10 @@ class NetworkController extends EventEmitter {
   }
 
   getCurrentProvider() {
-    const { provider } = this.store.getState();
+    const { provider, network, custom } = this.store.getState();
+    if (!network || (!NETWORK_TYPE_NAME_KV[network] && network !== custom.type)) {
+      throw new BizError(`Current provider ${provider?.type || network} disconnect.`);
+    }
     return provider;
   }
 

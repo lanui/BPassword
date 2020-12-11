@@ -25,6 +25,7 @@ import {
   API_RT_VALT_CHANGED_TRANS_NOTIFY,
 } from '../msgapi/api-types';
 import NetworkController from '../network/index.js';
+import Web3Controller from '../web3';
 
 /*********************************************************************
  * AircraftClass ::
@@ -102,6 +103,11 @@ class BackMainController extends EventEmitter {
     // network
     this.networkController = new NetworkController({
       initState: initState.NetworkController,
+    });
+
+    this.web3Controller = new Web3Controller({
+      initState: initState.Web3Controller,
+      getCurrentProvider: this.networkController.getCurrentProvider.bind(this.networkController),
     });
 
     /** binding store state changed subscribe to update store value */

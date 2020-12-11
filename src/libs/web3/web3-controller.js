@@ -15,18 +15,30 @@ import { ROPSTEN, NETWORK_TYPE_NAME_KV } from '../network/enums';
  *    @comments:
  **********************************************************************/
 const StateStruct = {
-  network: ROPSTEN,
+  tokens: {}, // address:{symbol,chainId,lasttime,balance}
 };
 class Web3Controller extends EventEmitter {
   constructor(opts = {}) {
     super();
-
-    const initState = opts.initState || {
-      network: ROPSTEN,
-    };
+    this.getCurrentProvider = opts.getCurrentProvider;
+    const initState = opts.initState || _initStateStruct();
 
     this.store = new ObservableStore(initState);
+
+    this.on('reloadBalances', this.reloadBalances.bind(this));
   }
+
+  reloadBalances() {}
+}
+
+/**
+ *
+ */
+function _initStateStruct() {
+  return {
+    tokens: {},
+    txs: [],
+  };
 }
 
 export default Web3Controller;
