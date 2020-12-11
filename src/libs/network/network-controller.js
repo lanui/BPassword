@@ -74,13 +74,15 @@ class NetworkController extends EventEmitter {
   }
 
   async changedNetwork(network) {
-    if (typeof network !== object) {
+    logger.debug(`WhisperListener Received Data>>>`, network);
+    if (typeof network !== 'object') {
       throw new BizError('Network Params illegal.');
     }
     const { chainId, nickname, providerType } = network;
     let _provider;
     if (providerType === PROVIDER_TYPE_CUSTOM) {
-      _provider = this.customzieStore.getState();
+      _provider = this.customStore.getState();
+      logger.debug(`WhisperListener Received Data>>>`, _provider);
       if (_provider) {
         _provider.providerType = PROVIDER_TYPE_CUSTOM;
       }
@@ -105,7 +107,7 @@ class NetworkController extends EventEmitter {
       const networkType = await web3.eth.net.getNetworkType();
       _provider.chainId = chainId;
       _provider.type = networkType;
-      this.provider.updateState(_provider);
+      this.providerStore.updateState(_provider);
       this.networkStore.putState(networkType);
 
       return this.getSendState();

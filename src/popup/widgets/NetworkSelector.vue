@@ -45,29 +45,26 @@ export default {
   },
   methods: {
     async networkChanged(chainId) {
-      const nws = this.$store.state.web3.networks;
+      const nws = await this.$store.state.web3.networks;
       const network = nws.find((n) => parseInt(n.chainId) === parseInt(chainId));
       if (!network) {
         console.error('no network matched.', chainId);
         return;
       }
       console.log('>>>>>>>>>>>>>', network);
-      this.$toast('OK');
-      // const whisperer = new WhispererController();
-      // whisperer
-      //   .sendSimpleMessage(API_RT_CHANGED_NETWORK, data)
-      //   .then(async (websiteState) => {
-      //     await this.$store.dispatch('passbook/subInitState4Site', websiteState);
-      //     this.gobackHandle();
-      //   })
-      //   .catch((err) => {
-      //     this.ctrl.loading = false;
-      //     this.error = err.message;
-      //     setTimeout(() => {
-      //       this.error = '';
-      //     }, 6000);
-      //   });
-      // await this.$store.dispatch('web3/updateCurrentNetwork', chainId);
+      // this.$toast('OK');
+      const whisperer = new WhispererController();
+      whisperer
+        .sendSimpleMessage(API_RT_CHANGED_NETWORK, network)
+        .then(async (networkState) => {
+          const { chainId } = networkState;
+          await this.$store.dispatch('web3/updateCurrentNetwork', chainId);
+          this.$toast(`Changed Network ${network.type}`, 'success');
+        })
+        .catch((err) => {
+          console.log(err);
+          this.$toast(`Changed Fail. ${err.message}`, 'fail', 10000);
+        });
     },
   },
   mounted() {},

@@ -14,6 +14,7 @@ import messageIcon from '@ui/assets/icons/tips.svg';
 import successIcon from '@ui/assets/icons/success.svg';
 import failIcon from '@ui/assets/icons/fail.svg';
 import warnIcon from '@ui/assets/icons/warning.svg';
+import signedIcon from '@ui/assets/icons/signed.svg';
 export default {
   name: 'CustToast',
   computed: {
@@ -26,6 +27,8 @@ export default {
           return this.icons.warn;
         case 'fail':
           return this.icons.fail;
+        case 'signed':
+          return this.icons.signed;
         default:
           return this.icons.message;
       }
@@ -38,11 +41,12 @@ export default {
         fail: failIcon,
         warn: warnIcon,
         success: successIcon,
+        signed: signedIcon,
       },
       showToast: true,
       type: 'normal',
       message: '',
-      duration: 3000,
+      duration: 5000,
     };
   },
 };
@@ -87,7 +91,7 @@ export default {
 
 .toast-success {
   color: rgba(0, 202, 155, 1);
-  background: rgba(0, 202, 155, 0.2);
+  background: rgba(0, 202, 155, 0.3);
 }
 
 .toast-warn {
@@ -98,5 +102,10 @@ export default {
 .toast-fail {
   color: #f56c6c;
   background: rgb(253, 226, 226);
+}
+
+.toast-signed {
+  color: #515151;
+  background: rgb(246, 246, 246);
 }
 </style>

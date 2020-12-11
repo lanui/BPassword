@@ -163,7 +163,7 @@ class WhisperperListener {
   }
 
   async changedNetworkState(reqData) {
-    return this.networkController.changedNetwork(reqData);
+    return this.controller.networkController.changedNetwork(reqData);
   }
 }
 
@@ -176,7 +176,7 @@ async function HandleCypherApi(message, sender, sendResp) {
 
   try {
     let reqData = message.reqData;
-    logger.debug(`WhisperListener Received Data>>>`, apiType, sender);
+    logger.debug(`WhisperListener Received Data>>>`, apiType, sender, reqData);
     switch (apiType) {
       case API_FETCH_EXT_STATE:
         return this.getExtInfo(reqData, sender);
@@ -201,7 +201,6 @@ async function HandleCypherApi(message, sender, sendResp) {
       case API_RT_DELETE_MOB_ITEM:
         return this.deleteMobileItem(reqData);
       case API_RT_FILL_FEILDS:
-        logger.debug(`WhisperListener Received Data>>>`, apiType, reqData);
         return this.filledFieldValt(reqData, sender);
       case API_RT_CHANGED_NETWORK:
         return this.changedNetworkState(reqData);
