@@ -113,7 +113,7 @@ class NetworkController extends EventEmitter {
       return this.getSendState();
     } catch (err) {
       logger.warn('Ping network failed', err.message);
-      throw new BizError(err.message, NETWORK_TIMEOUT);
+      throw new BizError(`RPC provider ${_provider.type} connected fail.`, NETWORK_TIMEOUT);
     }
   }
 
