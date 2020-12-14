@@ -103,7 +103,7 @@ class NetworkController extends EventEmitter {
 
     try {
       const web3 = new Web3(new Web3.providers.HttpProvider(_provider.rpcUrl));
-      const chainId = await web3.eth.net.getId();
+      const chainId = await web3.eth.getChainId();
       const networkType = await web3.eth.net.getNetworkType();
       _provider.chainId = chainId;
       _provider.type = networkType;
@@ -152,8 +152,8 @@ class NetworkController extends EventEmitter {
     return sendState;
   }
 
-  getCurrentProvider() {
-    const { provider, network, custom } = this.store.getState();
+  async getCurrentProvider() {
+    const { provider, network, custom } = await this.store.getState();
     if (!network || (!NETWORK_TYPE_NAME_KV[network] && network !== custom.type)) {
       throw new BizError(`Current provider ${provider?.type || network} disconnect.`);
     }
@@ -167,7 +167,7 @@ class NetworkController extends EventEmitter {
         throw 'no provider in store.';
       }
       const web3 = new Web3(new Web3.providers.HttpProvider(provider.rpcUrl));
-      const chainId = await web3.eth.net.getId();
+      const chainId = await web3.eth.getChainId();
       const networkType = await web3.eth.net.getNetworkType();
       logger.debug('Ping>>>>>>', chainId, networkType);
       this.providerStore.updateState({ type: networkType });

@@ -219,4 +219,12 @@ export default class AccountController extends EventEmitter {
       ...memState,
     };
   }
+
+  /**
+   * when env3 no create will return undefined
+   */
+  async getCurrentWallet() {
+    const state = await this.memStore.getState();
+    return state;
+  }
 }

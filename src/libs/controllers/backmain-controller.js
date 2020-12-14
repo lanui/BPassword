@@ -107,6 +107,7 @@ class BackMainController extends EventEmitter {
 
     this.web3Controller = new Web3Controller({
       initState: initState.Web3Controller,
+      currentAccState: this.accountController.getCurrentWallet.bind(this.accountController),
       getCurrentProvider: this.networkController.getCurrentProvider.bind(this.networkController),
     });
 
@@ -117,6 +118,7 @@ class BackMainController extends EventEmitter {
       WebsiteController: this.websiteController.store,
       MobileController: this.mobileController.store,
       NetworkController: this.networkController.store,
+      Web3Controller: this.web3Controller.store,
     });
 
     /**

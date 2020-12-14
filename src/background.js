@@ -32,6 +32,7 @@ import FoxWhispererListener from './libs/messages/fox/whisperer-listener';
 import { stopPasswordSaving } from './libs/platforms/utils';
 
 import { isFox } from './libs/platforms/utils';
+import ContractsBaseInfo from './libs/web3/contracts';
 
 global.BPError = BPError;
 
@@ -62,6 +63,8 @@ initialize().catch((error) => {
 });
 
 async function initialize() {
+  //load smarts debug
+  loadSmarts();
   const initState = await localStateFromPersistence();
   logger.debug(`Background initState>>>>`, initState);
   setupController(initState || {});
@@ -193,6 +196,14 @@ async function setupController(initState) {
   }
 
   /** ======== setupController:internal functions end =============== */
+}
+/**
+ *
+ */
+function loadSmarts() {
+  if (LOG_LEVEL === 'DEBUG') {
+    global.SmartsInfo = ContractsBaseInfo;
+  }
 }
 
 /**
