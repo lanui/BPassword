@@ -13,9 +13,18 @@ export const subInitNetworkState = async ({ commit }, networkState) => {
   }
 };
 
-export const updateCurrentNetwork = async ({ commit }, chainId) => {
-  //TODO send to backend
+/**
+ *
+ * @param {Object} context vuex
+ * @param {Object} web3State [chainBalances,chainTxs,chainId,ts]
+ */
+export const subInitWeb3State = async ({ commit }, web3State = {}) => {
+  const { ts = 0, chainBalances = {}, chainTxs = {} } = web3State;
+  commit(types.UPDATE_CHAIN_BALANCES, chainBalances);
+  commit(types.UPDATE_LASTTIMESATMP, ts);
+};
 
+export const updateCurrentNetwork = async ({ commit }, chainId) => {
   commit(types.UPDATE_CHAINID, chainId);
 };
 

@@ -13,7 +13,7 @@ import {
   ACCOUNT_NOT_EXISTS,
 } from '../biz-error/error-codes';
 
-import { getWeb3Inst, wei2EtherFixed } from './web3-helpers';
+import { getWeb3Inst } from './web3-helpers';
 import APIManager from './apis';
 
 import { BT_TOKEN, ETH_TOKEN } from './contracts/enums';
@@ -77,6 +77,8 @@ class Web3Controller extends EventEmitter {
 
       this.store.updateState(balances);
       logger.debug('Web3Controller:reloadBalances>>>>', balances);
+
+      return this.getSendState(chainId);
     } catch (err) {
       logger.warn('Web3 disconnect.', err);
       throw new BizError(`Provider ${_provider.rpcUrl} disconnected.`, NETWORK_UNAVAILABLE);
@@ -100,8 +102,24 @@ class Web3Controller extends EventEmitter {
     return balances[chainId];
   }
 
-  registWeb3Inst() {
-    _registWeb3Global.call(this);
+  getSendState(chainId) {
+    const { balances = {}, ts = 0, txs } = this.store.getState();
+    let chainBalances = {},
+      chainTxs = [];
+    if (chainId && typeof balances[chainId] === 'object') {
+      chainBalances = balances[chainId];
+    }
+    if (chainId && txs && txs[chainId] && Array.isArray(txs[chainId])) {
+      chainTxs = txs[chainId];
+    }
+    let sendState = {
+      ts,
+      chainId,
+      chainBalances,
+      chainTxs,
+    };
+
+    return sendState;
   }
 }
 
@@ -112,10 +130,10 @@ function _initStateStruct() {
   const initState = {
     balances: {},
     tokens: {},
-    txs: [],
+    txs: {},
     smarts: {},
     ts: new Date().getTime(),
-    historys: [],
+    historys: {},
   };
 
   let smarts = {
@@ -130,14 +148,6 @@ function _initStateStruct() {
   initState.smarts = smarts;
 
   return initState;
-}
-
-async function _registWeb3Global() {
-  const _provider = await this.getCurrentProvider();
-  if (_provider && _provider.rpcUrl) {
-    let web3 = getWeb3Inst(_provider.rpcUrl);
-    this.web3js = web3;
-  }
 }
 
 export default Web3Controller;

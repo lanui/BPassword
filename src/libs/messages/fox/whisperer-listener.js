@@ -18,6 +18,7 @@ import {
   API_RT_FILL_FEILDS,
   API_FETCH_EXT_STATE,
   API_RT_CHANGED_NETWORK,
+  API_RT_RELOAD_CHAIN_BALANCES,
 } from '../../msgapi/api-types';
 
 import { checkApiType } from '../../msgapi';
@@ -165,6 +166,11 @@ class WhisperperListener {
   async changedNetworkState(reqData) {
     return this.controller.networkController.changedNetwork(reqData);
   }
+
+  async reloadTokenBalances(reqData) {
+    logger.debug(`Whisperer reloadTokenBalances>>>`, reqData);
+    return this.controller.web3Controller.reloadBalances();
+  }
 }
 
 async function HandleCypherApi(message, sender, sendResp) {
@@ -204,6 +210,8 @@ async function HandleCypherApi(message, sender, sendResp) {
         return this.filledFieldValt(reqData, sender);
       case API_RT_CHANGED_NETWORK:
         return this.changedNetworkState(reqData);
+      case API_RT_RELOAD_CHAIN_BALANCES:
+        return this.reloadTokenBalances(reqData);
       default:
         throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
     }

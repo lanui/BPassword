@@ -460,11 +460,17 @@ class BackMainController extends EventEmitter {
     const { isUnlocked } = this.accountController.memStore.getState();
 
     const NetworkController = this.networkController.getSendState();
+    const chainId = NetworkController.chainId;
+    let Web3Controller = {};
+    if (chainId) {
+      Web3Controller = this.web3Controller.getSendState(chainId);
+    }
     return {
       isUnlocked: Boolean(isUnlocked),
       isInitialized: Boolean(env3),
       ...this.memStore.getState(),
       NetworkController,
+      Web3Controller,
     };
   }
 

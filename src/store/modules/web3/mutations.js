@@ -12,4 +12,10 @@ export default {
       state.networks = networks;
     }
   },
+  [types.UPDATE_CHAIN_BALANCES](state, chainBalances = {}) {
+    state.chainBalances = Object.assign(state.chainBalances, chainBalances);
+  },
+  [types.UPDATE_LASTTIMESATMP](state, ts = 0) {
+    state.lasttimestamp = ts;
+  },
 };

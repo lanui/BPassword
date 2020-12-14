@@ -17,6 +17,7 @@ export const initState = async ({ commit, dispatch }, initState = {}) => {
     WebsiteController,
     env3,
     NetworkController,
+    Web3Controller,
   } = initState;
 
   commit(types.UPDATE_ISUNLOCKED, isUnlocked);
@@ -41,6 +42,9 @@ export const initState = async ({ commit, dispatch }, initState = {}) => {
 
   if (isUnlocked && MobileController) {
     await dispatch('passbook/subInitState4Mob', MobileController);
+  }
+  if (isUnlocked && Web3Controller) {
+    await dispatch('web3/subInitWeb3State', Web3Controller);
   }
 };
 

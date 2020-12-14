@@ -8,7 +8,7 @@
           </v-icon>
         </div>
         <div class="item-line balance">
-          {{ diamondsBalText }}
+          {{ getDiamondsText }}
         </div>
         <div class="item-line symbol">Diamonds</div>
       </div>
@@ -19,7 +19,7 @@
           </v-icon>
         </div>
         <div class="item-line balance">
-          {{ btsBalText }}
+          {{ getBTsBalanceText }}
         </div>
         <div class="item-line symbol">BTs</div>
       </div>
@@ -34,7 +34,7 @@ export default {
   components: {},
   computed: {
     ...mapGetters('ui', ['icons']),
-    ...mapGetters('acc', ['diamondsBalText', 'ethBalText', 'btsBalText']),
+    ...mapGetters('web3', ['getBTsBalanceText', 'getEthBalanceText', 'getDiamondsText']),
   },
   data() {
     return {};

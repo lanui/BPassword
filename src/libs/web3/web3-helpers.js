@@ -4,26 +4,34 @@ import { PROVIDER_ILLEGAL, NETWORK_UNAVAILABLE } from '../biz-error/error-codes'
 
 import logger from '../logger';
 
+const diamondsRate = 10000;
+
 export function getWeb3Inst(rpcUrl) {
   if (!rpcUrl) throw new BizError('Illegal rpcUrl', PROVIDER_ILLEGAL);
   const web3js = new Web3(new Web3.providers.HttpProvider(rpcUrl));
   return web3js;
 }
 
-export function wei2EtherFixed(wei = '0', fixNum = 4) {
-  if (/^0$/.test(wei)) {
+export function wei2Ether(wei = '0', fixedNum = 4) {
+  if (/^[0]*(\.)?[0]*$/.test(wei)) {
     return '0.00';
   }
-  fixNum = fixNum > 6 || fixNum < 0 ? 2 : fixNum;
-  let ether = Web3.utils.fromWei(wei, 'ether');
-  return parseFloat(ether).toFixed(fixNum);
+
+  fixedNum = fixedNum > 6 || fixedNum < 0 ? 4 : fixedNum;
+  let etherValt = Web3.utils.fromWei(wei.toString(), 'ether');
+  etherValt = parseFloat(etherValt).toFixed(fixedNum);
+
+  return /^\d*\.[0-9]{2}00$/.test(etherValt) ? etherValt.toFixed(fixedNum - 2) : etherValt;
 }
 
-// export const tokenInfo = async (web3js,ContractName) => {
-//   if(!web3js){
-//     throw new BizError('web3 instance undefined.', INTERNAL_ERROR);
-//   }
-//   if(!ContractName || ){
-//     throw new BizError(`Token Contract illegal.${ContractName}`, INTERNAL_ERROR);
-//   }
-// }
+export function wei2Diamonds(wei = '0', fixedNum = 4) {
+  if (/^[0]*(\.)?[0]*$/.test(wei)) {
+    return '0.00';
+  }
+
+  fixedNum = fixedNum > 6 || fixedNum < 0 ? 4 : fixedNum;
+  let etherValt = Web3.utils.fromWei(wei.toString(), 'ether');
+  etherValt = (parseFloat(etherValt) * diamondsRate).toFixed(fixedNum);
+
+  return /^\d*\.[0-9]{2}00$/.test(etherValt) ? etherValt.toFixed(fixedNum - 2) : etherValt;
+}

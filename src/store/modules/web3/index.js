@@ -1,6 +1,7 @@
 import mutations from './mutations';
 import * as actions from './actions';
 import * as getters from './getters';
+import { ETH_TOKEN, BT_TOKEN } from '@lib/web3/contracts/enums';
 
 export default {
   namespaced: true,
@@ -15,7 +16,6 @@ export default {
   state: {
     chainId: 3,
     selectedAddress: '',
-    selectedSubKey: '',
     networks: [
       {
         type: 'ropsten',
@@ -30,5 +30,10 @@ export default {
         color: 'rgba(3, 135, 137, 0.7)',
       },
     ],
+    chainBalances: {
+      [ETH_TOKEN]: '0',
+      [BT_TOKEN]: '0',
+    },
+    lasttimestamp: 0,
   },
 };

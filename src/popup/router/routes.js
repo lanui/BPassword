@@ -31,6 +31,7 @@ export default [
         component: HomeIndex, //HomeIndex
         meta: {
           auth: true,
+          refreshBalance: true,
         },
       },
     ],
@@ -87,6 +88,7 @@ export default [
         component: WalletIndex, //HomeIndex
         meta: {
           auth: true,
+          refreshBalance: true,
         },
       },
       {

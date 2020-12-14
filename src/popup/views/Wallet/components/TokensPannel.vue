@@ -5,7 +5,7 @@
         <v-img :src="iconDiamands" width="26" height="26"></v-img>
       </div>
       <div class="token-item-row balance">
-        {{ diamondsBalText }}
+        {{ getDiamondsText }}
       </div>
       <div class="token-item-row symbol">Diamonds</div>
     </div>
@@ -14,7 +14,7 @@
         <v-img :src="iconBPTs" width="26" height="26"></v-img>
       </div>
       <div class="token-item-row balance">
-        {{ btsBalText }}
+        {{ getBTsBalanceText }}
       </div>
       <div class="token-item-row symbol">BTs</div>
     </div>
@@ -29,7 +29,7 @@ import iconBPTs from '@/ui/assets/icons/icon_bpts.png';
 export default {
   name: 'WalletTokensPannel',
   computed: {
-    ...mapGetters('acc', ['btsBalText', 'diamondsBalText']),
+    ...mapGetters('web3', ['getBTsBalanceText', 'getDiamondsText']),
   },
   data() {
     return {
@@ -38,6 +38,7 @@ export default {
     };
   },
   methods: {},
+  mounted() {},
 };
 </script>
 <style>
