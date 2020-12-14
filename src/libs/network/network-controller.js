@@ -139,6 +139,7 @@ class NetworkController extends EventEmitter {
         nickname: n.nickname,
         chainId: n.chainId,
         color: n.color,
+        disabled: n.disabled,
       };
     });
 

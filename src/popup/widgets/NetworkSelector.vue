@@ -51,14 +51,14 @@ export default {
         console.error('no network matched.', chainId);
         return;
       }
-      console.log('>>>>>>>>>>>>>', network);
+
       // this.$toast('OK');
       const whisperer = new WhispererController();
       whisperer
         .sendSimpleMessage(API_RT_CHANGED_NETWORK, network)
-        .then(async (networkState) => {
-          const { chainId } = networkState;
-          await this.$store.dispatch('web3/updateCurrentNetwork', chainId);
+        .then(async (web3State = {}) => {
+          // const { networkState ={},web3State={}} = respState
+          await this.$store.dispatch('web3/subInitWeb3State', web3State);
           this.$toast(`Changed Network ${network.type}`, 'success');
         })
         .catch((err) => {

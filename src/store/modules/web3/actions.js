@@ -19,9 +19,10 @@ export const subInitNetworkState = async ({ commit }, networkState) => {
  * @param {Object} web3State [chainBalances,chainTxs,chainId,ts]
  */
 export const subInitWeb3State = async ({ commit }, web3State = {}) => {
-  const { ts = 0, chainBalances = {}, chainTxs = {} } = web3State;
+  const { ts = 0, chainBalances = {}, chainTxs = {}, chainId } = web3State;
   commit(types.UPDATE_CHAIN_BALANCES, chainBalances);
   commit(types.UPDATE_LASTTIMESATMP, ts);
+  commit(types.UPDATE_CHAINID, chainId);
 };
 
 export const updateCurrentNetwork = async ({ commit }, chainId) => {

@@ -9,7 +9,7 @@ export default {
   mutations,
   getters: {
     chainId: (state) => state.chainId,
-    networks: (state) => state.networks,
+    networks: (state) => state.networks.filter((n) => !n.disabled),
     selectedAddress: (state) => state.selectedAddress || '',
     ...getters,
   },

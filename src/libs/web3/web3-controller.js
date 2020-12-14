@@ -39,6 +39,8 @@ class Web3Controller extends EventEmitter {
     this.currentAccState = opts.currentAccState;
     const initState = opts.initState || _initStateStruct();
 
+    this.reloadTokenBalances = _reloadBalances.bind(this);
+
     this.store = new ObservableStore(initState);
 
     this.on('reloadBalances', this.reloadBalances.bind(this));
@@ -50,39 +52,41 @@ class Web3Controller extends EventEmitter {
       logger.warn('Current Provdier Unset or RPCUrl illegal.', _provider?.rpcUrl);
       throw new BizError('Provider Unset or illegal rpcUrl.', PROVIDER_ILLEGAL);
     }
-    const state = this.store.getState() || {};
-    let { balances = {} } = state;
-    const accState = await this.currentAccState();
-    if (!accState || !accState.isUnlocked) {
-      logger.warn('get current account state fail', accState);
-      throw new BizError('account not exists or logout', ACCOUNT_NOT_EXISTS);
-    }
 
-    try {
-      const { type, rpcUrl, chainId } = _provider;
-      // dev3:MainPriKey,SubPriKey [uint8Array]
-      const { selectedAddress, dev3 } = accState;
-      let web3js = getWeb3Inst(rpcUrl);
-      logger.debug('Web3Controller:reloadBalances>>>>', selectedAddress);
+    return this.reloadTokenBalances(_provider);
+    // const state = this.store.getState() || {};
+    // let { balances = {} } = state;
+    // const accState = await this.currentAccState();
+    // if (!accState || !accState.isUnlocked) {
+    //   logger.warn('get current account state fail', accState);
+    //   throw new BizError('account not exists or logout', ACCOUNT_NOT_EXISTS);
+    // }
 
-      let ethBalance = await web3js.eth.getBalance(selectedAddress);
-      let btBalance = await APIManager.BTApi.getBalance(web3js, selectedAddress, chainId);
+    // try {
+    //   const { type, rpcUrl, chainId } = _provider;
+    //   // dev3:MainPriKey,SubPriKey [uint8Array]
+    //   const { selectedAddress, dev3 } = accState;
+    //   let web3js = getWeb3Inst(rpcUrl);
+    //   logger.debug('Web3Controller:reloadBalances>>>>', selectedAddress);
 
-      let chainBalance = {
-        [ETH_TOKEN]: ethBalance,
-        [BT_TOKEN]: btBalance,
-      };
+    //   let ethBalance = await web3js.eth.getBalance(selectedAddress);
+    //   let btBalance = await APIManager.BTApi.getBalance(web3js, selectedAddress, chainId);
 
-      balances[chainId] = chainBalance;
+    //   let chainBalance = {
+    //     [ETH_TOKEN]: ethBalance,
+    //     [BT_TOKEN]: btBalance,
+    //   };
 
-      this.store.updateState(balances);
-      logger.debug('Web3Controller:reloadBalances>>>>', balances);
+    //   balances[chainId] = chainBalance;
 
-      return this.getSendState(chainId);
-    } catch (err) {
-      logger.warn('Web3 disconnect.', err);
-      throw new BizError(`Provider ${_provider.rpcUrl} disconnected.`, NETWORK_UNAVAILABLE);
-    }
+    //   this.store.updateState(balances);
+    //   logger.debug('Web3Controller:reloadBalances>>>>', balances);
+
+    //   return this.getSendState(chainId);
+    // } catch (err) {
+    //   logger.warn('Web3 disconnect.', err);
+    //   throw new BizError(`Provider ${_provider.rpcUrl} disconnected.`, NETWORK_UNAVAILABLE);
+    // }
   }
 
   async getBalanceState() {
@@ -148,6 +152,46 @@ function _initStateStruct() {
   initState.smarts = smarts;
 
   return initState;
+}
+
+async function _reloadBalances(provider) {
+  if (!provider || !provider.rpcUrl) {
+    logger.warn('Current Provdier Unset or RPCUrl illegal.', provider?.rpcUrl);
+    throw new BizError('Provider Unset or illegal rpcUrl.', PROVIDER_ILLEGAL);
+  }
+  const state = this.store.getState() || {};
+  let { balances = {} } = state;
+  const accState = await this.currentAccState();
+  if (!accState || !accState.isUnlocked) {
+    logger.warn('get current account state fail', accState);
+    throw new BizError('account not exists or logout', ACCOUNT_NOT_EXISTS);
+  }
+
+  try {
+    const { type, rpcUrl, chainId } = provider;
+    // dev3:MainPriKey,SubPriKey [uint8Array]
+    const { selectedAddress, dev3 } = accState;
+    let web3js = getWeb3Inst(rpcUrl);
+    logger.debug('Web3Controller:reloadBalances>>>>', selectedAddress);
+
+    let ethBalance = await web3js.eth.getBalance(selectedAddress);
+    let btBalance = await APIManager.BTApi.getBalance(web3js, selectedAddress, chainId);
+
+    let chainBalance = {
+      [ETH_TOKEN]: ethBalance,
+      [BT_TOKEN]: btBalance,
+    };
+
+    balances[chainId] = chainBalance;
+
+    this.store.updateState(balances);
+    logger.debug('Web3Controller:reloadBalances>>>>', balances);
+
+    return this.getSendState(chainId);
+  } catch (err) {
+    logger.warn('Web3 disconnect.', err);
+    throw new BizError(`Provider ${provider.rpcUrl} disconnected.`, NETWORK_UNAVAILABLE);
+  }
 }
 
 export default Web3Controller;

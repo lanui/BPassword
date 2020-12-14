@@ -164,7 +164,11 @@ class WhisperperListener {
   }
 
   async changedNetworkState(reqData) {
-    return this.controller.networkController.changedNetwork(reqData);
+    const networkState = await this.controller.networkController.changedNetwork(reqData);
+    const currentProvider = await this.controller.networkController.getCurrentProvider();
+    const web3State = await this.controller.web3Controller.reloadBalances(currentProvider);
+    logger.debug('>>>changedNetworkState>>>>', networkState, web3State);
+    return web3State;
   }
 
   async reloadTokenBalances(reqData) {
