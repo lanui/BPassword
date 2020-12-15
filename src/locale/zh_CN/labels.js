@@ -16,6 +16,8 @@ const labels = {
   managementPass: '管理账号',
   help: '帮助',
   version: '版本',
+  memberExpired: '会员有效期',
+  nonMember: '非会员',
 };
 
 export default labels;

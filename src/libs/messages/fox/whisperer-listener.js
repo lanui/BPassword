@@ -167,7 +167,19 @@ class WhisperperListener {
     const networkState = await this.controller.networkController.changedNetwork(reqData);
     const currentProvider = await this.controller.networkController.getCurrentProvider();
     const web3State = await this.controller.web3Controller.reloadBalances(currentProvider);
-    logger.debug('>>>changedNetworkState>>>>', networkState, web3State);
+    const selectedAddress = await this.controller.accountController.getMainAddress();
+    logger.debug('>>>changedNetworkState>>>>', networkState, web3State, selectedAddress);
+    await this.controller.web3Controller.emit(
+      'web3:reload:member:status',
+      currentProvider,
+      selectedAddress
+    );
+
+    await this.controller.web3Controller.emit(
+      'web3:reload:config',
+      currentProvider,
+      selectedAddress
+    );
     return web3State;
   }
 

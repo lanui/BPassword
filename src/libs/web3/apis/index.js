@@ -1,4 +1,5 @@
 import * as BTApi from './bt-api';
+import * as BPTMemberApi from './bpt-member-api';
 
 /*********************************************************************
  * AircraftClass ::
@@ -14,4 +15,5 @@ import * as BTApi from './bt-api';
 
 export default {
   BTApi,
+  BPTMemberApi,
 };

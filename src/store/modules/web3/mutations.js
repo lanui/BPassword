@@ -18,4 +18,7 @@ export default {
   [types.UPDATE_LASTTIMESATMP](state, ts = 0) {
     state.lasttimestamp = ts;
   },
+  [types.UPDATE_CHAIN_STATUS](state, chainStatus = {}) {
+    state.chainStatus = Object.assign(state.chainStatus, chainStatus);
+  },
 };

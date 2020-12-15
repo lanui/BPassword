@@ -17,6 +17,8 @@ import EditMobileItem from '../views/Passbook/EditMobileItem.vue';
 import WalletIndex from '../views/Wallet/Index.vue';
 import ExportWallet from '../views/Wallet/ExportWallet.vue';
 
+import RechargeMembership from '../views/Wallet/RechargeMembership.vue';
+
 //Profile
 import ProfileIndex from '../views/Profile/Index.vue';
 
@@ -28,7 +30,7 @@ export default [
       {
         path: 'index',
         alias: ['/', '/passbook'],
-        component: HomeIndex, //HomeIndex
+        component: WalletIndex, //HomeIndex
         meta: {
           auth: true,
           refreshBalance: true,
@@ -85,7 +87,7 @@ export default [
       {
         path: 'index',
         alias: '/wallet',
-        component: WalletIndex, //HomeIndex
+        component: WalletIndex,
         meta: {
           auth: true,
           refreshBalance: true,
@@ -93,7 +95,14 @@ export default [
       },
       {
         path: 'export',
-        component: ExportWallet, //HomeIndex
+        component: ExportWallet,
+        meta: {
+          auth: true,
+        },
+      },
+      {
+        path: 'recharge',
+        component: RechargeMembership,
         meta: {
           auth: true,
         },

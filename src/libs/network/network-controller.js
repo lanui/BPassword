@@ -172,7 +172,7 @@ class NetworkController extends EventEmitter {
       const web3 = new Web3(new Web3.providers.HttpProvider(provider.rpcUrl));
       const chainId = await web3.eth.getChainId();
       const networkType = await web3.eth.net.getNetworkType();
-      logger.debug('Ping>>>>>>', chainId, networkType);
+      logger.debug('Ping...>>>>>>', chainId, networkType);
       this.providerStore.updateState({ type: networkType });
       this.networkStore.putState(networkType);
     } catch (error) {

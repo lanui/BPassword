@@ -1,24 +1,36 @@
 <template>
-  <div class="tokens-pannel--wrap">
-    <div class="token-item">
-      <div class="token-item-row icon">
-        <v-img :src="iconDiamands" width="26" height="26"></v-img>
+  <v-container>
+    <v-row>
+      <div class="tokens-pannel--wrap">
+        <div class="token-item">
+          <div class="token-item-row icon">
+            <v-img :src="iconDiamands" width="26" height="26"></v-img>
+          </div>
+          <div class="token-item-row balance">
+            {{ getDiamondsText }}
+          </div>
+          <div class="token-item-row symbol">Diamonds</div>
+        </div>
+        <div class="token-item">
+          <div class="token-item-row icon">
+            <v-img :src="iconBPTs" width="26" height="26"></v-img>
+          </div>
+          <div class="token-item-row balance">
+            {{ getBTsBalanceText }}
+          </div>
+          <div class="token-item-row symbol">BTs</div>
+        </div>
       </div>
-      <div class="token-item-row balance">
-        {{ getDiamondsText }}
-      </div>
-      <div class="token-item-row symbol">Diamonds</div>
-    </div>
-    <div class="token-item">
-      <div class="token-item-row icon">
-        <v-img :src="iconBPTs" width="26" height="26"></v-img>
-      </div>
-      <div class="token-item-row balance">
-        {{ getBTsBalanceText }}
-      </div>
-      <div class="token-item-row symbol">BTs</div>
-    </div>
-  </div>
+    </v-row>
+    <v-row justify="center" class="text-center">
+      <v-col cols="6" class="py-0"></v-col>
+      <v-col cols="6" class="py-0">
+        <v-btn @click.stop="gotoRechargePage" small color="primary">
+          {{ $t('btn.recharge') }}
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -37,7 +49,11 @@ export default {
       iconBPTs,
     };
   },
-  methods: {},
+  methods: {
+    gotoRechargePage() {
+      this.$router.push({ path: '/wallet/recharge' });
+    },
+  },
   mounted() {},
 };
 </script>

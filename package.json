@@ -53,6 +53,7 @@
     "keythereum": "^1.2.0",
     "lodash": "^4.17.20",
     "loglevel": "^1.7.0",
+    "moment": "^2.29.1",
     "nanoid": "^3.1.16",
     "obj-multiplex": "^1.0.0",
     "obs-store": "^4.0.3",

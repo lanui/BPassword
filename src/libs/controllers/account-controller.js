@@ -157,6 +157,10 @@ export default class AccountController extends EventEmitter {
     }
   }
 
+  async getMainAddress() {
+    const { env3 } = await this.store.getState();
+    return !env3 ? undefined : env3?.mainAddress;
+  }
   /**
    *
    * @param {object} env3 keystore

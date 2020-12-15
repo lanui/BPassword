@@ -24,6 +24,9 @@ const pages = {
     finnacialTitle: '实时财报',
     showOnBlockChain: '在区块链上显示',
   },
+  recharge: {
+    title: '会员充值',
+  },
 };
 
 export default pages;

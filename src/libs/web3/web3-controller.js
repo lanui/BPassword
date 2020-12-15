@@ -1,7 +1,7 @@
+import { debounce } from 'lodash';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
-
-import { ROPSTEN, NETWORK_TYPE_NAME_KV } from '../network/enums';
+import ComposedStore from 'obs-store/lib/composed';
 
 import { SmartAddressesTranslate } from './contracts/index';
 
@@ -13,14 +13,15 @@ import {
   ACCOUNT_NOT_EXISTS,
 } from '../biz-error/error-codes';
 
-import { getWeb3Inst } from './web3-helpers';
+import { getWeb3Inst, getChainConfig } from './web3-helpers';
 import APIManager from './apis';
 
 import { BT_TOKEN, ETH_TOKEN } from './contracts/enums';
+import { DEFAULT_GAS_LIMIT } from './cnst';
 
 /*********************************************************************
  * AircraftClass ::
- *    @description:
+ *    @description: update store struct
  *    @description:
  * WARNINGS:
  *
@@ -29,22 +30,44 @@ import { BT_TOKEN, ETH_TOKEN } from './contracts/enums';
  *    @created:  2020-12-09
  *    @comments:
  **********************************************************************/
-const MEMBER_COSTWEI_PER_YEAR = '98000000000000000000';
-const StateStruct = {
-  tokens: {}, // address:{symbol,chainId,lasttime,balance}
-};
+
 class Web3Controller extends EventEmitter {
   constructor(opts = {}) {
     super();
     this.getCurrentProvider = opts.getCurrentProvider;
     this.currentAccState = opts.currentAccState;
-    const initState = opts.initState || _initStateStruct();
+    const initState = opts.initState || {};
+    const {
+      config = _initConfigState(),
+      smarts = SmartAddressesTranslate(),
+      balances = {},
+      historys = {},
+      txs = {},
+      status = {},
+    } = initState;
 
     this.reloadTokenBalances = _reloadBalances.bind(this);
 
-    this.store = new ObservableStore(initState);
+    this.configStore = new ObservableStore(config);
+    this.smartStore = new ObservableStore(smarts);
+    this.balanceStore = new ObservableStore(balances);
+    this.txStore = new ObservableStore(txs);
+    this.historyStore = new ObservableStore(historys);
+    this.statusStore = new ObservableStore(status);
+
+    this.store = new ComposedStore({
+      config: this.configStore,
+      smarts: this.smartStore,
+      balances: this.balanceStore,
+      historys: this.historyStore,
+      txs: this.txStore,
+      status: this.statusStore,
+    });
 
     this.on('reloadBalances', this.reloadBalances.bind(this));
+
+    this.on('web3:reload:config', debounce(_reloadConfig.bind(this), 1000));
+    this.on('web3:reload:member:status', _reloadChainStatus.bind(this));
   }
 
   async reloadBalances() {
@@ -75,8 +98,9 @@ class Web3Controller extends EventEmitter {
   }
 
   getSendState(chainId) {
-    const { balances = {}, ts = 0, txs } = this.store.getState();
+    const { balances = {}, ts = 0, txs = {}, config = {}, status = {} } = this.store.getState();
     let chainBalances = {},
+      chainStatus = {},
       chainTxs = [];
     if (chainId && typeof balances[chainId] === 'object') {
       chainBalances = balances[chainId];
@@ -84,9 +108,15 @@ class Web3Controller extends EventEmitter {
     if (chainId && txs && txs[chainId] && Array.isArray(txs[chainId])) {
       chainTxs = txs[chainId];
     }
+
+    if (chainId && status[chainId]) {
+      chainStatus = status[chainId];
+    }
+
     let sendState = {
-      ts,
+      chainStatus,
       chainId,
+      ts,
       chainBalances,
       chainTxs,
     };
@@ -95,34 +125,48 @@ class Web3Controller extends EventEmitter {
   }
 }
 
+function _initConfigState() {
+  return {
+    gasLimit: DEFAULT_GAS_LIMIT,
+  };
+}
+
 /**
  *
+ * @param {object} provider
+ * @param {string} address hex string
  */
-function _initStateStruct() {
-  const initState = {
-    config: {
-      memberCostWeiPerYear: MEMBER_COSTWEI_PER_YEAR,
-    },
-    balances: {},
-    tokens: {},
-    txs: {},
-    smarts: {},
-    ts: new Date().getTime(),
-    historys: {},
-  };
-
-  let smarts = {
-    1: [],
-    3: [],
-  };
-
-  if (SmartAddressesTranslate()) {
-    smarts = SmartAddressesTranslate();
+async function _reloadChainStatus(provider, address) {
+  try {
+    if (!provider || !address) {
+      logger.debug('no provider so unhanlder set MemberCostWeiPerYear.');
+      throw new BizError('params illegal.', PROVIDER_ILLEGAL);
+    }
+    const { chainId, rpcUrl } = provider;
+    const web3js = getWeb3Inst(rpcUrl);
+    const info = await APIManager.BPTMemberApi.getMemberBaseInFo(web3js, chainId, address);
+    this.statusStore.updateState(info);
+  } catch (err) {
+    logger.debug('reload smart status failed.', err.message);
   }
+}
 
-  initState.smarts = smarts;
+async function _reloadConfig(provider, address) {
+  try {
+    if (!provider || !address) {
+      logger.debug('no provider so unhanlder set MemberCostWeiPerYear.');
+      return;
+    }
+    const { rpcUrl, chainId } = provider;
+    const web3js = getWeb3Inst(rpcUrl);
 
-  return initState;
+    const chainConfig = await getChainConfig(web3js, address);
+    logger.debug('_reloadConfig>>>>', chainConfig);
+
+    this.configStore.updateState(chainConfig);
+  } catch (err) {
+    logger.debug('reload MemberCostWeiPerYear Failed.', err.message);
+  }
 }
 
 async function _reloadBalances(provider) {
@@ -130,8 +174,7 @@ async function _reloadBalances(provider) {
     logger.warn('Current Provdier Unset or RPCUrl illegal.', provider?.rpcUrl);
     throw new BizError('Provider Unset or illegal rpcUrl.', PROVIDER_ILLEGAL);
   }
-  const state = this.store.getState() || {};
-  let { balances = {} } = state;
+
   const accState = await this.currentAccState();
   if (!accState || !accState.isUnlocked) {
     logger.warn('get current account state fail', accState);
@@ -141,21 +184,22 @@ async function _reloadBalances(provider) {
   try {
     const { type, rpcUrl, chainId } = provider;
     // dev3:MainPriKey,SubPriKey [uint8Array]
-    const { selectedAddress, dev3 } = accState;
+    const { selectedAddress } = accState;
     let web3js = getWeb3Inst(rpcUrl);
-    logger.debug('Web3Controller:reloadBalances>>>>', selectedAddress);
+    // logger.debug('Web3Controller:reloadBalances>>>>', selectedAddress);
 
     let ethBalance = await web3js.eth.getBalance(selectedAddress);
     let btBalance = await APIManager.BTApi.getBalance(web3js, selectedAddress, chainId);
 
-    let chainBalance = {
-      [ETH_TOKEN]: ethBalance,
-      [BT_TOKEN]: btBalance,
+    let balances = {
+      [chainId]: {
+        [ETH_TOKEN]: ethBalance,
+        [BT_TOKEN]: btBalance,
+      },
     };
 
-    balances[chainId] = chainBalance;
+    this.balanceStore.updateState(balances);
 
-    this.store.updateState(balances);
     logger.debug('Web3Controller:reloadBalances>>>>', balances);
 
     return this.getSendState(chainId);

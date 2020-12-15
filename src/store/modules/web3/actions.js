@@ -19,14 +19,23 @@ export const subInitNetworkState = async ({ commit }, networkState) => {
  * @param {Object} web3State [chainBalances,chainTxs,chainId,ts]
  */
 export const subInitWeb3State = async ({ commit }, web3State = {}) => {
-  const { ts = 0, chainBalances = {}, chainTxs = {}, chainId } = web3State;
-  commit(types.UPDATE_CHAIN_BALANCES, chainBalances);
-  commit(types.UPDATE_LASTTIMESATMP, ts);
+  const { chainBalances = {}, chainTxs = {}, chainId, chainStatus } = web3State;
   commit(types.UPDATE_CHAINID, chainId);
+  commit(types.UPDATE_CHAIN_BALANCES, chainBalances);
+  commit(types.UPDATE_CHAIN_STATUS, chainStatus);
 };
 
 export const updateCurrentNetwork = async ({ commit }, chainId) => {
   commit(types.UPDATE_CHAINID, chainId);
+};
+
+/**
+ * recharaged used
+ * @param {object} context vuex
+ * @param {object} chainStatus
+ */
+export const updateChainStatus = async ({ commit }, chainStatus = {}) => {
+  commit(types.UPDATE_CHAIN_STATUS, chainStatus);
 };
 
 /**

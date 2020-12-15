@@ -12,6 +12,7 @@ const btns = {
   close: '关闭',
   unlock: '解锁',
   expqrcode: '保存二维码',
+  recharge: '充值',
 };
 
 export default btns;

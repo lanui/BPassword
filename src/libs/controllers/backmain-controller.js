@@ -8,7 +8,7 @@ import ObservableStore from 'obs-store';
 import ComposableObservableStore from '../observestore/composable-obs-store.js';
 
 import logger from '../logger/index.js';
-import { buildExtVersion, buildExtAppName } from '../code-settings';
+import { buildExtVersion, LOG_LEVEL } from '../code-settings';
 import ProfileController from './profile-controller';
 import AccountController from './account-controller';
 
@@ -26,6 +26,7 @@ import {
 } from '../msgapi/api-types';
 import NetworkController from '../network/index.js';
 import Web3Controller from '../web3';
+import Web3 from 'web3';
 
 /*********************************************************************
  * AircraftClass ::
@@ -715,6 +716,7 @@ class BackMainController extends EventEmitter {
 }
 
 /** ------------------------------  File Scope Functions ----------------------------- */
+
 /**
  * This Function will be call at the Extension runtime enviroment completed
  * @antation : make sure env3,dev3,isUnlocked parameters status
@@ -723,8 +725,23 @@ class BackMainController extends EventEmitter {
  * @Description : 1. sync blocker data[]
  */
 async function _runtimeStartupHandler() {
-  this.networkController.emit('network:ping:noerror');
-  const { provider } = this.networkController.store.getState();
+  await this.networkController.emit('network:ping:noerror');
+  let selectedAddress = '';
+  const { env3 } = this.accountController.store.getState();
+  if (env3 && env3.mainAddress) {
+    selectedAddress = env3.mainAddress;
+  }
+  const { provider } = await this.networkController.store.getState();
+
+  // logger.debug("_runtimeStartupHandler>>>", provider, selectedAddress)
+  await this.web3Controller.emit('web3:reload:member:status', provider, selectedAddress);
+
+  await this.web3Controller.emit('web3:reload:config', provider, selectedAddress);
+
+  if (provider.rpcUrl && LOG_LEVEL === 'DEBUG') {
+    const web3 = new Web3(new Web3.providers.HttpProvider(provider.rpcUrl));
+    global.web3 = web3;
+  }
 
   logger.debug('Backmain:runtimeStartupHandler>>>call>>>', new Date(), provider);
 }

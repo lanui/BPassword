@@ -2,6 +2,7 @@ import mutations from './mutations';
 import * as actions from './actions';
 import * as getters from './getters';
 import { ETH_TOKEN, BT_TOKEN } from '@lib/web3/contracts/enums';
+import { MEMBER_COSTWEI_PER_YEAR } from '@lib/web3/cnst.js';
 
 export default {
   namespaced: true,
@@ -33,6 +34,10 @@ export default {
     chainBalances: {
       [ETH_TOKEN]: '0',
       [BT_TOKEN]: '0',
+    },
+    chainStatus: {
+      memberCostWeiPerYear: MEMBER_COSTWEI_PER_YEAR,
+      membershipDeadline: 0,
     },
     lasttimestamp: 0,
   },

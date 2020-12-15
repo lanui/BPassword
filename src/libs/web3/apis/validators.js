@@ -48,3 +48,21 @@ export const validChainAddress = (chainId, contractName) => {
 
   return btInfo.address;
 };
+
+export const validParams = (params) => {
+  if (!params) throw new BizError('Params undefined', INTERNAL_ERROR);
+
+  if (typeof params === 'object') {
+    const keys = Object.keys(params);
+    if (keys.length === 0) {
+      throw new BizError('Params is null object.', INTERNAL_ERROR);
+    }
+
+    for (let i in keys) {
+      let key = keys[i];
+      if (params[key] == undefined) {
+        throw new BizError(`Params ${key} undefined.`, INTERNAL_ERROR);
+      }
+    }
+  }
+};

@@ -26,4 +26,7 @@ export const NETWORK_TIMEOUT = '504504';
 export const NETWORK_UNAVAILABLE = '500500';
 export const PROVIDER_ILLEGAL = '511511';
 
+//Balance
+export const INSUFFICIENT_ETH_BALANCE = '600001'; // insufficient eth balance
+export const INSUFFICIENT_BTS_BALANCE = '600002';
 /** UI Start */

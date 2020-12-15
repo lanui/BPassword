@@ -2,6 +2,8 @@ import { ETH_TOKEN, BT_TOKEN } from '@lib/web3/contracts/enums';
 
 import { wei2Ether, wei2Diamonds } from '@lib/web3/web3-helpers';
 
+import moment from 'moment';
+
 const diffHours = 0.5;
 
 export const currentNetwork = (state) => {
@@ -37,4 +39,19 @@ export const balanceExpired = (state) => {
   const diff = (currTs - lasttimestamp) / (1000 * 60 * 60);
 
   return diff >= diffHours;
+};
+
+export const getMembershipExpired = (state) => {
+  const { chainStatus = {} } = state;
+  const expired = chainStatus.membershipDeadline;
+  if (!expired || expired === '0' || expired < 0) return '';
+  const text = moment(new Date(expired)).format('YYYY-MM-DD');
+  return text;
+};
+
+export const membershipCostBTsPerYear = (state) => {
+  const { chainStatus = {} } = state;
+  const wei = chainStatus.memberCostWeiPerYear;
+  if (!wei) return '';
+  return wei2Ether(wei, 0);
 };
