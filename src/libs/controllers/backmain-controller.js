@@ -29,10 +29,11 @@ import Web3Controller from '../web3';
 
 /*********************************************************************
  * AircraftClass ::
- *     @Description: MainController entry
- *     @Description: sub controller> getState is changed state struct
+ *     @Description : MainController entry
+ *     @Description : sub controller> getState is changed state struct
  *        for memStore, so when your define state key attention.
  *        So as not to be overwritten repeatedly
+ *     @Description : Add extension onStartup handler for fox.at 2020-12-15
  * WARNINGS:
  *      don't use store getFlatState ,it maybe cover by after append controller
  *      used same name keys
@@ -138,6 +139,9 @@ class BackMainController extends EventEmitter {
 
     //管理
     this.activeLoginStore = new ObservableStore({ operType: 'init', password: '', username: '' });
+
+    //global event registed
+    this.once('ctx:runtime:initial', _runtimeStartupHandler.bind(this));
   }
 
   memStoreWatch(state) {
@@ -708,6 +712,21 @@ class BackMainController extends EventEmitter {
       valtState,
     };
   }
+}
+
+/** ------------------------------  File Scope Functions ----------------------------- */
+/**
+ * This Function will be call at the Extension runtime enviroment completed
+ * @antation : make sure env3,dev3,isUnlocked parameters status
+ *            & this function only call once.
+ *
+ * @Description : 1. sync blocker data[]
+ */
+async function _runtimeStartupHandler() {
+  this.networkController.emit('network:ping:noerror');
+  const { provider } = this.networkController.store.getState();
+
+  logger.debug('Backmain:runtimeStartupHandler>>>call>>>', new Date(), provider);
 }
 
 export default BackMainController;

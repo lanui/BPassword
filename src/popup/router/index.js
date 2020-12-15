@@ -44,14 +44,11 @@ router.beforeEach(async (to, form, next) => {
       let refreshBalance = false;
       refreshBalance = !!(to && to.meta && to.meta.refreshBalance && isUnlocked);
       if (refreshBalance) {
-        console.log('>>>>>>>>>>>>>>>>should refresh balances>>', refreshBalance, to?.fullPath);
-
         const whisperer = new WhispererController({ portName: 'router-reload-balance' });
         const data = { from: `router:${to.path}` };
         whisperer
           .sendSimpleMessage(API_RT_RELOAD_CHAIN_BALANCES, data)
           .then(async (web3State) => {
-            console.log(web3State);
             if (web3State) {
               await store.dispatch('web3/subInitWeb3State', web3State);
             }

@@ -29,6 +29,7 @@ import { BT_TOKEN, ETH_TOKEN } from './contracts/enums';
  *    @created:  2020-12-09
  *    @comments:
  **********************************************************************/
+const MEMBER_COSTWEI_PER_YEAR = '98000000000000000000';
 const StateStruct = {
   tokens: {}, // address:{symbol,chainId,lasttime,balance}
 };
@@ -54,39 +55,6 @@ class Web3Controller extends EventEmitter {
     }
 
     return this.reloadTokenBalances(_provider);
-    // const state = this.store.getState() || {};
-    // let { balances = {} } = state;
-    // const accState = await this.currentAccState();
-    // if (!accState || !accState.isUnlocked) {
-    //   logger.warn('get current account state fail', accState);
-    //   throw new BizError('account not exists or logout', ACCOUNT_NOT_EXISTS);
-    // }
-
-    // try {
-    //   const { type, rpcUrl, chainId } = _provider;
-    //   // dev3:MainPriKey,SubPriKey [uint8Array]
-    //   const { selectedAddress, dev3 } = accState;
-    //   let web3js = getWeb3Inst(rpcUrl);
-    //   logger.debug('Web3Controller:reloadBalances>>>>', selectedAddress);
-
-    //   let ethBalance = await web3js.eth.getBalance(selectedAddress);
-    //   let btBalance = await APIManager.BTApi.getBalance(web3js, selectedAddress, chainId);
-
-    //   let chainBalance = {
-    //     [ETH_TOKEN]: ethBalance,
-    //     [BT_TOKEN]: btBalance,
-    //   };
-
-    //   balances[chainId] = chainBalance;
-
-    //   this.store.updateState(balances);
-    //   logger.debug('Web3Controller:reloadBalances>>>>', balances);
-
-    //   return this.getSendState(chainId);
-    // } catch (err) {
-    //   logger.warn('Web3 disconnect.', err);
-    //   throw new BizError(`Provider ${_provider.rpcUrl} disconnected.`, NETWORK_UNAVAILABLE);
-    // }
   }
 
   async getBalanceState() {
@@ -132,6 +100,9 @@ class Web3Controller extends EventEmitter {
  */
 function _initStateStruct() {
   const initState = {
+    config: {
+      memberCostWeiPerYear: MEMBER_COSTWEI_PER_YEAR,
+    },
     balances: {},
     tokens: {},
     txs: {},

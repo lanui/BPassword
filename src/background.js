@@ -101,10 +101,14 @@ async function setupController(initState) {
   }
 
   devAutoLogin('1234');
+
+  // make sure controller initialized
+  /** Extension Runtime Initial */
+  controller.emit('ctx:runtime:initial');
+
   /** ======== setupController:internal functions begain =============== */
   // Connetion functions
 
-  let injet = 0;
   /**
    *
    * @param {port} remotePort

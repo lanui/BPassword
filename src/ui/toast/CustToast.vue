@@ -1,12 +1,13 @@
 <template>
   <div class="CustToast cust-toast" :class="'toast-' + type" v-if="showToast">
-    <div class="toast-flex">
-      <span class="icon">
+    <div class="toast-icon">
+      <div class="icon">
         <img :src="iconSrc" />
-      </span>
+      </div>
     </div>
-
-    {{ message }}
+    <div class="toast-content">
+      {{ message }}
+    </div>
   </div>
 </template>
 <script>
@@ -59,7 +60,7 @@ export default {
   left: 50%;
   top: 50%;
   background: rgb(233, 233, 235);
-  padding: 10px;
+  padding: 8px;
   border-radius: 5px;
   transform: translate(-50%, -50%);
   animation: show-toast 0.2s;
@@ -84,7 +85,24 @@ export default {
   margin-top: 3px;
   margin-right: 4px;
 }
-.toast-message {
+.cust-toast > div {
+  display: flex;
+  align-items: center;
+}
+
+.toast-icon {
+  flex: 0 0 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+div.toast-content {
+  flex: 1 1 auto;
+  justify-self: start;
+  align-items: center;
+}
+
+div.toast-message {
   color: white;
   background: linear-gradient(217deg, #7917d3 0%, #0362c3 100%);
 }
