@@ -21,4 +21,9 @@ export default {
   [types.UPDATE_CHAIN_STATUS](state, chainStatus = {}) {
     state.chainStatus = Object.assign(state.chainStatus, chainStatus);
   },
+  [types.UPDATE_GAS_STATE](state, gasState) {
+    if (gasState) {
+      state.gasState = Object.assign(state.gasState, gasState);
+    }
+  },
 };

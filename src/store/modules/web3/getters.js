@@ -1,6 +1,6 @@
 import { ETH_TOKEN, BT_TOKEN } from '@lib/web3/contracts/enums';
 
-import { wei2Ether, wei2Diamonds } from '@lib/web3/web3-helpers';
+import { wei2Ether, wei2Diamonds, compareWei } from '@lib/web3/web3-helpers';
 
 import moment from 'moment';
 
@@ -54,4 +54,41 @@ export const membershipCostBTsPerYear = (state) => {
   const wei = chainStatus.memberCostWeiPerYear;
   if (!wei) return '';
   return wei2Ether(wei, 0);
+};
+
+export const estimateBts = (state) => {
+  const { chainStatus = {}, chainBalances = {} } = state;
+  const ethWei = chainBalances[ETH_TOKEN];
+  if (!ethWei || ethWei == '0') return false;
+
+  const btsWei = chainBalances[BT_TOKEN] || 0;
+  const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
+
+  if (compareWei(btsWei, memberCostWeiPerYear) < 0) {
+    return false;
+  }
+  return true;
+};
+
+export const currentAllowance = (state) => {
+  const { chainBalances } = state;
+  const allowance2bptMember = chainBalances.allowance;
+  let allowanceWei = '0';
+  if (typeof allowance2bptMember === 'object' && Object.values(allowance2bptMember).length) {
+    allowanceWei = Object.values(allowance2bptMember)[0];
+  }
+
+  return allowanceWei;
+};
+
+/**
+ *
+ * @param {} state
+ */
+export const validNeedApprove = (state) => {
+  const { chainStatus } = state;
+  const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
+  const allowanceWei = currentAllowance(state);
+
+  return compareWei(allowanceWei, memberCostWeiPerYear) < 0;
 };

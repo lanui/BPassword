@@ -13,7 +13,7 @@ import BTInterface from '../contracts/abis/BT.json';
  *    @created:  2020-12-14
  *    @comments:
  **********************************************************************/
-export const getBalance = async (web3js, address, chainId) => {
+export const getBalance = async (web3js, chainId, address) => {
   validWeb3Addr(web3js, address);
   const inst = getBTContractInst(web3js, chainId, address);
   const balance = await inst.methods.balanceOf(address).call();
@@ -28,4 +28,19 @@ export const getBTContractInst = (web3js, chainId, address) => {
   }
   const inst = new web3js.eth.Contract(BTInterface.abi, contractAddress, options);
   return inst;
+};
+
+export const getBTContractAddress = (chainId) => {
+  const contractAddress = validChainAddress(chainId, BT_TOKEN);
+  return contractAddress;
+};
+
+export const getAllowance = async (web3js, chainId, owner, spender) => {
+  validWeb3Addr(web3js, owner);
+  const inst = getBTContractInst(web3js, chainId, owner);
+
+  const allowanceWei = await inst.methods.allowance(owner, spender).call();
+  return {
+    [spender]: allowanceWei,
+  };
 };

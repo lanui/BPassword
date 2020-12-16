@@ -26,6 +26,7 @@ export default {
     icons: {
       ARROW_LEFT_MDI: 'mdi-chevron-left',
       ARROW_RIGHT_MDI: 'mdi-chevron-right',
+      ARROW_DOWN_MDI: 'mdi-chevron-down',
       ITEM_DEL_MDI: 'mdi-delete-forever-outline',
       DIAMOND_MDI: 'mdi-diamond-stone',
       BTS_MDI: 'mdi-database',

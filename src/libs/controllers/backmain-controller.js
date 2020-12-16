@@ -4,6 +4,7 @@ import endOfStream from 'end-of-stream';
 import PortStream from 'extension-port-stream';
 import { nanoid } from 'nanoid';
 import ObservableStore from 'obs-store';
+import axios from 'axios';
 
 import ComposableObservableStore from '../observestore/composable-obs-store.js';
 
@@ -109,8 +110,8 @@ class BackMainController extends EventEmitter {
 
     this.web3Controller = new Web3Controller({
       initState: initState.Web3Controller,
-      currentAccState: this.accountController.getCurrentWallet.bind(this.accountController),
       getCurrentProvider: this.networkController.getCurrentProvider.bind(this.networkController),
+      walletState: this.accountController.getWalletState.bind(this.accountController),
     });
 
     /** binding store state changed subscribe to update store value */
@@ -725,6 +726,9 @@ class BackMainController extends EventEmitter {
  * @Description : 1. sync blocker data[]
  */
 async function _runtimeStartupHandler() {
+  // async call gasStation
+  this.web3Controller.emit('web3:reload:gasStation');
+
   await this.networkController.emit('network:ping:noerror');
   let selectedAddress = '';
   const { env3 } = this.accountController.store.getState();
@@ -734,13 +738,14 @@ async function _runtimeStartupHandler() {
   const { provider } = await this.networkController.store.getState();
 
   // logger.debug("_runtimeStartupHandler>>>", provider, selectedAddress)
-  await this.web3Controller.emit('web3:reload:member:status', provider, selectedAddress);
+  // await this.web3Controller.emit('web3:reload:member:status', provider, selectedAddress);
 
   await this.web3Controller.emit('web3:reload:config', provider, selectedAddress);
 
   if (provider.rpcUrl && LOG_LEVEL === 'DEBUG') {
     const web3 = new Web3(new Web3.providers.HttpProvider(provider.rpcUrl));
     global.web3 = web3;
+    global.$get = axios.get;
   }
 
   logger.debug('Backmain:runtimeStartupHandler>>>call>>>', new Date(), provider);

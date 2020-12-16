@@ -28,9 +28,13 @@
         </v-list-item-title>
       </v-list-item>
     </v-list>
+    <gas-controller-panel ref="gasCtx" />
     <v-row justify="center" class="px-0">
-      <v-col cols="10">
-        <v-btn block color="primary" small> 充值 </v-btn>
+      <v-col v-if="validNeedApprove" cols="5">
+        <v-btn block @click.stop="approveAndChargeHandler" color="primary" small> Approve </v-btn>
+      </v-col>
+      <v-col :cols="validNeedApprove ? 5 : 10">
+        <v-btn @click.stop="rechargeHandler" block color="primary" small> 充值 </v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -38,13 +42,15 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import SubnavBar from '@/popup/widgets/SubnavBar.vue';
+import GasControllerPanel from './components/GasControllerPanel.vue';
 export default {
   name: 'RechargeMembership',
   components: {
     SubnavBar,
+    GasControllerPanel,
   },
   computed: {
-    ...mapGetters('web3', ['getMembershipExpired', 'membershipCostBTsPerYear']),
+    ...mapGetters('web3', ['getMembershipExpired', 'membershipCostBTsPerYear', 'validNeedApprove']),
     expiredText() {
       let text = this.getMembershipExpired;
       return !text ? this.$t('l.nonMember') : text;
@@ -56,6 +62,15 @@ export default {
   methods: {
     gobackHandle() {
       this.$router.go(-1);
+    },
+    async approveAndChargeHandler() {
+      const data = {
+        gasPriceGwei: this.$refs.gasCtx.gasPrice,
+      };
+      this.$toast('approveAndChargeHandler' + JSON.stringify(data));
+    },
+    async rechargeHandler() {
+      this.$toast('Approve');
     },
   },
 };

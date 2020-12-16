@@ -5,7 +5,6 @@
       :gobackCall="gobackHandle"
       :title="$t('p.wallet.title')"
     />
-
     <wallet-head-card />
     <tokens-pannel />
   </v-container>

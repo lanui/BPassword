@@ -68,10 +68,6 @@ class NetworkController extends EventEmitter {
       network: this.networkStore,
     });
 
-    // setTimeout(async () => {
-    //   this.pingNetwork();
-    // }, 1000);
-
     this.on('network:ping:noerror', this.pingNetwork.bind(this));
   }
 

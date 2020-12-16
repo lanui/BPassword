@@ -3,7 +3,6 @@ import { validChainAddress, validWeb3Addr, validParams } from './validators';
 import { BPT_MEMBER } from '../contracts/enums';
 
 import { getBalance, getBTContractInst } from './bt-api';
-import { RECHARGE_YEAR_TYPE } from '../cnst';
 
 import { compareWei } from '../web3-helpers';
 import BizError from '@lib/biz-error';
@@ -34,6 +33,11 @@ export const getBPTMemberContractInst = (web3js, chainId, address) => {
   }
   const inst = new web3js.eth.Contract(smartInterface.abi, contractAddress, options);
   return inst;
+};
+
+export const getBptMemberAddress = (chainId) => {
+  const contractAddress = validChainAddress(chainId, BPT_MEMBER);
+  return contractAddress;
 };
 
 export const getMemberCostPerYear = async (web3js, chainId, address) => {

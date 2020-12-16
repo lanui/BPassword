@@ -12,6 +12,7 @@ export default {
     chainId: (state) => state.chainId,
     networks: (state) => state.networks.filter((n) => !n.disabled),
     selectedAddress: (state) => state.selectedAddress || '',
+    gasState: (state) => state.gasState,
     ...getters,
   },
   state: {
@@ -38,6 +39,12 @@ export default {
     chainStatus: {
       memberCostWeiPerYear: MEMBER_COSTWEI_PER_YEAR,
       membershipDeadline: 0,
+    },
+    gasState: {
+      gasLimit: 0,
+      gasPrice: 0,
+      safeLow: 0,
+      fastest: 0,
     },
     lasttimestamp: 0,
   },

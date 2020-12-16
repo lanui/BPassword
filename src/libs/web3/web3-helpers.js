@@ -1,8 +1,7 @@
 import Web3 from 'web3';
+
 import BizError from '../biz-error';
 import { PROVIDER_ILLEGAL, NETWORK_UNAVAILABLE, INTERNAL_ERROR } from '../biz-error/error-codes';
-
-import logger from '../logger';
 
 const diamondsRate = 10000;
 
@@ -51,15 +50,14 @@ export async function getChainConfig(web3js, address) {
     throw new BizError('Params illegal.', INTERNAL_ERROR);
   }
 
+  const chain = await web3js.eth.net.getNetworkType();
   const chainId = await web3js.eth.getChainId();
   const gasPrice = await web3js.eth.getGasPrice();
-  const nonce = await web3js.eth.getTransactionCount(address);
 
   const config = {
-    [chainId]: {
-      gasPrice,
-      nonce,
-    },
+    chainId,
+    gasPrice,
+    chain: chain,
   };
 
   return config;

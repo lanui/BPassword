@@ -1,4 +1,5 @@
 import { debounce } from 'lodash';
+import axios from 'axios';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
 import ComposedStore from 'obs-store/lib/composed';
@@ -11,13 +12,26 @@ import {
   PROVIDER_ILLEGAL,
   NETWORK_UNAVAILABLE,
   ACCOUNT_NOT_EXISTS,
+  INTERNAL_ERROR,
 } from '../biz-error/error-codes';
 
 import { getWeb3Inst, getChainConfig } from './web3-helpers';
 import APIManager from './apis';
 
-import { BT_TOKEN, ETH_TOKEN } from './contracts/enums';
-import { DEFAULT_GAS_LIMIT } from './cnst';
+import { BT_TOKEN, ETH_TOKEN, BT_APPRPOVE_ESGAS } from './contracts/enums';
+import {
+  DEFAULT_GAS_LIMIT,
+  TX_PENDING,
+  TX_FAILED,
+  TX_CONFIRMED,
+  DEFAULT_GAS_STATION_URL,
+  DEFAULT_GAS_PRICE,
+} from './cnst';
+
+import { getBalance, getBTContractInst } from './apis/bt-api';
+import { getBptMemberAddress } from './apis/bpt-member-api';
+import { signedDataTransaction, signedRawTxData4Method } from './send-rawtx';
+import Web3 from 'web3';
 
 /*********************************************************************
  * AircraftClass ::
@@ -35,7 +49,8 @@ class Web3Controller extends EventEmitter {
   constructor(opts = {}) {
     super();
     this.getCurrentProvider = opts.getCurrentProvider;
-    this.currentAccState = opts.currentAccState;
+
+    this.walletState = opts.walletState;
     const initState = opts.initState || {};
     const {
       config = _initConfigState(),
@@ -48,6 +63,7 @@ class Web3Controller extends EventEmitter {
 
     this.reloadTokenBalances = _reloadBalances.bind(this);
 
+    // config not depend chainId
     this.configStore = new ObservableStore(config);
     this.smartStore = new ObservableStore(smarts);
     this.balanceStore = new ObservableStore(balances);
@@ -68,6 +84,14 @@ class Web3Controller extends EventEmitter {
 
     this.on('web3:reload:config', debounce(_reloadConfig.bind(this), 1000));
     this.on('web3:reload:member:status', _reloadChainStatus.bind(this));
+
+    this.on('web3:reload:gasStation', _gasStation.bind(this));
+    this.on(
+      'update:config:estimateGas',
+      debounce(this.updateEstimateGasConfig.bind(this), 2 * 60 * 1000)
+    );
+
+    this.rechargeMembership = _rechargeMembership.bind(this);
   }
 
   async reloadBalances() {
@@ -105,15 +129,19 @@ class Web3Controller extends EventEmitter {
     if (chainId && typeof balances[chainId] === 'object') {
       chainBalances = balances[chainId];
     }
-    if (chainId && txs && txs[chainId] && Array.isArray(txs[chainId])) {
-      chainTxs = txs[chainId];
+    if (chainId && txs && typeof txs === 'object') {
+      chainTxs = Object.values(txs).filter((tx) => tx.chainId === chainId);
     }
 
     if (chainId && status[chainId]) {
       chainStatus = status[chainId];
     }
 
+    const configState = this.configStore.getState();
+    let gasState = _translateGasStation(configState, chainId);
+
     let sendState = {
+      gasState,
       chainStatus,
       chainId,
       ts,
@@ -122,6 +150,86 @@ class Web3Controller extends EventEmitter {
     };
 
     return sendState;
+  }
+
+  /**
+   * @depared
+   * @param {*} chainId
+   * @param {*} custGasLimit
+   */
+  async getBaseTxParams(chainId, custGasLimit = 0) {
+    const state = this.configStore.getState();
+    if (!state || !state[chainId]) {
+      throw new BizError('configState illegal.', INTERNAL_ERROR);
+    }
+    const { chain, gasLimit } = state;
+    let { gasPrice, nonce } = state[chainId];
+    const txParams = {
+      gasLimit: custGasLimit > 0 ? custGasLimit : gasLimit,
+      gasPrice,
+      nonce,
+      chain,
+    };
+
+    return txParams;
+  }
+
+  /**
+   *
+   * @param {string} chainId chainId
+   * @param {*} txObj
+   * @param {string} statusText
+   */
+  updateChainTx(chainId, txObj, statusText) {
+    if (typeof txObj !== 'object' || !txObj.txHash || !chainId) {
+      throw new BizError('Tx Object data or chainId illegal.', INTERNAL_ERROR);
+    }
+    statusText = statusText || TX_PENDING;
+    const uid = `${chainId}_${txObj.txHash}`;
+    const txState = {
+      [uid]: {
+        ...txObj,
+        chainId,
+        statusText,
+      },
+    };
+
+    this.txStore.updateState(txState);
+  }
+
+  /**
+   *
+   * @param {string} uid [chainId_txHash]
+   * @param {string} statusText
+   * @param {object} info
+   */
+  updateTxStatus(uid, statusText, info = {}) {
+    const state = this.txStore.getState() || {};
+    const old = state[uid];
+    if (old) {
+      let newState = {
+        ...old,
+        statusText,
+        ...info,
+      };
+
+      this.txStore.updateState(newState);
+      //TODO
+    }
+  }
+
+  async approveToMembership(gasPriceSwei = 0) {
+    await _approveToMember.call(this, gasPriceSwei);
+  }
+
+  /**
+   * methods key->number
+   * @param {object} gasUsedState
+   */
+  updateEstimateGasConfig(gasUsedState) {
+    if (typeof gasUsedState === 'object') {
+      this.configStore.updateState(gasUsedState);
+    }
   }
 }
 
@@ -151,6 +259,197 @@ async function _reloadChainStatus(provider, address) {
   }
 }
 
+async function _rechargeMembership(custGasLimit = 0) {
+  const walletState = await this.walletState();
+  if (
+    !walletState ||
+    !walletState.isUnlocked ||
+    !walletState.dev3 ||
+    !walletState.selectedAddress
+  ) {
+    throw new BizError('Extension logout or no account.', ACCOUNT_NOT_EXISTS);
+  }
+
+  const selectedAddress = walletState.selectedAddress;
+
+  const _provider = await this.getCurrentProvider();
+  if (!_provider || !_provider.rpcUrl) {
+    logger.debug('no provider so unhanlder set initialized.');
+    return;
+  }
+  const { chainId, rpcUrl } = _provider;
+  const { chain, gasLimit, gasPrice } = await this.getBaseTxParams(chainId, custGasLimit);
+
+  const web3js = getWeb3Inst(rpcUrl);
+  const signOpts = {
+    dev3: walletState.dev3,
+    chain,
+  };
+
+  const nonce = await web3js.eth.getTransactionCount(selectedAddress);
+  const tokenInst = getBTContractInst(web3js, chainId, selectedAddress);
+  const tokenAddress = tokenInst._address;
+
+  const approveAddress = getBptMemberAddress(chainId);
+
+  const btsBalance = await getBalance(web3js, chainId, selectedAddress);
+  logger.debug('TokenInst>>>>>>>>>>>>>>>>>>>>>>>>>', tokenAddress);
+  const encodeData = tokenInst.methods.approve(approveAddress, '0').encodeABI();
+
+  const txParams = {
+    gasLimit,
+    gasPrice,
+    nonce,
+    to: tokenAddress,
+    data: encodeData,
+  };
+
+  logger.debug('txParams>>>>', txParams);
+  const rawData = await signedDataTransaction(txParams, signOpts);
+  logger.debug('signed data>>>>>', rawData);
+
+  let txState = {
+    from: selectedAddress,
+    to: approveAddress,
+    nonce,
+  };
+
+  // const txResult = await web3js.eth.sendSignedTransaction(rawData);
+
+  let hash;
+  web3js.eth
+    .sendSignedTransaction(rawData)
+    .once('transactionHash', async (txHash) => {
+      logger.debug('recharge transactionHash:', txHash);
+      txState.txHash = txHash;
+      this.updateChainTx(chainId, txState, TX_PENDING);
+    })
+    // .on("confirmation",async (confirmNumber,receipt)=>{
+    //   logger.debug("recharge confirmNumber:", confirmNumber,receipt)
+    // })
+    .on('error', (err) => {
+      logger.debug('recharge Error:', err);
+    })
+    .then((receipt) => {
+      logger.debug('recharge receiptor:', receipt);
+    });
+}
+
+/**
+ * gasPriceSwei = gwei/10
+ * @param {string|Number} gasPriceSwei
+ * @param {number} custGasLimit
+ */
+async function _approveToMember(gasPriceSwei) {
+  const toWei = Web3.utils.toWei;
+  const walletState = await this.walletState();
+  if (
+    !walletState ||
+    !walletState.isUnlocked ||
+    !walletState.dev3 ||
+    !walletState.selectedAddress
+  ) {
+    throw new BizError('Extension logout or no account.', ACCOUNT_NOT_EXISTS);
+  }
+
+  const _provider = await this.getCurrentProvider();
+  if (!_provider || !_provider.rpcUrl) {
+    logger.debug('no provider so unhanlder set initialized.');
+    return;
+  }
+
+  /** Inst init defined */
+  const selectedAddress = walletState.selectedAddress;
+  const { chainId, rpcUrl } = _provider;
+
+  const { config = {} } = this.store.getState();
+  const { chainStatus = {} } = this.getSendState(chainId);
+
+  const web3js = getWeb3Inst(rpcUrl);
+  const tokenInst = getBTContractInst(web3js, chainId, selectedAddress);
+  const tokenAddress = tokenInst._address;
+
+  const btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
+
+  //TODO valid insuffient
+  let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || toWei('98', 'ether');
+
+  //TODO txs valid pending
+
+  let { chain, gasPrice, gasStation = {} } = config;
+
+  const approveAddress = getBptMemberAddress(chainId);
+
+  const dataABI = tokenInst.methods.approve(approveAddress, btsBalance).encodeABI();
+
+  let lastApproveGas = config[BT_APPRPOVE_ESGAS];
+  if (!lastApproveGas) {
+    lastApproveGas = await tokenInst.methods
+      .approve(approveAddress, btsBalance)
+      .estimateGas({ from: selectedAddress });
+  }
+
+  let gasLimit = parseInt(parseFloat(lastApproveGas) * 1.1);
+
+  logger.debug('approveAddress:>>>BTs>', btsBalance, lastApproveGas);
+
+  let avg = gasStation.average;
+  if (gasPriceSwei && gasPriceSwei !== '0') {
+    gasPrice = toWei((gasPriceSwei / 10).toString(), 'Gwei');
+  } else if (avg && avg != '0') {
+    gasPrice = toWei((avg / 10).toString(), 'Gwei');
+  }
+
+  /** 组织参数 */
+
+  const dev3 = walletState.dev3;
+
+  const txParams = {
+    gasLimit,
+    gasPrice,
+    value: 0,
+    to: tokenAddress,
+  };
+
+  logger.debug('approveAddress:>>>BTs>', txParams);
+
+  const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+    chain,
+    selectedAddress,
+  });
+
+  logger.debug('Web3 signed data hex string:', txRawDataSerialize);
+
+  let txState = {
+    txHash: '',
+    chainId,
+    cts: new Date().getTime(),
+  };
+  web3js.eth
+    .sendSignedTransaction(txRawDataSerialize)
+    .once('transactionHash', async (txHash) => {
+      logger.debug('recharge transactionHash:', txHash);
+      txState.txHash = txHash;
+      this.updateChainTx(chainId, txState, TX_PENDING);
+    })
+    // .on("confirmation",async (confirmNumber,receipt,latestBlockHash)=>{
+    //   logger.debug("recharge confirmNumber:", confirmNumber,receipt)
+    // })
+    .on('error', (err, receipt) => {
+      logger.debug('recharge Error:', err, receipt);
+    })
+    .then((receipt) => {
+      let uid = `${chainId}_${txState.txHash}`;
+      if (receipt && receipt.gasUsed) {
+        const gasNumState = { [BT_APPRPOVE_ESGAS]: receipt.gasUsed };
+        this.emit('update:config:estimateGas', gasNumState);
+      }
+
+      this.updateTxStatus(uid, TX_CONFIRMED, receipt);
+      logger.debug('recharge receiptor:', receipt, uid);
+    });
+}
+
 async function _reloadConfig(provider, address) {
   try {
     if (!provider || !address) {
@@ -175,7 +474,7 @@ async function _reloadBalances(provider) {
     throw new BizError('Provider Unset or illegal rpcUrl.', PROVIDER_ILLEGAL);
   }
 
-  const accState = await this.currentAccState();
+  const accState = await this.walletState();
   if (!accState || !accState.isUnlocked) {
     logger.warn('get current account state fail', accState);
     throw new BizError('account not exists or logout', ACCOUNT_NOT_EXISTS);
@@ -188,13 +487,21 @@ async function _reloadBalances(provider) {
     let web3js = getWeb3Inst(rpcUrl);
     // logger.debug('Web3Controller:reloadBalances>>>>', selectedAddress);
 
+    const spenderAddress = getBptMemberAddress(chainId);
     let ethBalance = await web3js.eth.getBalance(selectedAddress);
-    let btBalance = await APIManager.BTApi.getBalance(web3js, selectedAddress, chainId);
+    let btBalance = await APIManager.BTApi.getBalance(web3js, chainId, selectedAddress);
+    const allowance = await APIManager.BTApi.getAllowance(
+      web3js,
+      chainId,
+      selectedAddress,
+      spenderAddress
+    );
 
     let balances = {
       [chainId]: {
         [ETH_TOKEN]: ethBalance,
         [BT_TOKEN]: btBalance,
+        allowance,
       },
     };
 
@@ -207,6 +514,54 @@ async function _reloadBalances(provider) {
     logger.warn('Web3 disconnect.', err);
     throw new BizError(`Provider ${provider.rpcUrl} disconnected.`, NETWORK_UNAVAILABLE);
   }
+}
+
+async function _gasStation(url) {
+  const opts = {
+    timeout: 3000,
+    withCredentials: true,
+  };
+
+  try {
+    const resp = await axios.get(DEFAULT_GAS_STATION_URL, opts);
+    if (resp && resp.status === 200 && resp.data) {
+      let gasStation = resp.data;
+      delete gasStation.gasPriceRange;
+      logger.debug('Response:>>>>>', gasStation);
+      this.configStore.updateState({ gasStation });
+
+      return gasStation;
+    } else {
+      return false;
+    }
+  } catch (err) {
+    logger.debug('Error>>>>>>', err);
+  }
+}
+
+function _translateGasStation(configState) {
+  const fromWei = Web3.utils.fromWei;
+  let defaultGasPrice = DEFAULT_GAS_PRICE;
+
+  if (configState && configState.gasPrice) {
+    defaultGasPrice = configState['gasPrice'];
+  }
+  const { gasLimit = DEFAULT_GAS_LIMIT, gasStation } = configState;
+
+  const averageGwei = fromWei(defaultGasPrice.toString(), 'Gwei');
+  const defAvg = parseFloat(averageGwei) * 10;
+
+  let gasState = {
+    gasLimit,
+    average: defAvg,
+    safeLow: defAvg / 2,
+    fast: defAvg,
+    fastest: defAvg * 2,
+    gasPrice: defAvg,
+    ...gasStation,
+  };
+
+  return gasState;
 }
 
 export default Web3Controller;

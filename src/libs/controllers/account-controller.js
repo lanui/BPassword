@@ -212,6 +212,22 @@ export default class AccountController extends EventEmitter {
   }
 
   /**
+   * @returns object or null
+   *
+   */
+  getWalletState() {
+    let memState = this.memStore.getState();
+    let { env3 } = this.store.getState();
+    if (!env3) return null;
+    let baseState = {
+      selectedAddress: env3.mainAddress,
+      isUnlocked: false,
+    };
+    const walletState = { ...baseState, ...memState };
+    return walletState;
+  }
+
+  /**
    * getFlatState
    */
   getState() {
@@ -222,13 +238,5 @@ export default class AccountController extends EventEmitter {
       autoLockedMinutes: timeoutMinutes || 0,
       ...memState,
     };
-  }
-
-  /**
-   * when env3 no create will return undefined
-   */
-  async getCurrentWallet() {
-    const state = await this.memStore.getState();
-    return state;
   }
 }

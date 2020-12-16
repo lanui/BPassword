@@ -11,7 +11,7 @@
           </div>
           <div class="token-item-row symbol">Diamonds</div>
         </div>
-        <div class="token-item">
+        <div class="token-item" @click.stop="gotoRechargePage">
           <div class="token-item-row icon">
             <v-img :src="iconBPTs" width="26" height="26"></v-img>
           </div>
@@ -25,7 +25,7 @@
     <v-row justify="center" class="text-center">
       <v-col cols="6" class="py-0"></v-col>
       <v-col cols="6" class="py-0">
-        <v-btn @click.stop="gotoRechargePage" small color="primary">
+        <v-btn v-if="estimateBts" @click.stop="gotoRechargePage" small color="primary">
           {{ $t('btn.recharge') }}
         </v-btn>
       </v-col>
@@ -41,7 +41,7 @@ import iconBPTs from '@/ui/assets/icons/icon_bpts.png';
 export default {
   name: 'WalletTokensPannel',
   computed: {
-    ...mapGetters('web3', ['getBTsBalanceText', 'getDiamondsText']),
+    ...mapGetters('web3', ['getBTsBalanceText', 'getDiamondsText', 'estimateBts']),
   },
   data() {
     return {
@@ -51,7 +51,9 @@ export default {
   },
   methods: {
     gotoRechargePage() {
-      this.$router.push({ path: '/wallet/recharge' });
+      if (this.estimateBts) {
+        this.$router.push({ path: '/wallet/recharge' });
+      }
     },
   },
   mounted() {},
@@ -78,6 +80,11 @@ export default {
   flex: 1 1 50%;
   justify-content: center;
   align-items: center;
+}
+
+.token-item:hover {
+  cursor: pointer;
+  background: rgba(239, 240, 240, 1);
 }
 
 .tokens-pannel--wrap .token-item:last-child {
