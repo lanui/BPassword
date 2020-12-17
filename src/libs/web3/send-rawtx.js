@@ -7,6 +7,8 @@ import { PARAMS_ILLEGAL } from '../biz-error/error-codes';
 import logger from '../logger';
 
 import { DEFAULT_GAS_LIMIT } from './cnst';
+import { findNetworkByChainId, SUPPORT_HARDFORKS } from '../network/enums';
+import { chain } from 'lodash';
 
 /*********************************************************************
  * AircraftClass ::
@@ -55,10 +57,11 @@ export const signedRawTxData4Method = async (web3js, dev3, txParams, data, opts)
     throw new BizError('web3js and data required.', PARAMS_ILLEGAL);
   }
 
-  let { selectedAddress, chain } = opts;
+  logger.debug('Common>>>>>', opts);
+  let { selectedAddress, chainId, chain } = opts;
 
-  if (!chain) {
-    chain = await web3js.eth.net.getNetworkType();
+  if (!chainId) {
+    chainId = await web3js.eth.getChainId();
   }
 
   let txData = validTxParams(txParams);
@@ -66,7 +69,24 @@ export const signedRawTxData4Method = async (web3js, dev3, txParams, data, opts)
   txData.nonce = nonce;
   txData.data = data;
 
-  const common = new Common({ chain: chain });
+  let common;
+  if (!findNetworkByChainId(chainId)) {
+    const networkId = await web3js.eth.net.getId();
+    common = Common.forCustomChain(
+      'mainnet',
+      {
+        name: chain,
+        chainId: chainId,
+        networkId,
+      },
+      'petersburg'
+    );
+  } else {
+    common = new Common({ chain: chainId });
+  }
+
+  logger.debug('Common>>>>>', common);
+
   const tx = Transaction.fromTxData(txData, { common });
 
   const signedTx = tx.sign(dev3.MainPriKey);

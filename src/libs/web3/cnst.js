@@ -7,3 +7,4 @@ export const TX_PENDING = 'pending';
 export const TX_FAILED = 'failed';
 export const TX_CONFIRMED = 'confirmed';
 export const DEFAULT_GAS_STATION_URL = 'https://ethgasstation.info/api/ethgasAPI.json';
+export const DEFAULT_HARDFORK = 'byzantium';

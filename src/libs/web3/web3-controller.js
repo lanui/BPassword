@@ -359,7 +359,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
   const dataABI = tokenInst.methods.approve(approveAddress, btsBalance).encodeABI();
 
   let lastApproveGas = config[BT_APPRPOVE_ESGAS];
-  if (!lastApproveGas) {
+  if (!lastApproveGas || lastApproveGas) {
     lastApproveGas = await tokenInst.methods
       .approve(approveAddress, btsBalance)
       .estimateGas({ from: selectedAddress });
@@ -390,6 +390,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
   logger.debug('approveAddress:>>>BTs>', txParams);
 
   const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+    chainId,
     chain,
     selectedAddress,
   });
@@ -482,6 +483,7 @@ async function _approveToMember(reqId, gasPriceSwei) {
   logger.debug('approveAddress:>>>BTs>', txParams);
 
   const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+    chainId,
     chain,
     selectedAddress,
   });

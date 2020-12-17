@@ -55,3 +55,6 @@ export const PROVIDER_TYPE_INFURA = 'infura';
 export function findNetworkByChainId(chainId) {
   return Object.values(NETWORK_TYPE_NAME_KV).find((n) => parseInt(n.chainId) === parseInt(chainId));
 }
+
+export const DEFAULT_HARDFORK = 'byzantium';
+export const SUPPORT_HARDFORKS = ['byzantium', 'istanbul', 'petersburg', 'muirGlacier'];

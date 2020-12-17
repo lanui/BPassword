@@ -7,23 +7,23 @@ const customAddresses = {
   1337: [
     {
       contractName: 'BT',
-      address: '0x8D23104B0030F7724A69c7954Adb47ac6d18f981',
+      address: '0x43f07Fb1B26B0b891055f8d68509E17E8581B92c',
     },
     {
       contractName: 'Admin',
-      address: '0xA7558b783B0aEB758e4ee7dA0E414c020B549B14',
+      address: '0xDEeF52e1c6Da66Fd2E78FFC03fBD86bfB6b4bE76',
     },
     {
       contractName: 'bptMember',
-      address: '0x87BFAe3ce20dEFb730F22B036E100C7BC93bfA65',
+      address: '0x9C5ac4FE6161dFEb887993ef07acE0eF72466D34',
     },
     {
       contractName: 'bptStorage',
-      address: '0x9578FaFCADe4e9BDE45DE5eF332c0989a66F1E6d',
+      address: '0x6f2267FBD84E94b083b83b2DdcE993E2df4aB460',
     },
     {
       contractName: 'bptStorageByEvent',
-      address: '0x7bd890087Fdd8D25030a7e002C6F0A23E43eCcB0',
+      address: '0xb1305e836CA0DF69c66a025cF86dFDF64714A0D1',
     },
   ],
 };
