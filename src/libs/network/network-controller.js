@@ -143,6 +143,7 @@ class NetworkController extends EventEmitter {
 
     const sendState = {
       chainId: provider?.chainId || ROPSTEN_CHAIN_ID,
+      rpcUrl: provider.rpcUrl,
       enabledCustomize,
       networkType: provider?.type,
       networks,

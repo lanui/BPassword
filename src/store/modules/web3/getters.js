@@ -90,5 +90,8 @@ export const validNeedApprove = (state) => {
   const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
   const allowanceWei = currentAllowance(state);
 
+  //TODO remove
+  return true;
+
   return compareWei(allowanceWei, memberCostWeiPerYear) < 0;
 };

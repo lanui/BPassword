@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import App from './App';
-
+import { nanoid } from 'nanoid';
 import vuetify from '../ui/vuetify/index';
 import '@ui/assets/css/p3.css';
 
@@ -26,6 +26,8 @@ const livedManager = new LivedManager({
   store,
 });
 global.$lived = livedManager;
+
+Vue.prototype.$uid = nanoid;
 
 /* eslint-disable no-new */
 global.p3 = new Vue({

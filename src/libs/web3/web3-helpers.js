@@ -2,6 +2,7 @@ import Web3 from 'web3';
 
 import BizError from '../biz-error';
 import { PROVIDER_ILLEGAL, NETWORK_UNAVAILABLE, INTERNAL_ERROR } from '../biz-error/error-codes';
+import { TX_CONFIRMED, TX_FAILED, TX_PENDING } from './cnst';
 
 const diamondsRate = 10000;
 
@@ -61,4 +62,31 @@ export async function getChainConfig(web3js, address) {
   };
 
   return config;
+}
+
+/**
+ *
+ * @param {object} web3js
+ * @param {string} txHash
+ * @param {number} cts
+ * @returns {object} txState||null
+ */
+export async function getReceiptStatus(web3js, txHash, cts) {
+  const diffCTS = 5 * 60 * 1000;
+  if (!txHash || !cts) {
+    throw new BizError('txHash must string hex and cts must timestamp number.', INTERNAL_ERROR);
+  }
+
+  const receipt = await web3js.eth.getTransactionReceipt(txHash);
+  const currCts = new Date().getTime();
+
+  if (receipt) {
+    let statusText =
+      receipt.status === null ? TX_PENDING : !!receipt.status ? TX_CONFIRMED : TX_FAILED;
+    return { ...receipt, statusText };
+  } else if (receipt === null && currCts - cts > diffCTS) {
+    return { statusText: TX_FAILED };
+  } else {
+    return null;
+  }
 }

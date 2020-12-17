@@ -26,6 +26,12 @@ export const API_RT_VALT_CHANGED_TRANS_NOTIFY = 'bpValtChangedTransNotifiedInjet
 export const API_RT_CHANGED_NETWORK = 'bpChangedNetwork';
 export const API_RT_RELOAD_CHAIN_BALANCES = 'reloadChainBalances';
 
+/** Fetch signedRawData */
+export const API_RT_FETCH_BTAPPROVED_RAW_DATA = 'fetchBtApprovedRawData';
+export const API_RT_APPROVE_TO_MEMBER = 'smartApproveBT2Member';
+
+export const API_RT_ADDORUP_TX_STATE = 'bpAddOrUpdateChainTxState';
+
 /** leech */
 export const API_RT_FILL_FEILDS = 'bpLeechFillFeilds';
 

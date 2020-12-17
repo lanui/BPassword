@@ -52,13 +52,13 @@ export default {
         return;
       }
 
-      // this.$toast('OK');
       const whisperer = new WhispererController();
       whisperer
         .sendSimpleMessage(API_RT_CHANGED_NETWORK, network)
-        .then(async (web3State = {}) => {
-          // const { networkState ={},web3State={}} = respState
-          await this.$store.dispatch('web3/subInitWeb3State', web3State);
+        .then(async (respState = {}) => {
+          const { NetworkController = {}, Web3Controller = {} } = respState;
+          await this.$store.dispatch('web3/subInitNetworkState', NetworkController);
+          await this.$store.dispatch('web3/subInitWeb3State', Web3Controller);
           this.$toast(`Changed Network ${network.type}`, 'success');
         })
         .catch((err) => {

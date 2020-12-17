@@ -3,8 +3,13 @@ import vue from 'vue';
 import CustomToast from './CustToast';
 
 const ToastConstructor = vue.extend(CustomToast);
-
-function showToast(message, type = 'normal', duration = 3000) {
+/**
+ *
+ * @param {string} message
+ * @param {string} type [normal(default),message,success,signed,fail,warn]
+ * @param {number} duration
+ */
+function showToast(message, type = 'normal', duration = 5000) {
   const _toast = new ToastConstructor({
     data() {
       return {

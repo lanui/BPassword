@@ -24,7 +24,7 @@ const smarts = {
   1: [
     {
       contractName: 'BT',
-      address: '',
+      address: '0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d',
     },
     {
       contractName: 'Admin',
@@ -32,7 +32,7 @@ const smarts = {
     },
     {
       contractName: 'bptMember',
-      address: '',
+      address: '0x734B9833b0B57e249C1DD338aEaD86a45674d9d1',
     },
     {
       contractName: 'bptStorage',
@@ -40,7 +40,7 @@ const smarts = {
     },
     {
       contractName: 'bptStorageByEvent',
-      address: '',
+      address: '0xB574E1611dBC27Ae4123cCfa1C1954AA86F4676E',
     },
   ],
 };

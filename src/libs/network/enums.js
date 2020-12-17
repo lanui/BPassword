@@ -33,7 +33,7 @@ export const NETWORK_TYPE_NAME_KV = {
     chainId: MAINNET_CHAIN_ID,
     nickname: MAINNET_DISPLAY_NAME,
     color: 'rgba(3, 135, 137, 0.7)',
-    disabled: true,
+    disabled: false,
   },
   [ROPSTEN]: {
     type: ROPSTEN,

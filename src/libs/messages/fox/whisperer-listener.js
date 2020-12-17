@@ -19,6 +19,8 @@ import {
   API_FETCH_EXT_STATE,
   API_RT_CHANGED_NETWORK,
   API_RT_RELOAD_CHAIN_BALANCES,
+  API_RT_FETCH_BTAPPROVED_RAW_DATA,
+  API_RT_ADDORUP_TX_STATE,
 } from '../../msgapi/api-types';
 
 import { checkApiType } from '../../msgapi';
@@ -168,7 +170,7 @@ class WhisperperListener {
     const currentProvider = await this.controller.networkController.getCurrentProvider();
     const web3State = await this.controller.web3Controller.reloadBalances(currentProvider);
     const selectedAddress = await this.controller.accountController.getMainAddress();
-    logger.debug('>>>changedNetworkState>>>>', networkState, web3State, selectedAddress);
+
     await this.controller.web3Controller.emit(
       'web3:reload:member:status',
       currentProvider,
@@ -180,12 +182,40 @@ class WhisperperListener {
       currentProvider,
       selectedAddress
     );
-    return web3State;
+    // logger.debug('>>>changedNetworkState>>>>', networkState, web3State, selectedAddress);
+    return { NetworkController: networkState, Web3Controller: web3State };
   }
 
   async reloadTokenBalances(reqData) {
-    logger.debug(`Whisperer reloadTokenBalances>>>`, reqData);
     return this.controller.web3Controller.reloadBalances();
+  }
+
+  /**
+   *
+   * @param {object} reqData
+   */
+  async signedForBTApproved(reqData) {
+    return this.controller.web3Controller.signedBTApproved4Member(reqData);
+  }
+
+  /**
+   *
+   * {uid:txState}
+   * @param {object} reqData
+   */
+  async addOrUpdateChainTxState(reqData) {
+    logger.debug(`Whisperer signedForBTApproved>>>`, reqData);
+    if (typeof reqData !== 'object') {
+      throw new BizError('txState illegal. it must contain reqId,chainId,txHash', INTERNAL_ERROR);
+    }
+    const { reqId } = reqData;
+
+    const chainTxs = await this.controller.web3Controller.chainTxStatusUpdateForUI(reqData);
+
+    return {
+      reqId,
+      chainTxs,
+    };
   }
 }
 
@@ -228,6 +258,10 @@ async function HandleCypherApi(message, sender, sendResp) {
         return this.changedNetworkState(reqData);
       case API_RT_RELOAD_CHAIN_BALANCES:
         return this.reloadTokenBalances(reqData);
+      case API_RT_FETCH_BTAPPROVED_RAW_DATA:
+        return this.signedForBTApproved(reqData);
+      case API_RT_ADDORUP_TX_STATE:
+        return this.addOrUpdateChainTxState(reqData);
       default:
         throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
     }

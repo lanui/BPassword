@@ -13,9 +13,12 @@ export default {
     networks: (state) => state.networks.filter((n) => !n.disabled),
     selectedAddress: (state) => state.selectedAddress || '',
     gasState: (state) => state.gasState,
+    chainTxs: (state) => state.chainTxs,
+    rpcUrl: (state) => state.rpcUrl,
     ...getters,
   },
   state: {
+    rpcUrl: '',
     chainId: 3,
     selectedAddress: '',
     networks: [
@@ -46,6 +49,7 @@ export default {
       safeLow: 0,
       fastest: 0,
     },
+    chainTxs: [],
     lasttimestamp: 0,
   },
 };

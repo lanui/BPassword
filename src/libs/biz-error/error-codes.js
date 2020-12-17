@@ -5,6 +5,7 @@ export const UNKONW_ERROR = '999999';
 export const INTERNAL_ERROR = '999998';
 export const PARAMS_ILLEGAL = '999997';
 export const APITYPE_ILLEGAL = '900000';
+export const INTERNAL_MISS_MSG = '988888'; //消息传递丢失
 
 /** Wallet account */
 export const WALLET_ENV3_EXISTS = '700000';
@@ -21,6 +22,9 @@ export const VEX_ITEM_EXIST = '710002';
 export const VEX_ITEM_EDIT = '710003';
 export const VEX_ITEM_DELETE = '710004';
 
+// signed methods raw data
+export const SIGNED_BT_APPROVED_FAIL = '770000';
+
 //network
 export const NETWORK_TIMEOUT = '504504';
 export const NETWORK_UNAVAILABLE = '500500';
@@ -29,4 +33,5 @@ export const PROVIDER_ILLEGAL = '511511';
 //Balance
 export const INSUFFICIENT_ETH_BALANCE = '600001'; // insufficient eth balance
 export const INSUFFICIENT_BTS_BALANCE = '600002';
+
 /** UI Start */
