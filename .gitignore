@@ -105,6 +105,7 @@ dist
 
 # locak env ignore
 config/.*.env.js
+distribution-src-zip.js
 
 # project ignore
 yarn.lock

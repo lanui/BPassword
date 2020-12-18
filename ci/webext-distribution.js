@@ -20,11 +20,12 @@ if (!signParams.JWT_ID || !signParams.JWT_SECRET) {
   );
   process.env.$WEB_EXT_API_KEY = signParams.JWT_ID;
   process.env.$WEB_EXT_API_SECRET = signParams.JWT_SECRET;
-  if (!process.env.$WEB_EXT_CHANNEL) {
-    process.env.$WEB_EXT_CHANNEL = 'unlisted';
 
-    console.log(chalk.red(process.env.$WEB_EXT_CHANNEL));
-  }
+  process.env.$WEB_EXT_CHANNEL = process.env.DISTRIBUTION_CHANNEL || 'unlisted';
+  console.log(chalk.red(process.env.$WEB_EXT_CHANNEL));
+
+  // process.exit(1)
+
   process.env.$WEB_EXT_TIMEOUT = 20 * 60 * 1000;
   //$WEB_EXT_ID
 }

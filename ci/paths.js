@@ -8,6 +8,7 @@ const targetPath = providerEnv.EXT_TARGET || 'chrome';
 module.exports = {
   context: path.resolve(__dirname, '../'),
   dist: path.resolve(__dirname, '../dist', targetPath),
+  distzip: path.resolve(__dirname, '../dist-zip'),
   src: path.resolve(__dirname, '../src'),
   manifest: path.resolve(__dirname, '../src/manifest.json'),
   R,
