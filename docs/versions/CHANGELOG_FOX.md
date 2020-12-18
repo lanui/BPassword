@@ -1,10 +1,17 @@
 # Firefox
 
+## v0.8.0 (**self signed**)
+
+- [x] approve BT to Registration Member
+- [x] Registration Member
+- [x] inteligente web3 or eth-utils for query token
+- [x] persistence ethereum network state
+
 ## v0.7.2 (**self signed**)
 
 > 12-3
 
--
+- [x] same with AMO v0.7.1
 
 ## v0.7.1 (**Release Awaiting Approve**)
 
