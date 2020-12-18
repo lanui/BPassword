@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import { chain, debounce } from 'lodash';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
@@ -61,8 +61,6 @@ class Web3Controller extends EventEmitter {
       status = {},
     } = initState;
 
-    this.reloadTokenBalances = _reloadBalances.bind(this);
-
     // config not depend chainId
     this.configStore = new ObservableStore(config);
     this.smartStore = new ObservableStore(smarts);
@@ -87,7 +85,7 @@ class Web3Controller extends EventEmitter {
 
     this.on('web3:reload:gasStation', _gasStation.bind(this));
     this.on(
-      'update:config:estimateGas',
+      'update:status:store:estimateGas',
       debounce(this.updateEstimateGasConfig.bind(this), 2 * 60 * 1000)
     );
   }
@@ -99,7 +97,7 @@ class Web3Controller extends EventEmitter {
       throw new BizError('Provider Unset or illegal rpcUrl.', PROVIDER_ILLEGAL);
     }
 
-    return this.reloadTokenBalances(_provider);
+    return _reloadBalances.call(this, _provider);
   }
 
   async getBalanceState() {
@@ -161,31 +159,31 @@ class Web3Controller extends EventEmitter {
   }
 
   /**
-   *
+   * add txState into txStore
    * @param {string} chainId chainId
-   * @param {*} txObj
+   * @param {*} txState
    * @param {string} statusText
    */
-  updateChainTx(chainId, txObj, statusText) {
-    if (typeof txObj !== 'object' || !txObj.txHash || !chainId) {
-      throw new BizError('Tx Object data or chainId illegal.', INTERNAL_ERROR);
+  addTxState(chainId, txState, statusText) {
+    if (typeof txState !== 'object' || !txState.reqId || !chainId) {
+      throw new BizError('Tx Object data illegal, or unfound chainId,reqId. ', INTERNAL_ERROR);
     }
     statusText = statusText || TX_PENDING;
-    const uid = `${chainId}_${txObj.txHash}`;
-    const txState = {
+    const uid = `${chainId}_${txState.reqId}`;
+    const updateTxState = {
       [uid]: {
-        ...txObj,
+        ...txState,
         chainId,
         statusText,
       },
     };
 
-    this.txStore.updateState(txState);
+    this.txStore.updateState(updateTxState);
   }
 
   /**
    *
-   * @param {string} uid [chainId_txHash]
+   * @param {string} uid [chainId_reqId]
    * @param {string} statusText
    * @param {object} info
    */
@@ -200,22 +198,46 @@ class Web3Controller extends EventEmitter {
       };
 
       this.txStore.updateState({ [uid]: newState });
-      //TODO
     }
-  }
-
-  async approveToMembership(gasPriceSwei = 0) {
-    await _approveToMember.call(this, gasPriceSwei);
   }
 
   /**
    * methods key->number
    * @param {object} gasUsedState
    */
-  updateEstimateGasConfig(gasUsedState) {
-    if (typeof gasUsedState === 'object') {
-      this.configStore.updateState(gasUsedState);
+  updateEstimateGasConfig(gasUsedState, chainId) {
+    if (!chainId) {
+      chainId = this.configStore.getState().chainId;
     }
+    if (typeof gasUsedState === 'object') {
+      const wholeState = this.statusStore.getState();
+      const old = wholeState[chainId] || {};
+      const updateState = {
+        [chainId]: {
+          ...old,
+          ...gasUsedState,
+        },
+      };
+
+      this.statusStore.updateState(updateState);
+    }
+  }
+
+  /**
+   *
+   * @param {string} key required
+   * @param {number} chainId optional
+   */
+  lastEstimateGas(key, chainId) {
+    if (!chainId) {
+      chainId = this.configStore.getState().chainId;
+    }
+
+    const statusState = this.statusStore.getState();
+    if (statusState[chain] && statusState[chain][key]) {
+      return statusState[chain][key];
+    }
+    return undefined;
   }
 
   getPendingTxs(chainId) {
@@ -248,12 +270,12 @@ class Web3Controller extends EventEmitter {
    */
   async chainTxStatusUpdateForUI(txState) {
     const txs = this.txStore.getState();
-    const { chainId, txHash, reqId } = txState || {};
-    if (!reqId || !chainId || !txHash) {
+    const { chainId, reqId } = txState || {};
+    if (!reqId || !chainId) {
       throw new BizError('TxState must contains reqId,chainId and txHash');
     }
 
-    let uid = `${chainId}_${txHash}`;
+    let uid = `${chainId}_${reqId}`;
     const oldState = txs[uid] || {};
 
     const newState = {
@@ -266,6 +288,15 @@ class Web3Controller extends EventEmitter {
     this.txStore.updateState(newState);
 
     return this.getChainTxs(chainId);
+  }
+
+  /**
+   * only test
+   * @deprecated
+   * @param {number} gasPriceSwei
+   */
+  async approveToMembership(gasPriceSwei = 0) {
+    await _approveToMember.call(this, gasPriceSwei);
   }
 }
 
@@ -293,27 +324,6 @@ async function _reloadChainStatus(provider, address) {
   } catch (err) {
     logger.debug('reload smart status failed.', err.message);
   }
-}
-
-async function _rechargeMembership(custGasLimit = 0) {
-  const walletState = await this.walletState();
-  if (
-    !walletState ||
-    !walletState.isUnlocked ||
-    !walletState.dev3 ||
-    !walletState.selectedAddress
-  ) {
-    throw new BizError('Extension logout or no account.', ACCOUNT_NOT_EXISTS);
-  }
-
-  const selectedAddress = walletState.selectedAddress;
-
-  const _provider = await this.getCurrentProvider();
-  if (!_provider || !_provider.rpcUrl) {
-    logger.debug('no provider so unhanlder set initialized.');
-    return;
-  }
-  const { chainId, rpcUrl } = _provider;
 }
 
 async function _signedApproved4Member(reqId, gasPriceSwei) {
@@ -358,14 +368,18 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
 
   const dataABI = tokenInst.methods.approve(approveAddress, btsBalance).encodeABI();
 
-  let lastApproveGas = config[BT_APPRPOVE_ESGAS];
+  let lastApproveGas = this.lastEstimateGas(BT_APPRPOVE_ESGAS, chainId); // config[BT_APPRPOVE_ESGAS];
   if (!lastApproveGas || lastApproveGas) {
     lastApproveGas = await tokenInst.methods
       .approve(approveAddress, btsBalance)
       .estimateGas({ from: selectedAddress });
+
+    const updateGasState = { [BT_APPRPOVE_ESGAS]: lastApproveGas };
+    this.emit('update:status:store:estimateGas', updateGasState, chainId);
   }
 
-  let gasLimit = parseInt(parseFloat(lastApproveGas) * 1.1);
+  // this will from custom UI set
+  let gasLimit = parseInt(parseFloat(lastApproveGas) * 1.05);
 
   logger.debug('approveAddress:>>>BTs>', btsBalance, lastApproveGas);
 
@@ -492,19 +506,12 @@ async function _approveToMember(reqId, gasPriceSwei) {
 
   // return new Promise(async(resolve,reject) => {
   let txState = {
-    reqId: '',
+    reqId,
     txHash: '',
     chainId,
     statusText: TX_PENDING,
     cts: new Date().getTime(),
   };
-
-  // const txHash = await web3js.eth.sendSignedTransaction(txRawDataSerialize);
-  // logger.debug('approve TxHash:', txHash);
-  // txState.txHash = txHash;
-  // await this.updateChainTx(chainId, txState, TX_PENDING);
-  // const web3State = await this.getSendState(chainId);
-  // return web3State;
 
   await web3js.eth
     .sendSignedTransaction(txRawDataSerialize)
@@ -521,17 +528,17 @@ async function _approveToMember(reqId, gasPriceSwei) {
       // throw BizError(err.message, INTERNAL_ERROR)
 
       if (txState.txHash) {
-        let uid = `${chainId}_${txState.txHash}`;
+        let uid = `${chainId}_${reqId}`;
         this.updateTxStatus(uid, TX_FAILED, receipt);
       }
       throw new BizError(err.message, INTERNAL_ERROR);
       // return reject(new BizError(err.message,INTERNAL_ERROR))
     })
     .then(async (receipt) => {
-      let uid = `${chainId}_${txState.txHash}`;
+      let uid = `${chainId}_${reqId}`;
       if (receipt && receipt.gasUsed) {
         const gasNumState = { [BT_APPRPOVE_ESGAS]: receipt.gasUsed };
-        this.emit('update:config:estimateGas', gasNumState);
+        this.emit('update:status:store:estimateGas', gasNumState);
       }
 
       this.updateTxStatus(uid, TX_CONFIRMED, receipt);
@@ -575,7 +582,7 @@ async function _reloadBalances(provider) {
   }
 
   try {
-    const { type, rpcUrl, chainId } = provider;
+    const { rpcUrl, chainId } = provider;
     // dev3:MainPriKey,SubPriKey [uint8Array]
     const { selectedAddress } = accState;
     let web3js = getWeb3Inst(rpcUrl);

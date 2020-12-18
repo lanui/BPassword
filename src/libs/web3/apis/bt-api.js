@@ -1,6 +1,7 @@
 import { validWeb3Addr, validChainAddress } from './validators';
 import { BT_TOKEN } from '../contracts/enums';
 import BTInterface from '../contracts/abis/BT.json';
+import logger from '../../logger';
 
 /*********************************************************************
  * AircraftClass ::
@@ -16,6 +17,7 @@ import BTInterface from '../contracts/abis/BT.json';
 export const getBalance = async (web3js, chainId, address) => {
   validWeb3Addr(web3js, address);
   const inst = getBTContractInst(web3js, chainId, address);
+  logger.debug('getBalance>>>>>>>>>>>>>>>>>>', chainId, address, inst._address);
   const balance = await inst.methods.balanceOf(address).call();
   return balance;
 };

@@ -5,6 +5,7 @@ export const MAINNET = 'mainnet';
 export const GOERLI = 'goerli';
 export const LOCALHOST = 'localhost';
 export const CUSTOM_DEFAULT = 'private';
+export const MAINNET_NAME = 'main';
 
 export const MAINNET_NETWORK_ID = '1';
 export const ROPSTEN_NETWORK_ID = '3';
@@ -29,6 +30,7 @@ export const INFURA_PROVIDER_TYPES = [ROPSTEN_DISPLAY_NAME, MAINNET_DISPLAY_NAME
 export const NETWORK_TYPE_NAME_KV = {
   [MAINNET]: {
     type: MAINNET,
+    name: MAINNET_NAME,
     networkId: MAINNET_NETWORK_ID,
     chainId: MAINNET_CHAIN_ID,
     nickname: MAINNET_DISPLAY_NAME,
@@ -37,6 +39,7 @@ export const NETWORK_TYPE_NAME_KV = {
   },
   [ROPSTEN]: {
     type: ROPSTEN,
+    name: ROPSTEN,
     networkId: ROPSTEN_NETWORK_ID,
     chainId: ROPSTEN_CHAIN_ID,
     nickname: ROPSTEN_DISPLAY_NAME,

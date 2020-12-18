@@ -134,6 +134,7 @@ class NetworkController extends EventEmitter {
         id,
         providerType: n.providerType || PROVIDER_TYPE_INFURA,
         type: n.type,
+        name: n.name,
         nickname: n.nickname,
         chainId: n.chainId,
         color: n.color,
@@ -153,10 +154,7 @@ class NetworkController extends EventEmitter {
   }
 
   async getCurrentProvider() {
-    const { provider, network, custom } = await this.store.getState();
-    if (!network || (!NETWORK_TYPE_NAME_KV[network] && network !== custom.type)) {
-      throw new BizError(`Current provider ${provider?.type || network} disconnect.`);
-    }
+    const { provider } = await this.store.getState();
     return provider;
   }
 

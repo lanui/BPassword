@@ -1,3 +1,20 @@
+/*********************************************************************
+ * AircraftClass ::
+ *    @description: mainnet
+ *
+ *    @description: ropsten app
+ *      0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d
+ *
+ *    @description: Ropsten lan
+ *
+ *
+ * WARNINGS:
+ *
+ * HISTORY:
+ *    @author: lanbery@gmail.com
+ *    @created:  2020-12-18
+ *    @comments:
+ **********************************************************************/
 const smarts = {
   3: [
     {
@@ -24,7 +41,7 @@ const smarts = {
   1: [
     {
       contractName: 'BT',
-      address: '0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d',
+      address: '0xBC52a198619553fc1A0F925bB5B2E6EfaA9e45F1',
     },
     {
       contractName: 'Admin',
@@ -32,7 +49,7 @@ const smarts = {
     },
     {
       contractName: 'bptMember',
-      address: '0x734B9833b0B57e249C1DD338aEaD86a45674d9d1',
+      address: '0xa691571A54eE924855753e0eeA07db78840a81B7',
     },
     {
       contractName: 'bptStorage',
@@ -40,7 +57,7 @@ const smarts = {
     },
     {
       contractName: 'bptStorageByEvent',
-      address: '0xB574E1611dBC27Ae4123cCfa1C1954AA86F4676E',
+      address: '0x8A91F4b3A1249Cb29ee0b80B2CDF57EbfbD53b07',
     },
   ],
 };
