@@ -2,6 +2,8 @@
 
 ## v0.8.0 (**self signed**)
 
+> [click download self signed version](https://github.com/lanui/BPassword/releases/download/v0.8.0/bpassword-0.8.0-an+fx.xpi)
+
 - [x] approve BT to Registration Member
 - [x] Registration Member
 - [x] inteligente web3 or eth-utils for query token
