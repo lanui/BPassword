@@ -34,15 +34,15 @@
 
 ### Firefox add-on
 
-> Current Version Features (**v0.7.0**)
+> Current Version Features (**v0.8.0**)
 
 - [x] Base on ethereum Account generate,import&export
 - [x] Website pass item CURD functions management by popup UI.
 - [x] Mobile pass item CURD functions management by popup UI.
 - [ ] auto locked setting.
 - [ ] Synchronize local data with blockchain
-- [ ] Tokens query
-- [ ] send Transaction
+- [x] Tokens query
+- [x] send Transaction
 - [x] toggler popui hot key
 - [x] options page
 - [x] website inject & auto filled login fields.

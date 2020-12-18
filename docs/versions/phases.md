@@ -27,10 +27,20 @@
 
 ## Firefox
 
+### Phase 4
+
+> version 0.9.x
+
+- [ ] add Tx view page
+- [ ] sync block pass items for type of website
+- [ ] sync block pass items for type of mobile
+
 ### Phase 3
 
 > version 0.8.x
 
+- [x] approve BT to Registration Member
+- [x] Registration Member
 - [ ] auto locked setting.
-- [ ] inteligente web3 or eth-utils for query token
-- [ ] persistence ethereum network state
+- [x] inteligente web3 or eth-utils for query token
+- [x] persistence ethereum network state
