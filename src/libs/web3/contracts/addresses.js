@@ -3,10 +3,14 @@
  *    @description: mainnet
  *
  *    @description: ropsten app
- *      0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d
+ *      0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d - BT
+ *      0x734B9833b0B57e249C1DD338aEaD86a45674d9d1 - bptMember
+ *      0xB574E1611dBC27Ae4123cCfa1C1954AA86F4676E - bptStorageByEvent
  *
  *    @description: Ropsten lan
- *
+ *      0xa492CcF60d4fB5380d14BC7fFeef08f1b26059d1 - BT
+ *      0x1f2dfec2aafd7e668910c34b86dd31eb6ede4737 - bptMember
+ *      0x8a92eb3de19bd9d9265e725eaf6744fa131f3985 - bptStorageByEvent
  *
  * WARNINGS:
  *
@@ -19,7 +23,7 @@ const smarts = {
   3: [
     {
       contractName: 'BT',
-      address: '0xa492CcF60d4fB5380d14BC7fFeef08f1b26059d1',
+      address: '0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d',
     },
     {
       contractName: 'Admin',
@@ -27,7 +31,7 @@ const smarts = {
     },
     {
       contractName: 'bptMember',
-      address: '0x1f2dfec2aafd7e668910c34b86dd31eb6ede4737',
+      address: '0x734B9833b0B57e249C1DD338aEaD86a45674d9d1',
     },
     {
       contractName: 'bptStorage',
@@ -35,7 +39,7 @@ const smarts = {
     },
     {
       contractName: 'bptStorageByEvent',
-      address: '0x8a92eb3de19bd9d9265e725eaf6744fa131f3985',
+      address: '0xB574E1611dBC27Ae4123cCfa1C1954AA86F4676E',
     },
   ],
   1: [

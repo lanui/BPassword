@@ -30,7 +30,7 @@ export default [
       {
         path: 'index',
         alias: ['/', '/passbook'],
-        component: HomeIndex, //HomeIndex
+        component: WalletIndex, //HomeIndex
         meta: {
           auth: true,
           refreshBalance: true,

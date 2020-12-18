@@ -50,6 +50,7 @@ export default {
       fastest: 0,
     },
     chainTxs: [],
+    chainAllowance: {},
     lasttimestamp: 0,
   },
 };

@@ -57,7 +57,12 @@ import GasControllerPanel from './components/GasControllerPanel.vue';
 import logger from '@lib/logger';
 import WhispererController from '@lib/messages/whisperer-controller';
 import { getWeb3Inst } from '@lib/web3/web3-helpers';
-import { API_RT_FETCH_BTAPPROVED_RAW_DATA, API_RT_ADDORUP_TX_STATE } from '@lib/msgapi/api-types';
+import {
+  API_RT_FETCH_BTAPPROVED_RAW_DATA,
+  API_RT_ADDORUP_TX_STATE,
+  API_RT_FETCH_REGIST_MEMBER_RAW_DATA,
+  API_RT_RELOAD_CHAIN_BALANCES,
+} from '@lib/msgapi/api-types';
 
 import { INTERNAL_ERROR, INTERNAL_MISS_MSG } from '@lib/biz-error/error-codes';
 import { TX_PENDING, TX_FAILED, TX_CONFIRMED } from '@lib/web3/cnst';
@@ -141,6 +146,8 @@ export default {
           throw new BizError('Signed Approved fail.', INTERNAL_ERROR);
         }
 
+        const { willAllowance = 0, diamondsFee } = signedRet;
+
         const rawData = signedRet.rawData;
         tradingText = `Approved Signed rawData : ${rawData}`;
         that.updateTradingText(tradingText);
@@ -209,8 +216,13 @@ export default {
               statusText: _status ? TX_CONFIRMED : TX_FAILED,
             };
 
+            await that.$store.dispatch('web3/updateBTAllowance', willAllowance);
+
             await that.$store.dispatch('web3/addOrUpdateChainTxState', _retTxState);
-            that.$toast(`Approved Success.`, 'success', 4000);
+
+            let allowanceBT = web3js.utils.fromWei(willAllowance, 'ether');
+            let toastMsg = `Approved Success. Current Allowance [${allowanceBT} BT] `;
+            that.$toast(toastMsg, 'success', 6000);
 
             //send
             whisperer
@@ -237,10 +249,128 @@ export default {
       }
     },
     async rechargeHandler() {
-      const text =
-        'web3.js is a collection of libraries that allow you to interact with a local or remote' +
-        ' ethereum node using HTTP, IPC or WebSocket. The following documentation will guide you through installing and running web3.js as well as providing an API reference documentation with examples.';
-      this.startLoading(text);
+      const reqId = this.$uid();
+      const chainId = this.chainTxs;
+
+      const that = this;
+      let toastMsg = '',
+        tradingText = '';
+      try {
+        that.startLoading('Member registration...');
+        const web3js = getWeb3Inst(this.rpcUrl);
+        const gasPriceSwei = this.$refs.gasCtx.gasPrice;
+
+        const whisperer = new WhispererController({ portName: `RegistMember_${reqId}` });
+        const reqData = { reqId, gasPriceSwei };
+
+        const signedRet = await whisperer.sendSimpleMessage(
+          API_RT_FETCH_REGIST_MEMBER_RAW_DATA,
+          reqData
+        );
+
+        logger.debug('>>>>>>>>>>>>>>>>>>>>>>>', signedRet);
+        if (!signedRet || !signedRet.rawData) {
+          throw new BizError('Signed data failed.', INTERNAL_ERROR);
+        }
+
+        const { rawData, diamondsFee } = signedRet;
+
+        tradingText = `Signed data success : ${rawData}`;
+        that.updateTradingText(tradingText);
+
+        let txState = {
+          reqId,
+          chainId,
+          cts: new Date().getTime(),
+          statusText: TX_PENDING,
+          txHash: null,
+        };
+
+        web3js.eth
+          .sendSignedTransaction(rawData)
+          .once('transactionHash', async (txHash) => {
+            txState.txHash = txHash;
+            tradingText = `send transaction success : ${txHash}`;
+            that.updateTradingText(tradingText);
+
+            await that.$store.dispatch('web3/addTxState', txState);
+
+            whisperer
+              .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, txState)
+              .then(async (respState) => {
+                respState &&
+                  respState.chainTxs &&
+                  that.$store.dispatch('web3/updateChainTxs', respState.chainTxs);
+              })
+              .catch((err) => {
+                logger.debug(err);
+              });
+          })
+          .on('error', async (err, receipt) => {
+            let errTxState = txState;
+            receipt && (errTxState = { ...txState, ...receipt });
+            errTxState.statusText = TX_FAILED;
+
+            await that.$store.dispatch('web3/addOrUpdateChainTxState', errTxState);
+
+            whisperer
+              .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, errTxState)
+              .then((respState) => {
+                respState &&
+                  respState.chainTxs &&
+                  that.$store.dispatch('web3/updateChainTxs', respState.chainTxs);
+              })
+              .catch((err) => {
+                logger.debug(err);
+              });
+
+            that.stopLoading();
+
+            that.$toast(`Member registration failed. ${err.message}`, 'fail', 6000);
+          })
+          .then(async (receipt) => {
+            const _status = receipt.status;
+            let _retTxState = {
+              ...txState,
+              ...receipt,
+              statusText: _status ? TX_CONFIRMED : TX_FAILED,
+            };
+
+            await that.$store.dispatch('web3/addOrUpdateChainTxState', _retTxState);
+            that.$toast('Member registration completed.', 'success', 6000);
+
+            whisperer
+              .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, _retTxState)
+              .then((respState) => {
+                respState &&
+                  respState.chainTxs &&
+                  that.$store.dispatch('web3/updateChainTxs', respState.chainTxs);
+              })
+              .catch((err) => {
+                logger.debug(err);
+              });
+            whisperer
+              .sendSimpleMessage(API_RT_RELOAD_CHAIN_BALANCES, { from: 'Registion Success' })
+              .then(async (web3State) => {
+                if (web3State) {
+                  await that.$store.dispatch('web3/subInitWeb3State', web3State);
+                }
+              })
+              .catch((err) => {
+                console.warn(err.message);
+              });
+            that.stopLoading();
+          });
+      } catch (err) {
+        let message = 'Member registration failed.';
+        that.stopLoading();
+        if (err.code === INTERNAL_ERROR) {
+          console.warn(err.message);
+        } else {
+          message = err.message;
+        }
+        this.$toast(message, 'fail', 8000);
+      }
     },
   },
 };

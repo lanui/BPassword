@@ -20,11 +20,19 @@ export const subInitNetworkState = async ({ commit }, networkState) => {
  * @param {Object} web3State [chainBalances,chainTxs,chainId,ts]
  */
 export const subInitWeb3State = async ({ commit }, web3State = {}) => {
-  const { chainBalances = {}, chainTxs = [], chainId, chainStatus, gasState } = web3State;
+  const {
+    chainBalances = {},
+    chainTxs = [],
+    chainId,
+    chainStatus,
+    gasState,
+    chainAllowance = {},
+  } = web3State;
   commit(types.UPDATE_GAS_STATE, gasState);
   commit(types.UPDATE_CHAINID, chainId);
   commit(types.UPDATE_CHAIN_BALANCES, chainBalances);
   commit(types.UPDATE_CHAIN_STATUS, chainStatus);
+  commit(types.UPDATE_CHAIN_ALLOWANCE, chainAllowance);
 
   commit(types.SET_CHAIN_TXS, chainTxs);
 };
@@ -71,4 +79,13 @@ export const updateChainTxs = async ({ commit }, chainTxs) => {
   if (Array.isArray(chainTxs)) {
     commit(types.SET_CHAIN_TXS, chainTxs);
   }
+};
+
+/**
+ * 更新授权余额
+ * @param {object} context
+ * @param {string|number} allowanceWei
+ */
+export const updateBTAllowance = async ({ commit }, allowanceWei) => {
+  commit(types.UPDATE_CHAIN_BT_ALLOWANCE, allowanceWei);
 };

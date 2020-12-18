@@ -1,8 +1,9 @@
-import { ETH_TOKEN, BT_TOKEN } from '@lib/web3/contracts/enums';
+import { ETH_TOKEN, BT_TOKEN, BPT_MEMBER } from '@lib/web3/contracts/enums';
 
 import { wei2Ether, wei2Diamonds, compareWei } from '@lib/web3/web3-helpers';
 
 import moment from 'moment';
+import Web3 from 'web3';
 
 const diffHours = 0.5;
 
@@ -45,7 +46,7 @@ export const getMembershipExpired = (state) => {
   const { chainStatus = {} } = state;
   const expired = chainStatus.membershipDeadline;
   if (!expired || expired === '0' || expired < 0) return '';
-  const text = moment(new Date(expired)).format('YYYY-MM-DD');
+  const text = moment(new Date(expired * 1000)).format('YYYY-MM-DD');
   return text;
 };
 
@@ -70,15 +71,27 @@ export const estimateBts = (state) => {
   return true;
 };
 
-export const currentAllowance = (state) => {
-  const { chainBalances } = state;
-  const allowance2bptMember = chainBalances.allowance;
-  let allowanceWei = '0';
-  if (typeof allowance2bptMember === 'object' && Object.values(allowance2bptMember).length) {
-    allowanceWei = Object.values(allowance2bptMember)[0];
+export const currentAllowanceWei = (state) => {
+  const { selectedAddress, chainAllowance = {} } = state;
+  if (!selectedAddress) {
+    return '0';
   }
 
-  return allowanceWei;
+  let key = `${selectedAddress}_${BPT_MEMBER}`;
+  const wei = chainAllowance[key] || '0';
+
+  return wei;
+};
+
+export const currentAllowanceBT = (state) => {
+  const { selectedAddress, chainAllowance = {} } = state;
+  if (!selectedAddress) {
+    return '0';
+  }
+  let key = `${selectedAddress}_${BPT_MEMBER}`;
+  const wei = chainAllowance[key] || '0';
+
+  return Web3.utils.fromWei(wei, 'ether');
 };
 
 /**
@@ -88,7 +101,7 @@ export const currentAllowance = (state) => {
 export const validNeedApprove = (state) => {
   const { chainStatus } = state;
   const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
-  const allowanceWei = currentAllowance(state);
+  const allowanceWei = currentAllowanceWei(state);
 
   //TODO remove
   return true;

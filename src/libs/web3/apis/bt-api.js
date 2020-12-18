@@ -42,7 +42,5 @@ export const getAllowance = async (web3js, chainId, owner, spender) => {
   const inst = getBTContractInst(web3js, chainId, owner);
 
   const allowanceWei = await inst.methods.allowance(owner, spender).call();
-  return {
-    [spender]: allowanceWei,
-  };
+  return allowanceWei;
 };

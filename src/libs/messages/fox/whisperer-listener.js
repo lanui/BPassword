@@ -20,6 +20,7 @@ import {
   API_RT_CHANGED_NETWORK,
   API_RT_RELOAD_CHAIN_BALANCES,
   API_RT_FETCH_BTAPPROVED_RAW_DATA,
+  API_RT_FETCH_REGIST_MEMBER_RAW_DATA,
   API_RT_ADDORUP_TX_STATE,
 } from '../../msgapi/api-types';
 
@@ -198,6 +199,10 @@ class WhisperperListener {
     return this.controller.web3Controller.signedBTApproved4Member(reqData);
   }
 
+  async signedForRegistMember(reqData) {
+    return this.controller.web3Controller.signedRegistedMemberByYear(reqData);
+  }
+
   /**
    *
    * {uid:txState}
@@ -262,6 +267,8 @@ async function HandleCypherApi(message, sender, sendResp) {
         return this.signedForBTApproved(reqData);
       case API_RT_ADDORUP_TX_STATE:
         return this.addOrUpdateChainTxState(reqData);
+      case API_RT_FETCH_REGIST_MEMBER_RAW_DATA:
+        return this.signedForRegistMember(reqData);
       default:
         throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
     }
@@ -271,6 +278,7 @@ async function HandleCypherApi(message, sender, sendResp) {
 }
 
 function errorThrower(err) {
+  logger.debug('Whisper listener:', err);
   if (typeof err === 'object' && err.code) {
     throw err;
   } else if (typeof err === 'object' && err.code) {

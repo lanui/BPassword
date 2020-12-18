@@ -13,12 +13,27 @@ import {
   NETWORK_UNAVAILABLE,
   ACCOUNT_NOT_EXISTS,
   INTERNAL_ERROR,
+  INSUFFICIENT_BTS_BALANCE,
+  INSUFFICIENT_ETH_BALANCE,
 } from '../biz-error/error-codes';
 
-import { getWeb3Inst, getChainConfig } from './web3-helpers';
+import {
+  getWeb3Inst,
+  getChainConfig,
+  compareWei,
+  calcGasFee,
+  wei2Diamonds,
+  validGasFeeEnought,
+} from './web3-helpers';
 import APIManager from './apis';
 
-import { BT_TOKEN, ETH_TOKEN, BT_APPRPOVE_ESGAS } from './contracts/enums';
+import {
+  BT_TOKEN,
+  ETH_TOKEN,
+  BT_APPRPOVE_ESGAS,
+  BPT_MEMBER_RECHARGE_ESGAS,
+  BPT_MEMBER,
+} from './contracts/enums';
 import {
   DEFAULT_GAS_LIMIT,
   TX_PENDING,
@@ -28,7 +43,7 @@ import {
   DEFAULT_GAS_PRICE,
 } from './cnst';
 
-import { getBalance, getBTContractInst } from './apis/bt-api';
+import { getBTContractInst } from './apis/bt-api';
 import { getBptMemberAddress } from './apis/bpt-member-api';
 import { signedDataTransaction, signedRawTxData4Method } from './send-rawtx';
 import Web3 from 'web3';
@@ -59,6 +74,7 @@ class Web3Controller extends EventEmitter {
       historys = {},
       txs = {},
       status = {},
+      allowance = {},
     } = initState;
 
     // config not depend chainId
@@ -68,6 +84,7 @@ class Web3Controller extends EventEmitter {
     this.txStore = new ObservableStore(txs);
     this.historyStore = new ObservableStore(historys);
     this.statusStore = new ObservableStore(status);
+    this.allowStore = new ObservableStore(allowance);
 
     this.store = new ComposedStore({
       config: this.configStore,
@@ -76,6 +93,7 @@ class Web3Controller extends EventEmitter {
       historys: this.historyStore,
       txs: this.txStore,
       status: this.statusStore,
+      allowance: this.allowStore,
     });
 
     this.on('reloadBalances', this.reloadBalances.bind(this));
@@ -118,7 +136,10 @@ class Web3Controller extends EventEmitter {
   }
 
   getSendState(chainId) {
-    const { balances = {}, ts = 0, txs = {}, config = {}, status = {} } = this.store.getState();
+    const { balances = {}, txs = {}, config = {}, status = {} } = this.store.getState();
+    if (!chainId) {
+      chainId = config.chainId;
+    }
     let chainBalances = {},
       chainStatus = {},
       chainTxs = [];
@@ -136,13 +157,15 @@ class Web3Controller extends EventEmitter {
     const configState = this.configStore.getState();
     let gasState = _translateGasStation(configState, chainId);
 
+    let chainAllowance = this.getChainAllowance(chainId);
+
     let sendState = {
       gasState,
       chainStatus,
       chainId,
-      ts,
       chainBalances,
       chainTxs,
+      chainAllowance,
     };
 
     return sendState;
@@ -225,6 +248,33 @@ class Web3Controller extends EventEmitter {
 
   /**
    *
+   * @param {object} allowState
+   *    key-value : accAddress+'_'+'bptMember' : allowance
+   * @param {number} chainId
+   */
+  setAllowanceState(allowState, chainId) {
+    if (!chainId) {
+      chainId = this.configStore.getState().chainId;
+    }
+    const wholeState = this.allowStore.getState();
+    let old = wholeState[chainId];
+    const updateState = {
+      [chainId]: {
+        ...old,
+        ...allowState,
+      },
+    };
+
+    this.allowStore.updateState(updateState);
+  }
+
+  getChainAllowance(chainId) {
+    const wholeState = this.allowStore.getState() || {};
+    return wholeState[chainId] || {};
+  }
+
+  /**
+   *
    * @param {string} key required
    * @param {number} chainId optional
    */
@@ -252,6 +302,21 @@ class Web3Controller extends EventEmitter {
     return pendingTxs;
   }
 
+  updateMembershipDeadline(chainId, membershipDeadline) {
+    let wholeState = this.statusStore.getState();
+    if (chainId && membershipDeadline) {
+      let chainState = wholeState[chainId] || {};
+      const newState = {
+        [chainId]: {
+          ...chainState,
+          membershipDeadline,
+        },
+      };
+
+      this.statusStore.updateState(newState);
+    }
+  }
+
   /** --------------------------------- Signed Methods ------------------------------------ */
   async signedBTApproved4Member(reqData) {
     logger.debug('signedBTApproved4Member>>>>>>>>>>>>>>>>', reqData);
@@ -261,6 +326,20 @@ class Web3Controller extends EventEmitter {
     }
 
     return await _signedApproved4Member.call(this, reqId, gasPriceSwei);
+  }
+
+  /**
+   *
+   * @param {object} reqData
+   */
+  async signedRegistedMemberByYear(reqData = {}) {
+    logger.debug('signedBTApproved4Member>>>>>>>>>>>>>>>>', reqData);
+    const { reqId, gasPriceSwei = 0 } = reqData;
+    if (!reqId) {
+      throw new BizError('Miss parameter reqId', PARAMS_ILLEGAL);
+    }
+
+    return await _signedRegistMember.call(this, reqId, gasPriceSwei, 1);
   }
 
   /**
@@ -288,15 +367,6 @@ class Web3Controller extends EventEmitter {
     this.txStore.updateState(newState);
 
     return this.getChainTxs(chainId);
-  }
-
-  /**
-   * only test
-   * @deprecated
-   * @param {number} gasPriceSwei
-   */
-  async approveToMembership(gasPriceSwei = 0) {
-    await _approveToMember.call(this, gasPriceSwei);
   }
 }
 
@@ -355,18 +425,20 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
   const tokenInst = getBTContractInst(web3js, chainId, selectedAddress);
   const tokenAddress = tokenInst._address;
 
-  const btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
+  let btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
 
   //TODO valid insuffient
   let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || toWei('98', 'ether');
-
-  //TODO txs valid pending
+  if (compareWei(btsBalance, memberCostWeiPerYear) < 0) {
+    throw new BizError('Insuffient BT Balance.', INSUFFICIENT_BTS_BALANCE);
+  }
 
   let { chain, gasPrice, gasStation = {} } = config;
 
   const approveAddress = getBptMemberAddress(chainId);
 
-  const dataABI = tokenInst.methods.approve(approveAddress, btsBalance).encodeABI();
+  // btsBalance = web3js.utils.toWei('11','ether');
+  const dataABI = tokenInst.methods.approve(approveAddress, memberCostWeiPerYear).encodeABI();
 
   let lastApproveGas = this.lastEstimateGas(BT_APPRPOVE_ESGAS, chainId); // config[BT_APPRPOVE_ESGAS];
   if (!lastApproveGas || lastApproveGas) {
@@ -390,8 +462,10 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
     gasPrice = toWei((avg / 10).toString(), 'Gwei');
   }
 
-  /** 组织参数 */
+  let ethBal = await web3js.eth.getBalance(selectedAddress);
+  const diamondsFee = validGasFeeEnought(ethBal, gasPrice, gasLimit);
 
+  /** 组织参数 */
   const dev3 = walletState.dev3;
 
   const txParams = {
@@ -401,7 +475,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
     to: tokenAddress,
   };
 
-  logger.debug('approveAddress:>>>BTs>', txParams);
+  logger.debug('approveAddress:>>>BTs>', txParams, diamondsFee);
 
   const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
     chainId,
@@ -414,18 +488,20 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
   return {
     reqId,
     chainId,
+    diamondsFee,
+    willAllowance: btsBalance,
     rawData: txRawDataSerialize,
   };
 }
 
 /**
- * gasPriceSwei = gwei/10
- * @param {string|Number} gasPriceSwei
- * @param {number} custGasLimit
+ *
+ * @param {*} reqId
  */
-async function _approveToMember(reqId, gasPriceSwei) {
+async function _signedRegistMember(reqId, gasPriceSwei, charageType = 1) {
   const toWei = Web3.utils.toWei;
   const walletState = await this.walletState();
+  logger.debug('_signedRegistMember>>>', walletState);
   if (
     !walletState ||
     !walletState.isUnlocked ||
@@ -434,6 +510,8 @@ async function _approveToMember(reqId, gasPriceSwei) {
   ) {
     throw new BizError('Extension logout or no account.', ACCOUNT_NOT_EXISTS);
   }
+  const dev3 = walletState.dev3;
+  const selectedAddress = walletState.selectedAddress;
 
   const _provider = await this.getCurrentProvider();
   if (!_provider || !_provider.rpcUrl) {
@@ -441,114 +519,82 @@ async function _approveToMember(reqId, gasPriceSwei) {
     return;
   }
 
-  /** Inst init defined */
-  const selectedAddress = walletState.selectedAddress;
   const { chainId, rpcUrl } = _provider;
-
-  const { config = {} } = this.store.getState();
-  const { chainStatus = {} } = this.getSendState(chainId);
-
-  const web3js = getWeb3Inst(rpcUrl);
-  const tokenInst = getBTContractInst(web3js, chainId, selectedAddress);
-  const tokenAddress = tokenInst._address;
-
-  const btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
-
-  //TODO valid insuffient
-  let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || toWei('98', 'ether');
-
-  //TODO txs valid pending
-
-  let { chain, gasPrice, gasStation = {} } = config;
 
   const approveAddress = getBptMemberAddress(chainId);
 
-  const dataABI = tokenInst.methods.approve(approveAddress, btsBalance).encodeABI();
+  // Instance defined
+  const web3js = getWeb3Inst(rpcUrl);
+  const tokenInst = getBTContractInst(web3js, chainId, selectedAddress);
+  const bptMemberInst = APIManager.BPTMemberApi.getBPTMemberContractInst(
+    web3js,
+    chainId,
+    selectedAddress
+  );
 
-  let lastApproveGas = config[BT_APPRPOVE_ESGAS];
-  if (!lastApproveGas) {
-    lastApproveGas = await tokenInst.methods
-      .approve(approveAddress, btsBalance)
-      .estimateGas({ from: selectedAddress });
+  const { config = {} } = this.store.getState();
+  let { chain, gasPrice, gasStation = {} } = config;
+  const { chainStatus = {} } = this.getSendState(chainId);
+  let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || toWei('98', 'ether');
+
+  //check bts allownce
+  const btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
+  if (compareWei(btsBalance, memberCostWeiPerYear) < 0) {
+    throw new BizError('Insuffient BT balance.', INSUFFICIENT_BTS_BALANCE);
   }
 
-  let gasLimit = parseInt(parseFloat(lastApproveGas) * 1.1);
+  const allowBalance = await tokenInst.methods.allowance(selectedAddress, approveAddress).call();
 
-  logger.debug('approveAddress:>>>BTs>', btsBalance, lastApproveGas);
+  if (compareWei(allowBalance, memberCostWeiPerYear) < 0) {
+    throw new BizError('Insuffient BT balance allowance.', INSUFFICIENT_BTS_BALANCE);
+  }
+
+  let gasLimit = this.lastEstimateGas(BPT_MEMBER_RECHARGE_ESGAS, chainId);
+
+  if (!gasLimit) {
+    gasLimit = await bptMemberInst.methods
+      .RechargeByType(charageType)
+      .estimateGas({ from: selectedAddress });
+
+    const updateGasState = { [BPT_MEMBER_RECHARGE_ESGAS]: gasLimit };
+    this.emit('update:status:store:estimateGas', updateGasState, chainId);
+  }
+
+  logger.debug('_signedRegistMember>>>', bptMemberInst, charageType);
 
   let avg = gasStation.average;
-  if (gasPriceSwei && gasPriceSwei !== '0') {
+  if (gasPriceSwei > 0) {
     gasPrice = toWei((gasPriceSwei / 10).toString(), 'Gwei');
-  } else if (avg && avg != '0') {
+  } else if (avg > 0) {
     gasPrice = toWei((avg / 10).toString(), 'Gwei');
   }
 
-  /** 组织参数 */
+  //check eth balance
+  let ethBal = await web3js.eth.getBalance(selectedAddress);
+  const diamondsFee = validGasFeeEnought(ethBal, gasPrice, gasLimit);
 
-  const dev3 = walletState.dev3;
+  const dataABI = bptMemberInst.methods.RechargeByType(charageType).encodeABI();
 
   const txParams = {
     gasLimit,
     gasPrice,
     value: 0,
-    to: tokenAddress,
+    to: approveAddress,
   };
-
-  logger.debug('approveAddress:>>>BTs>', txParams);
 
   const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
-    chainId,
     chain,
+    chainId,
     selectedAddress,
   });
-
   logger.debug('Web3 signed data hex string:', txRawDataSerialize);
 
-  // return new Promise(async(resolve,reject) => {
-  let txState = {
+  return {
     reqId,
-    txHash: '',
     chainId,
-    statusText: TX_PENDING,
-    cts: new Date().getTime(),
+    diamondsFee,
+    rawData: txRawDataSerialize,
   };
-
-  await web3js.eth
-    .sendSignedTransaction(txRawDataSerialize)
-    .once('transactionHash', async (txHash) => {
-      logger.debug('recharge transactionHash:', txHash);
-      txState.txHash = txHash;
-      await this.updateChainTx(chainId, txState, TX_PENDING);
-      const web3State = await this.getSendState(chainId);
-      return web3State;
-      // return resolve(txHash)
-    })
-    .on('error', (err, receipt) => {
-      logger.debug('recharge Error:', err, receipt);
-      // throw BizError(err.message, INTERNAL_ERROR)
-
-      if (txState.txHash) {
-        let uid = `${chainId}_${reqId}`;
-        this.updateTxStatus(uid, TX_FAILED, receipt);
-      }
-      throw new BizError(err.message, INTERNAL_ERROR);
-      // return reject(new BizError(err.message,INTERNAL_ERROR))
-    })
-    .then(async (receipt) => {
-      let uid = `${chainId}_${reqId}`;
-      if (receipt && receipt.gasUsed) {
-        const gasNumState = { [BT_APPRPOVE_ESGAS]: receipt.gasUsed };
-        this.emit('update:status:store:estimateGas', gasNumState);
-      }
-
-      this.updateTxStatus(uid, TX_CONFIRMED, receipt);
-      logger.debug('recharge receiptor:', receipt, uid);
-      const web3State = await this.getSendState(chainId);
-      return web3State;
-      // return resolve(web3State);
-    });
-
-  return txState;
 }
 
 async function _reloadConfig(provider, address) {
@@ -591,6 +637,13 @@ async function _reloadBalances(provider) {
     const spenderAddress = getBptMemberAddress(chainId);
     let ethBalance = await web3js.eth.getBalance(selectedAddress);
     let btBalance = await APIManager.BTApi.getBalance(web3js, chainId, selectedAddress);
+    let balances = {
+      [chainId]: {
+        [ETH_TOKEN]: ethBalance,
+        [BT_TOKEN]: btBalance,
+      },
+    };
+
     const allowance = await APIManager.BTApi.getAllowance(
       web3js,
       chainId,
@@ -598,17 +651,26 @@ async function _reloadBalances(provider) {
       spenderAddress
     );
 
-    let balances = {
-      [chainId]: {
-        [ETH_TOKEN]: ethBalance,
-        [BT_TOKEN]: btBalance,
-        allowance,
-      },
+    let allowKey = `${selectedAddress}_${BPT_MEMBER}`;
+    const allowanceState = {
+      [allowKey]: allowance,
     };
 
-    this.balanceStore.updateState(balances);
+    logger.debug('Web3Controller:reloadBalances>>>>', allowanceState);
 
-    logger.debug('Web3Controller:reloadBalances>>>>', balances);
+    this.balanceStore.updateState(balances);
+    this.setAllowanceState(allowanceState, chainId);
+    logger.debug('Web3Controller:reloadBalances>>>>', allowanceState);
+
+    // update membership
+    const bptMemberInst = APIManager.BPTMemberApi.getBPTMemberContractInst(
+      web3js,
+      chainId,
+      selectedAddress
+    );
+    const membershipDeadline = await bptMemberInst.methods.allMembership(selectedAddress).call();
+    logger.debug('Web3Controller:reloadBalances>membershipTs>>>', membershipDeadline);
+    this.updateMembershipDeadline(chainId, membershipDeadline);
 
     return this.getSendState(chainId);
   } catch (err) {
