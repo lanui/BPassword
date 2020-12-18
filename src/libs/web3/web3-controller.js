@@ -438,7 +438,9 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
   const approveAddress = getBptMemberAddress(chainId);
 
   // btsBalance = web3js.utils.toWei('11','ether');
-  const dataABI = tokenInst.methods.approve(approveAddress, memberCostWeiPerYear).encodeABI();
+
+  //
+  const dataABI = tokenInst.methods.approve(approveAddress, btsBalance).encodeABI();
 
   let lastApproveGas = this.lastEstimateGas(BT_APPRPOVE_ESGAS, chainId); // config[BT_APPRPOVE_ESGAS];
   if (!lastApproveGas || lastApproveGas) {
