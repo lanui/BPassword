@@ -32,9 +32,9 @@ const CheckVersion = (target) => {
     if (
       !isValidSemVer(envVersion, true) ||
       compareSemVer(envVersion, '2.0.0') > 0 ||
-      compareSemVer(envVersion, '0.7.0')
+      compareSemVer(envVersion, '0.8.0') < 0
     ) {
-      throw 'Firefox version must <= 2.0.0 and > 0.7.0';
+      throw 'Firefox version must <= 2.0.0 and > 0.8.0';
     }
   }
 };
