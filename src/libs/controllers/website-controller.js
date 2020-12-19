@@ -43,6 +43,10 @@ class WebsiteController extends EventEmitter {
     this.store = new ObservableStore(Object.assign({}, StateStruct, initState));
 
     this.memStore = new ObservableStore();
+    /**
+     * 存储本地差异与chain
+     */
+    this.memDiffStore = new ObservableStore({});
 
     /**
      * tabId : {hostname,username,password}
@@ -321,6 +325,13 @@ class WebsiteController extends EventEmitter {
       hostname,
       items: newItems,
     };
+  }
+
+  /**
+   * Sync data from
+   */
+  async syncItemsFromChain() {
+    //
   }
 }
 

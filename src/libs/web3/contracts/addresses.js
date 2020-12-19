@@ -6,6 +6,7 @@
  *      0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d - BT
  *      0x734B9833b0B57e249C1DD338aEaD86a45674d9d1 - bptMember
  *      0xB574E1611dBC27Ae4123cCfa1C1954AA86F4676E - bptStorageByEvent
+ *      0x9b9688211D4f74D706a6250F89d1214846Da0291 - bptStorageByEvent-new
  *
  *    @description: Ropsten lan
  *      0xa492CcF60d4fB5380d14BC7fFeef08f1b26059d1 - BT
@@ -41,6 +42,10 @@ const smarts = {
       contractName: 'bptStorageByEvent',
       address: '0xB574E1611dBC27Ae4123cCfa1C1954AA86F4676E',
     },
+    {
+      contractName: 'bptWebStorageByEvent',
+      address: '0x9b9688211D4f74D706a6250F89d1214846Da0291',
+    },
   ],
   1: [
     {
@@ -62,6 +67,10 @@ const smarts = {
     {
       contractName: 'bptStorageByEvent',
       address: '0x8A91F4b3A1249Cb29ee0b80B2CDF57EbfbD53b07',
+    },
+    {
+      contractName: 'bptWebStorageByEvent',
+      address: '',
     },
   ],
 };
