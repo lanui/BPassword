@@ -74,10 +74,34 @@ class BackMainController extends EventEmitter {
     /** store:load form local storage */
     this.store = new ComposableObservableStore(initState);
 
+    /**
+     * 0. profileController
+     * 1. accountController
+     * 2. networkController
+     * 3. web3Controller
+     * 4. website
+     * 5. mobile
+     */
+
     //initState ==> will persistence locale storage
     this.profileController = new ProfileController({
       initState: initState.ProfileController,
       // network:'',
+    });
+
+    // network
+    this.networkController = new NetworkController({
+      initState: initState.NetworkController,
+    });
+
+    this.accountController = new AccountController({
+      initState: initState.AccountController,
+    });
+
+    this.web3Controller = new Web3Controller({
+      initState: initState.Web3Controller,
+      getCurrentProvider: this.networkController.getCurrentProvider.bind(this.networkController),
+      walletState: this.accountController.getWalletState.bind(this.accountController),
     });
 
     /**
@@ -86,6 +110,8 @@ class BackMainController extends EventEmitter {
      */
     this.websiteController = new WebsiteController({
       initState: initState.WebsiteController,
+      currentProvider: this.networkController.currentProvider.bind(this.networkController),
+      currentWalletState: this.accountController.getWalletState.bind(this.accountController),
       notifyInjet: this.notifiedAllInjetConnection.bind(this),
       getActivedMuxStream: this.getLeechConnection.bind(this),
       getActivedTopMuxStream: this.getActiveTopInjetConnection.bind(this),
@@ -93,25 +119,8 @@ class BackMainController extends EventEmitter {
 
     this.mobileController = new MobileController({
       initState: initState.MobileController,
-    });
-
-    this.accountController = new AccountController({
-      initState: initState.AccountController,
-      unlockWebsiteCypher: this.websiteController.unlock.bind(this.websiteController),
-      lockedWebsitePlain: this.websiteController.locked.bind(this.websiteController),
-      unlockMobileCypher: this.mobileController.unlock.bind(this.mobileController),
-      lockedMobilePlain: this.mobileController.locked.bind(this.mobileController),
-    });
-
-    // network
-    this.networkController = new NetworkController({
-      initState: initState.NetworkController,
-    });
-
-    this.web3Controller = new Web3Controller({
-      initState: initState.Web3Controller,
-      getCurrentProvider: this.networkController.getCurrentProvider.bind(this.networkController),
-      walletState: this.accountController.getWalletState.bind(this.accountController),
+      currentProvider: this.networkController.currentProvider.bind(this.networkController),
+      currentWalletState: this.accountController.getWalletState.bind(this.accountController),
     });
 
     /** binding store state changed subscribe to update store value */

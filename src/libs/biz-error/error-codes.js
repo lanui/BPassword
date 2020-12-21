@@ -9,6 +9,7 @@ export const INTERNAL_MISS_MSG = '988888'; //消息传递丢失
 
 /** Wallet account */
 export const WALLET_ENV3_EXISTS = '700000';
+export const WALLET_LOCKED = '790000';
 
 /** PrivateKey */
 export const MAIN_SECRET_KEY_ILLEGAL = '700001';

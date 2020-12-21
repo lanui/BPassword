@@ -1,13 +1,27 @@
 import _ from 'lodash';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
+import ComposedStore from 'obs-store/lib/composed';
 import RemoveableObserverStore from '../observestore/removeable-obs-store';
 
 import logger from '@/libs/logger';
 import { transferTerms, getDiff } from '../utils/item-transfer';
 import BPError from '../biz-error';
-import { VEX_ITEM_EXIST, VEX_ITEM_EDIT, VEX_ITEM_DELETE } from '../biz-error/error-codes';
+import {
+  VEX_ITEM_EXIST,
+  VEX_ITEM_EDIT,
+  VEX_ITEM_DELETE,
+  INTERNAL_ERROR,
+} from '../biz-error/error-codes';
 import { API_RT_FIELDS_VALT_CHANGED, API_RT_FIELDS_MATCHED_STATE } from '@/libs/msgapi/api-types';
+
+import {
+  getWebStorageEventInst,
+  fetchEventLogsFromChain,
+} from '../web3/apis/web-storage-event-api';
+import { getWeb3Inst } from '../web3/web3-helpers';
+import { SUB_ENTRY_FILE } from '../messages/fox/extension-info';
+import We3 from 'web3';
 
 /*********************************************************************
  * AircraftClass :: Website passbook management
@@ -35,13 +49,38 @@ class WebsiteController extends EventEmitter {
     super();
 
     const initState = opts.initState || {};
+    const { chainState = {}, versionState = {} } = initState;
+
+    this.currentProvider = opts.currentProvider;
+    this.currentWalletState = opts.currentWalletState;
 
     this.notifyInjet = opts.notifyInjet;
     this.getActivedMuxStream = opts.getActivedMuxStream;
     this.getActivedTopMuxStream = opts.getActivedTopMuxStream;
 
-    this.store = new ObservableStore(Object.assign({}, StateStruct, initState));
+    // this.store = new ObservableStore(Object.assign({}, StateStruct, initState));
 
+    /**
+     * locale State
+     * chainId:Cypher64
+     */
+    this.chainStore = new ObservableStore(chainState);
+    /**
+     * block chain state
+     * lastTxHash: {chainId,lastTxHash ,blockNumber}
+     * when sync from block update this state
+     * this state will sync block chain
+     */
+    this.versionStore = new ObservableStore(versionState);
+
+    this.store = new ComposedStore({
+      chainState: this.chainStore,
+      versionState: this.versionStore,
+    });
+
+    /**
+     *
+     */
     this.memStore = new ObservableStore();
     /**
      * 存储本地差异与chain
@@ -172,15 +211,22 @@ class WebsiteController extends EventEmitter {
   }
 
   async unlock(SubPriKey) {
+    let { chainId } = (await this.currentProvider()) || {};
+
+    if (!chainId) {
+      throw new BizError('lost chainId & provider', INTERNAL_ERROR);
+    }
+
     let Cypher64, Plain;
     try {
-      Cypher64 = (await this.store.getState()).Cypher64;
-      logger.debug('WebsiteController:unlock>>>>>>>>>>>>>>>>>>>>>>>>>>', Cypher64, typeof Cypher64);
+      Cypher64 = await this.getCypher64();
+      // logger.debug('WebsiteController:unlock>>>>>>>>>>>>>>>>>>>>>>>>>>', Cypher64, typeof Cypher64, SubPriKey);
       if (!Cypher64) {
         const f = InitFile(SubPriKey);
         Plain = f.Plain;
         Cypher64 = f.Cypher64;
-        this.store.updateState({ Cypher64 });
+
+        _initChainState.call(this, chainId, Cypher64);
       } else {
         Plain = decryptToPlainTxt(SubPriKey, Cypher64);
       }
@@ -210,7 +256,8 @@ class WebsiteController extends EventEmitter {
     try {
       const f = UpdateCmdAdd(subKey, cypher64, new Term(title, username, password));
       const { Plain, Cypher64 } = f;
-      this.store.updateState({ Cypher64 });
+
+      this.updateLocalChainCypher64(Cypher64);
       this.reloadMemStore(Plain, Cypher64);
       this.emit('notify:injet:client', hostname);
       return await this.getState();
@@ -231,12 +278,14 @@ class WebsiteController extends EventEmitter {
     try {
       const f = UpdateCmdChange(subKey, cypher64, new Term(title, username, password));
       const { Plain, Cypher64 } = f;
-      await this.store.updateState({ Cypher64 });
+
+      this.updateLocalChainCypher64(Cypher64);
       await this.reloadMemStore(Plain, Cypher64);
 
       if (hostname) this.emit('notify:injet:client', hostname);
       return await this.getState();
     } catch (err) {
+      logger.debug('>>>>', err);
       throw new BPError(`Title ${title} unfound.`, VEX_ITEM_EDIT);
     }
   }
@@ -253,7 +302,7 @@ class WebsiteController extends EventEmitter {
       const f = UpdateCmdDelete(subKey, cypher64, new Term(title, null, null));
 
       const { Plain, Cypher64 } = f;
-      await this.store.updateState({ Cypher64 });
+      this.updateLocalChainCypher64(Cypher64);
       await this.reloadMemStore(Plain, Cypher64);
       this.emit('notify:injet:client', hostname);
       return await this.getState();
@@ -278,17 +327,34 @@ class WebsiteController extends EventEmitter {
 
   async getState() {
     const state = await this.memStore.getState();
+    const { chainId } = await this.currentProvider();
     const diff = getDiff(state.Plain);
+
+    const lastChainState = this.getlatestBlockState(chainId);
 
     return {
       ...state,
       diff,
+      lastChainState,
     };
   }
 
+  /**
+   * get Locale chainStore State
+   */
   async getCypher64() {
-    const state = await this.store.getState();
-    return state.Cypher64 || '';
+    const { chainId } = this.currentProvider();
+    const chainState = (await this.chainStore.getState()) || {};
+    const cypher64 = chainState[chainId] && chainState[chainId] ? chainState[chainId] : '';
+    return cypher64;
+  }
+
+  updateLocalChainCypher64(Cypher64) {
+    const { chainId } = this.currentProvider();
+    if (!chainId) {
+      throw new BizError('lost chainId in currentProvider.', INTERNAL_ERROR);
+    }
+    this.chainStore.updateState({ [chainId]: Cypher64 });
   }
 
   /** notice : this state only send to injet feild-controller */
@@ -308,12 +374,6 @@ class WebsiteController extends EventEmitter {
       items = [];
     }
 
-    //make password safety don't send to page dom ,it only in leech can get password
-    // items = items.map((it) => {
-    //   it.password = 'bp-hidden';
-    //   return it;
-    // });
-
     const newItems = deepthCopyItems(items).map((it) => {
       // it.password = 'bp-hidden';
       return it;
@@ -328,16 +388,169 @@ class WebsiteController extends EventEmitter {
   }
 
   /**
-   * Sync data from
+   *
    */
-  async syncItemsFromChain() {
-    //
+  async networkChanged() {
+    const { chainId, rpcUrl } = this.currentProvider();
+
+    const { selectedAddress, isUnlocked, dev3 } = (await this.currentWalletState()) || {};
+    if (chainId) {
+      throw new BizError(
+        'Websiete changed network fail. may be lost chainId or rpcUrl',
+        INTERNAL_ERROR
+      );
+    }
+
+    if (!isUnlocked || !dev3) {
+      logger.warn('account locked or no account will not update website state');
+      return;
+    }
+
+    let Plain,
+      Cypher64 = await this.getCypher64();
+    if (!Cypher64) {
+      const f = InitFile(dev3.SubPriKey);
+      Plain = f.Plain;
+      Cypher64 = f.Cypher64;
+
+      _initChainState.call(this, chainId, Cypher64);
+    } else {
+      Plain = decryptToPlainTxt(dev3.SubPriKey, Cypher64);
+    }
+
+    Plain.unwrap && (Plain = Plain.unwrap());
+    this.reloadMemStore(Plain, Cypher64);
+  }
+
+  /**
+   *
+   */
+  async updateVersionState(chainId, blockNumber = 0, lastTxHash = '') {
+    if (!chainId) {
+      throw new BizError('lost chainId.', INTERNAL_ERROR);
+    }
+    const upState = {
+      [chainId]: {
+        uts: new Date().getTime(),
+        blockNumber,
+        lastTxHash,
+      },
+    };
+
+    this.versionStore.updateState(upState);
+  }
+
+  /**
+   *
+   * @param {*} chainId
+   */
+  getlatestBlockState(chainId) {
+    if (!chainId) {
+      throw new BizError('lost chainId.', INTERNAL_ERROR);
+    }
+
+    const verState = this.versionStore.getState() || {};
+    const { blockNumber = 0, lastTxHash = '' } = verState[chainId] || {};
+    return { blockNumber, lastTxHash };
+  }
+
+  /**
+   *
+   * @param {object} blockLogs
+   * @property {number} blockNumber
+   * @property {string} lastTxHash
+   * @property {array} logs [data bytes]
+   *
+   */
+  updateSyncBlockLogs(blockLogs) {}
+
+  /**
+   *
+   */
+  async mergeLocalFromChainCypher() {
+    const { isUnlocked, selectedAddress, dev3 } = this.currentWalletState();
+    const fromBlock = this.getFromBlockNumber();
+
+    const currCypher64 = await this.getCypher64();
+    if (!currCypher64) {
+      throw new BizError('Local Cypher Illegal.', INTERNAL_ERROR);
+    }
+
+    const logsResp = await _GetFromChainLogs.call(this, selectedAddress, fromBlock);
+
+    const { blockNumber, lastTxHash, logs = [] } = logsResp;
+    logger.debug('Chain data>>>>>>>', blockNumber, lastTxHash, logs.length);
+
+    let retFile = null;
+    if (logs.length > 0) {
+      retFile = UpdateBlockData(dev3.SubPriKey, currCypher64, blockNumber, lastTxHash, logs);
+      logger.debug('>>>>>>>', retFile);
+
+      this.reloadMemStore(retFile.Plain, retFile.Cypher64);
+
+      this.updateLocalChainCypher64(retFile.Cypher64);
+    }
+
+    return retFile;
+  }
+
+  /**
+   * make sure sync update memStore
+   * get last sync BlockNumber
+   */
+  getFromBlockNumber() {
+    const memState = this.memStore.getState() || {};
+    const { Plain = {} } = memState;
+    return Plain.BlockNumber || 0;
   }
 }
 
 function deepthCopyItems(items) {
   if (!items || !items.length) return [];
   return JSON.parse(JSON.stringify(items));
+}
+
+/**
+ *
+ * @param {object} blockData
+ * @property {number} blockNumber
+ * @property {string}
+ * @property {} Plain
+ */
+async function _updateSyncBlockData(blockData) {}
+
+async function _getLocalChainState(chainId) {
+  const _state = this.store.getState();
+  chaiId = chainId || _state.chainId;
+}
+
+/**
+ *
+ * @param {number} chainId
+ * @param {object} Cypher64
+ */
+function _initChainState(chainId, Cypher64) {
+  let upChainState = {
+    [chainId]: Cypher64,
+  };
+
+  this.chainStore.updateState(upChainState);
+}
+
+/**
+ *
+ * @param {number} fromBlock
+ */
+async function _GetFromChainLogs(selectedAddress, fromBlock = 0) {
+  const { chainId, rpcUrl } = this.currentProvider();
+
+  if (!chainId || !rpcUrl || !selectedAddress) {
+    throw new BizError('Params illegal', INTERNAL_ERROR);
+  }
+
+  const web3js = getWeb3Inst(rpcUrl);
+  const respLogs = await fetchEventLogsFromChain(web3js, chainId, selectedAddress, fromBlock);
+  return respLogs;
 }
 
 export default WebsiteController;

@@ -30,13 +30,7 @@ export default class AccountController extends EventEmitter {
   constructor(opts = {}) {
     super();
 
-    const {
-      initState,
-      unlockWebsiteCypher,
-      lockedWebsitePlain,
-      unlockMobileCypher,
-      lockedMobilePlain,
-    } = opts;
+    const { initState } = opts;
     // this state will persistence,don't put decrypt data
     this.store = new ObservableStore(
       Object.assign(
@@ -46,11 +40,6 @@ export default class AccountController extends EventEmitter {
         initState
       )
     );
-
-    this.unlockWebsiteCypher = unlockWebsiteCypher;
-    this.lockedWebsitePlain = lockedWebsitePlain;
-    this.unlockMobileCypher = unlockMobileCypher;
-    this.lockedMobilePlain = lockedMobilePlain;
 
     this.memStore = new ObservableStore({ isUnlocked: false });
   }
@@ -72,18 +61,10 @@ export default class AccountController extends EventEmitter {
         selectedAddress: env3.mainAddress,
       });
 
-      const SubPriKey = dev3.SubPriKey;
-
-      if (typeof this.unlockWebsiteCypher === 'function') {
-        await this.unlockWebsiteCypher(SubPriKey);
-      }
-      if (typeof this.unlockMobileCypher === 'function') {
-        this.unlockMobileCypher(SubPriKey);
-      }
-
       return {
         isUnlocked: Boolean(dev3),
         isInitialized: true,
+        dev3,
       };
     } catch (err) {
       console.warn(`unlock wallet failed.`, err);
@@ -98,12 +79,6 @@ export default class AccountController extends EventEmitter {
   async lock() {
     try {
       await this.memStore.putState({ isUnlocked: false });
-      if (typeof this.lockedWebsitePlain === 'function') {
-        await this.lockedWebsitePlain();
-      }
-      if (typeof this.lockedMobilePlain === 'function') {
-        this.lockedMobilePlain();
-      }
     } catch (error) {
       logger.warn('logout failed.', error);
     }
@@ -142,14 +117,6 @@ export default class AccountController extends EventEmitter {
 
       const SubPriKey = ret.dev3.SubPriKey;
 
-      if (typeof this.unlockWebsiteCypher === 'function') {
-        await this.unlockWebsiteCypher(SubPriKey);
-      }
-
-      if (typeof this.unlockMobileCypher === 'function') {
-        this.unlockMobileCypher(SubPriKey);
-      }
-
       return { ...ret, isUnlocked: Boolean(ret.dev3) };
     } catch (err) {
       logger.error(err);
@@ -181,13 +148,7 @@ export default class AccountController extends EventEmitter {
       };
 
       this.memStore.updateState(_memState);
-      const _subPriKey = dev3.SubPriKey;
-      if (typeof this.unlockWebsiteCypher === 'function') {
-        await this.unlockWebsiteCypher(_subPriKey);
-      }
-      if (typeof this.unlockMobileCypher === 'function') {
-        this.unlockMobileCypher(_subPriKey);
-      }
+
       this.store.updateState({ env3: env3 });
 
       return {

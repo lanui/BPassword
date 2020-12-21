@@ -8,3 +8,4 @@ export const TX_FAILED = 'failed';
 export const TX_CONFIRMED = 'confirmed';
 export const DEFAULT_GAS_STATION_URL = 'https://ethgasstation.info/api/ethgasAPI.json';
 export const DEFAULT_HARDFORK = 'byzantium';
+export const GAS_LIMIT_PLUS_RATE = 1.05;

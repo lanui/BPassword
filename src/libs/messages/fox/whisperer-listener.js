@@ -64,10 +64,13 @@ class WhisperperListener {
     const { password } = reqData;
     const ret = await this.controller.accountController.createWallet(password);
     const { env3 } = ret;
+
+    const { dev3 } = await this.controller.accountController.getWalletState();
+    await this.controller.websiteController.unlock(dev3.SubPriKey);
+    await this.controller.mobileController.unlock(dev3.SubPriKey);
+
     const initState = this.controller.getState();
-
     const respData = { env3, ...initState };
-
     logger.debug(`addWebsiteItem:${this._uuid}:Response Data>>>`, respData);
     return respData;
   }
@@ -78,13 +81,28 @@ class WhisperperListener {
     const retState = await this.controller.accountController.importWallet(env3, password);
     const respData = Object.assign({}, this.controller.getState(), retState);
 
+    const { dev3 } = this.controller.accountController.getWalletState();
+    await this.controller.websiteController.unlock(dev3.SubPriKey);
+    await this.controller.mobileController.unlock(dev3.SubPriKey);
+
     logger.debug(`addWebsiteItem:${this._uuid}:Response Data>>>`, respData);
     return respData;
   }
 
+  /**
+   *
+   * @param {*} reqData
+   */
   async login(reqData) {
     const { password } = reqData;
-    const dev3 = await this.controller.accountController.unlock(password);
+    await this.controller.accountController.unlock(password);
+    // const { selectedAddress, isUnlocked } = this.controller.accountController.getWalletState();
+    const { dev3 } = this.controller.accountController.getWalletState();
+    logger.debug('unlock dev3', dev3);
+    // website unlock
+    await this.controller.websiteController.unlock(dev3.SubPriKey);
+    await this.controller.mobileController.unlock(dev3.SubPriKey);
+
     const initState = this.controller.getState();
     await this.controller.unlockedNotifyCommunications();
     return initState;
@@ -92,6 +110,11 @@ class WhisperperListener {
 
   async logout() {
     const ret = await this.controller.accountController.lock();
+
+    // locked release memStore
+    await this.controller.websiteController.locked();
+    await this.controller.mobileController.locked();
+
     const initState = this.controller.getState();
 
     if (this.controller.lockingNotifyAllCommunications) {

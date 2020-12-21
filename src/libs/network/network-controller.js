@@ -158,6 +158,14 @@ class NetworkController extends EventEmitter {
     return provider;
   }
 
+  /**
+   * will instead getCurrentProvider
+   */
+  currentProvider() {
+    const { provider } = this.store.getState();
+    return provider;
+  }
+
   async pingNetwork() {
     try {
       const { provider } = this.store.getState();

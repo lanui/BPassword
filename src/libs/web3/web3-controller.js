@@ -15,6 +15,7 @@ import {
   INTERNAL_ERROR,
   INSUFFICIENT_BTS_BALANCE,
   INSUFFICIENT_ETH_BALANCE,
+  WALLET_LOCKED,
 } from '../biz-error/error-codes';
 
 import {
@@ -32,6 +33,8 @@ import {
   ETH_TOKEN,
   BT_APPRPOVE_ESGAS,
   BPT_MEMBER_RECHARGE_ESGAS,
+  BPT_STORAGE_WEB_COMMIT_ESGAS,
+  BPT_STORAGE_MOB_COMMIT_ESGAS,
   BPT_MEMBER,
 } from './contracts/enums';
 import {
@@ -41,12 +44,15 @@ import {
   TX_CONFIRMED,
   DEFAULT_GAS_STATION_URL,
   DEFAULT_GAS_PRICE,
+  GAS_LIMIT_PLUS_RATE,
 } from './cnst';
 
 import { getBTContractInst } from './apis/bt-api';
 import { getBptMemberAddress } from './apis/bpt-member-api';
 import { signedDataTransaction, signedRawTxData4Method } from './send-rawtx';
 import Web3 from 'web3';
+
+import { getWebStorageEventInst } from './apis/web-storage-event-api';
 
 /*********************************************************************
  * AircraftClass ::
@@ -65,7 +71,7 @@ class Web3Controller extends EventEmitter {
     super();
     this.getCurrentProvider = opts.getCurrentProvider;
 
-    this.walletState = opts.walletState;
+    this.currentWalletState = opts.walletState;
     const initState = opts.initState || {};
     const {
       config = _initConfigState(),
@@ -342,6 +348,10 @@ class Web3Controller extends EventEmitter {
     return await _signedRegistMember.call(this, reqId, gasPriceSwei, 1);
   }
 
+  async signedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
+    return _SignedWebsiteCommitCypher.call(this, reqId, gasPriceSwei, Cypher64);
+  }
+
   /**
    * @DateTime 2020-12-17
    * @param    {[object]}   txState [reqId,chainId,txHash] required [uid,statusText] optional
@@ -398,7 +408,7 @@ async function _reloadChainStatus(provider, address) {
 
 async function _signedApproved4Member(reqId, gasPriceSwei) {
   const toWei = Web3.utils.toWei;
-  const walletState = await this.walletState();
+  const walletState = await this.currentWalletState();
   if (
     !walletState ||
     !walletState.isUnlocked ||
@@ -453,7 +463,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
   }
 
   // this will from custom UI set
-  let gasLimit = parseInt(parseFloat(lastApproveGas) * 1.05);
+  let gasLimit = parseInt(parseFloat(lastApproveGas) * GAS_LIMIT_PLUS_RATE);
 
   logger.debug('approveAddress:>>>BTs>', btsBalance, lastApproveGas);
 
@@ -502,7 +512,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
  */
 async function _signedRegistMember(reqId, gasPriceSwei, charageType = 1) {
   const toWei = Web3.utils.toWei;
-  const walletState = await this.walletState();
+  const walletState = await this.currentWalletState();
   logger.debug('_signedRegistMember>>>', walletState);
   if (
     !walletState ||
@@ -623,7 +633,7 @@ async function _reloadBalances(provider) {
     throw new BizError('Provider Unset or illegal rpcUrl.', PROVIDER_ILLEGAL);
   }
 
-  const accState = await this.walletState();
+  const accState = await this.currentWalletState();
   if (!accState || !accState.isUnlocked) {
     logger.warn('get current account state fail', accState);
     throw new BizError('account not exists or logout', ACCOUNT_NOT_EXISTS);
@@ -727,6 +737,96 @@ function _translateGasStation(configState) {
   };
 
   return gasState;
+}
+
+async function _SignedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
+  const toWei = Web3.utils.toWei;
+  const bytesToHex = Web3.utils.bytesToHex;
+  const { chainId, rpcUrl } = await this.getCurrentProvider();
+  const { isUnlocked, selectedAddress, dev3 } = await this.currentWalletState();
+
+  if (!reqId || !Cypher64 || !chainId || !rpcUrl || !selectedAddress) {
+    throw new BizError('Params illegal.', INTERNAL_ERROR);
+  }
+
+  if (!isUnlocked || !dev3 || !dev3.SubPriKey) {
+    throw new BizError('Account logout.', WALLET_LOCKED);
+  }
+
+  const balanceState = await this.getBalanceState();
+
+  const web3js = getWeb3Inst(rpcUrl);
+  let ethwei = balanceState[ETH_TOKEN] || '0';
+
+  const storageInst = getWebStorageEventInst(web3js, chainId, selectedAddress);
+
+  const toContractAddress = storageInst._address;
+
+  const cypher64Hex = bytesToHex(ExtractCommit(dev3.SubPriKey, Cypher64));
+
+  let gasLimit = this.lastEstimateGas(BPT_STORAGE_WEB_COMMIT_ESGAS, chainId);
+
+  if (!gasLimit) {
+    gasLimit = await storageInst.methods.commit(cypher64Hex).estimateGas({ from: selectedAddress });
+
+    const updateGasState = {
+      [BPT_STORAGE_WEB_COMMIT_ESGAS]: gasLimit,
+    };
+    this.emit('update:status:store:estimateGas', updateGasState, chainId);
+  }
+
+  const { config = {} } = this.store.getState();
+  let { chain, gasPrice, gasStation = {} } = config;
+  let avg = gasStation.average;
+  if (gasPriceSwei > 0) {
+    gasPrice = toWei((gasPriceSwei / 10).toString(), 'Gwei');
+  } else if (avg > 0) {
+    gasPrice = toWei((avg / 10).toString(), 'Gwei');
+  }
+
+  // valid eth enought
+  const diamondsFee = validGasFeeEnought(ethwei, gasPrice, gasLimit);
+
+  let dataABI = await storageInst.methods.commit(cypher64Hex).encodeABI();
+
+  let txParams = {
+    gasLimit,
+    gasPrice,
+    value: 0,
+    to: toContractAddress,
+  };
+
+  const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+    chain,
+    chainId,
+    selectedAddress,
+  });
+
+  logger.debug('_SignedWebsiteCommitCypher>>', txRawDataSerialize);
+
+  return {
+    reqId,
+    chainId,
+    diamondsFee,
+    rawData: txRawDataSerialize,
+  };
+}
+
+async function _syncWebsiteChainData() {
+  const currentProvider = (await this.getCurrentProvider()) || {};
+  const { isUnlocked, dev3, selectedAddress } =
+    (await ctx.web3Controller.currentWalletState()) || {};
+  const { chainId, rpcUrl } = currentProvider;
+
+  if (!chainId || rpcUrl || !selectedAddress) {
+    throw new BizError('Params miss.', INTERNAL_ERROR);
+  }
+
+  if (!isUnlocked || !dev3) {
+    throw new BizError('Wallet locked.', WALLET_LOCKED);
+  }
+
+  const web3js = getWeb3Inst(rpcUrl);
 }
 
 export default Web3Controller;

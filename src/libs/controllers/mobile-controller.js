@@ -1,9 +1,17 @@
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
 
+import ComposedStore from 'obs-store/lib/composed';
+
 import logger from '@/libs/logger';
 import { transferTerms, getDiff } from '../utils/item-transfer';
-import { VEX_ITEM_EXIST, VEX_ITEM_EDIT, VEX_ITEM_DELETE } from '../biz-error/error-codes';
+import BizError from '../biz-error';
+import {
+  VEX_ITEM_EXIST,
+  VEX_ITEM_EDIT,
+  VEX_ITEM_DELETE,
+  INTERNAL_ERROR,
+} from '../biz-error/error-codes';
 
 /*********************************************************************
  * AircraftClass ::Mobile passbook management
@@ -30,9 +38,19 @@ class MobileController extends EventEmitter {
   constructor(opts = {}) {
     super();
 
+    this.currentProvider = opts.currentProvider;
+    this.currentWalletState = opts.currentWalletState;
+
     const initState = opts.initState || {};
 
-    this.store = new ObservableStore(Object.assign({}, StateStruct, initState));
+    const { localState = {}, versionState = [] } = initState;
+    this.localStore = new ObservableStore(localState);
+    this.versionStore = new ObservableStore(versionState);
+
+    this.store = new ComposedStore({
+      localState: this.localStore,
+      versionState: this.versionStore,
+    });
 
     this.memStore = new ObservableStore();
   }
@@ -44,12 +62,12 @@ class MobileController extends EventEmitter {
   async unlock(SubPriKey) {
     let Cypher64, Plain;
     try {
-      Cypher64 = (await this.store.getState()).Cypher64;
+      Cypher64 = await this.getCypher64();
       if (!Cypher64) {
         const f = InitFile(SubPriKey);
         Plain = f.Plain;
         Cypher64 = f.Cypher64;
-        this.store.updateState({ Cypher64 });
+        this.updateLocalChainCypher64(Cypher64);
       } else {
         Plain = decryptToPlainTxt(SubPriKey, Cypher64);
       }
@@ -79,7 +97,7 @@ class MobileController extends EventEmitter {
     try {
       const f = UpdateCmdAdd(subKey, cypher64, new Term(title, username, password));
       const { Plain, Cypher64 } = f;
-      this.store.updateState({ Cypher64 });
+      this.updateLocalChainCypher64(Cypher64);
       this.reloadMemStore(Plain, Cypher64);
 
       return await this.getState();
@@ -100,7 +118,7 @@ class MobileController extends EventEmitter {
     try {
       const f = UpdateCmdChange(subKey, cypher64, new Term(title, username, password));
       const { Plain, Cypher64 } = f;
-      await this.store.updateState({ Cypher64 });
+      this.updateLocalChainCypher64(Cypher64);
       await this.reloadMemStore(Plain, Cypher64);
 
       return await this.getState();
@@ -122,7 +140,7 @@ class MobileController extends EventEmitter {
       const f = UpdateCmdDelete(subKey, cypher64, new Term(title, null, null));
 
       const { Plain, Cypher64 } = f;
-      await this.store.updateState({ Cypher64 });
+      this.updateLocalChainCypher64(Cypher64);
       await this.reloadMemStore(Plain, Cypher64);
 
       return await this.getState();
@@ -146,8 +164,18 @@ class MobileController extends EventEmitter {
   }
 
   async getCypher64() {
-    const state = await this.store.getState();
-    return state.Cypher64 || '';
+    const { chainId } = this.currentProvider();
+    const localState = this.localStore.getState() || {};
+    return localState && localState[chainId] ? localState[chainId] : '';
+  }
+
+  async updateLocalChainCypher64(Cypher64) {
+    const { chainId } = this.currentProvider();
+    if (!chainId) {
+      throw new BizError('lost chainId in provider', INTERNAL_ERROR);
+    }
+
+    this.localStore.updateState({ [chainId]: Cypher64 });
   }
 
   async getState() {

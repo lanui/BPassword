@@ -43,7 +43,7 @@ export const transferTerms = (Plain, isWebsite = false) => {
       i.hostname = rets[0];
     }
     return i;
-  }).filter((it) => it.tips !== null && it.username !== null && it.password !== null);
+  }).filter((it) => it.title !== null && it.username !== null && it.password !== null);
 
   return items;
 };

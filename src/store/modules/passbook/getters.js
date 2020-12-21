@@ -11,29 +11,82 @@
 
 export const webdiff = (state) => {
   const Plain = state.webPlain;
-  if (!Plain || !Array.isArray(Plain.ChainData) || !Array.isArray(Plain.View)) {
-    return '';
-  }
+  // if (!Plain || !Array.isArray(Plain.Commit) ||Plain.Commit.length==0 ) {
+  //   return '';
+  // }
 
-  const viewLen = Plain.View.length,
-    chainLen = Plain.ChainData.length;
-  return calcDiffText(viewLen, chainLen);
+  return diffCalcPlain(Plain);
+
+  let add = 0,
+    del = 0;
+  Plain.Commit.forEach((c) => {
+    console.log('>>>>>>>>>>>>>', c.CType);
+    if (c.CType == 1) {
+      add += 1;
+    }
+    if (c.CType == 2) {
+      del += 1;
+    }
+  });
+
+  return add > 0 ? '+' + add : del > 0 ? '-' + del : '';
 };
 
 export const mobdiff = (state) => {
   const Plain = state.mobPlain;
-  if (!Plain || !Plain.ChainData || !Array.isArray(Plain.View) || !Array.isArray(Plain.ChainData)) {
+  if (!Plain || !Plain.Commit || !Array.isArray(Plain.Commit) || !Plain.Commit.length) {
     return '';
   }
-  const viewLen = Plain.View.length,
-    chainLen = Plain.ChainData.length;
-  return calcDiffText(viewLen, chainLen);
+  let add = 0,
+    del = 0;
+  Plain.Commit.forEach((c) => {
+    console.log('>>>>>>>>>>>>>', c.CType);
+    if (c.CType == 1) {
+      add += 1;
+    }
+    if (c.CType == 2) {
+      del += 1;
+    }
+  });
+
+  return add > 0 ? '+' + add : del > 0 ? '-' + del : '';
 };
 
-function calcDiffText(viewLen = 0, chainLen = 0) {
-  const diff = viewLen - chainLen;
-  if (diff === 0) return '';
-  return diff > 0 ? `+${diff}` : diff.toString();
+function diffCalcPlain(Plain) {
+  if (!Plain) {
+    return '';
+  }
+
+  let vLen = Plain.View.length,
+    chainLen = Plain.ChainData.length,
+    delLen = Plain.Trash.length,
+    commitLen = Plain.Commit.length;
+
+  let diff = vLen - chainLen;
+  if (diff !== 0) {
+    return diff > 0 ? `+${diff}` : '' + diff;
+  }
+
+  let dLen = Plain.Commit.filter((c) => c.CType == 2).length;
+  if (dLen) {
+    return '-' + dLen;
+  }
+  return '';
+}
+
+function diffCalcCommit(commits = []) {
+  let add = 0,
+    del = 0;
+  commits.forEach((c) => {
+    if (c.CType == 1) {
+      add += 1;
+    }
+    if (c.CType == 2) {
+      del += 1;
+    }
+  });
+
+  return add > 0 ? '+' + add : del > 0 ? '-' + del : '';
 }
 
 /**

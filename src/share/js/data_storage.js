@@ -463,6 +463,7 @@ function decryptToPlainTxt(key, cipher64) {
   }
   for (let i = 0; i < obj.Trash.length; i++) {
     let t = obj.Trash[i];
+
     p.Trash.data.push(new Term(t.title, t.name, t.password));
   }
   p.BlockNumber = obj.BlockNumber;
