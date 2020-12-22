@@ -103,3 +103,10 @@ export const websiteCommitItems = (state) => {
     return it;
   });
 };
+
+export const mobileCommitItems = (state) => {
+  return state.mobPlain.Commit.map((it) => {
+    it.title = it.Term.title;
+    return it;
+  });
+};

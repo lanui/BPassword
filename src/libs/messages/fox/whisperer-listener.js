@@ -24,6 +24,8 @@ import {
   API_RT_ADDORUP_TX_STATE,
   API_RT_SYNC_WEBSITE_DATA,
   API_RT_FETCH_WEBSITE_COMMIT_RAWDATA,
+  API_RT_SYNC_MOBILE_DATA,
+  API_RT_FETCH_MOBILE_COMMIT_RAWDATA,
 } from '../../msgapi/api-types';
 
 import { checkApiType } from '../../msgapi';
@@ -245,6 +247,23 @@ class WhisperperListener {
     );
   }
 
+  async mergeMobileChainData(reqData) {
+    return this.controller.mobileController.mergeLocalFromChainCypher();
+  }
+
+  async signedMobileCommitRawData(reqData) {
+    const { reqId, gasPriceSwei } = reqData;
+    const cypher64 = await this.controller.mobileController.getCypher64();
+    if (!cypher64) {
+      throw new BizError('miss locale cypher data.', INTERNAL_ERROR);
+    }
+
+    return await this.controller.web3Controller.signedMobileCommitCypher(
+      reqId,
+      gasPriceSwei,
+      cypher64
+    );
+  }
   /**
    *
    * {uid:txState}
@@ -315,6 +334,11 @@ async function HandleCypherApi(message, sender, sendResp) {
         return this.mergeWebsiteChainData(reqData);
       case API_RT_FETCH_WEBSITE_COMMIT_RAWDATA:
         return this.signedWebsiteCommitRawData(reqData);
+      case API_RT_SYNC_MOBILE_DATA:
+        return this.mergeMobileChainData(reqData);
+      case API_RT_FETCH_MOBILE_COMMIT_RAWDATA:
+        return this.signedMobileCommitRawData(reqData);
+
       default:
         throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
     }

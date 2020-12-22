@@ -13,6 +13,13 @@ import {
   INTERNAL_ERROR,
 } from '../biz-error/error-codes';
 
+import {
+  getMobStorageEventInst,
+  fetchEventLogsFromChain,
+} from '../web3/apis/mob-storage-event-api';
+
+import { getWeb3Inst } from '../web3/web3-helpers';
+
 /*********************************************************************
  * AircraftClass ::Mobile passbook management
  *     @Description: store encrypt data and history
@@ -43,8 +50,13 @@ class MobileController extends EventEmitter {
 
     const initState = opts.initState || {};
 
-    const { localState = {}, versionState = [] } = initState;
+    const { localState = {}, versionState = {} } = initState;
+    /**
+     * locale State
+     * chainId:Cypher64
+     */
     this.localStore = new ObservableStore(localState);
+
     this.versionStore = new ObservableStore(versionState);
 
     this.store = new ComposedStore({
@@ -187,6 +199,67 @@ class MobileController extends EventEmitter {
       diff,
     };
   }
+
+  getFromBlockNumber() {
+    const { Plain } = this.memStore.getState();
+    return Plain && Plain.BlockNumber ? Plain.BlockNumber : 0;
+  }
+
+  /** -------------------- Block Chain ------------------------ */
+  async mergeLocalFromChainCypher(fromBlock) {
+    const { selectedAddress, dev3 } = this.currentWalletState();
+    fromBlock = !fromBlock ? this.getFromBlockNumber() : fromBlock;
+
+    const currCypher64 = await this.getCypher64();
+    if (!currCypher64) {
+      throw new BizError('Local Cypher Illegal.', INTERNAL_ERROR);
+    }
+    const logsResp = await _GetFromChainLogs.call(this, selectedAddress, fromBlock);
+
+    const { blockNumber, lastTxHash, logs = [] } = logsResp;
+    logger.debug('Chain data>>>>>>>', fromBlock, blockNumber, lastTxHash, logs.length);
+    let retFile = null;
+    if (logs.length > 0 && blockNumber > fromBlock) {
+      retFile = UpdateBlockData(dev3.SubPriKey, currCypher64, blockNumber, lastTxHash, logs);
+      logger.debug('Mobile mergeLocalFromChainCypher>>>>>>>', retFile);
+      this.reloadMemStore(retFile.Plain, retFile.Cypher64);
+      this.updateLocalChainCypher64(retFile.Cypher64);
+    }
+
+    return await this.memStore.getState();
+  }
+
+  async getLatestLogs(fromBlock) {
+    const { selectedAddress } = this.currentWalletState();
+    fromBlock = !fromBlock ? this.getFromBlockNumber() : fromBlock;
+
+    const currCypher64 = await this.getCypher64();
+    if (!currCypher64) {
+      throw new BizError('Local Cypher Illegal.', INTERNAL_ERROR);
+    }
+
+    const logsResp = await _GetFromChainLogs.call(this, selectedAddress, fromBlock);
+
+    return logsResp;
+  }
+}
+
+/**
+ *
+ * @param {number} fromBlock
+ */
+async function _GetFromChainLogs(selectedAddress, fromBlock = 0) {
+  const { chainId, rpcUrl } = this.currentProvider();
+
+  if (!chainId || !rpcUrl || !selectedAddress) {
+    throw new BizError('Params illegal', INTERNAL_ERROR);
+  }
+
+  logger.debug('_GetFromChainLogs>>>>>>>>>>>>', fromBlock);
+  const web3js = getWeb3Inst(rpcUrl);
+  const respLogs = await fetchEventLogsFromChain(web3js, chainId, selectedAddress, fromBlock);
+  logger.debug('Mobile _GetFromChainLogs>>>>>>>>>>>>', respLogs);
+  return respLogs;
 }
 
 export default MobileController;

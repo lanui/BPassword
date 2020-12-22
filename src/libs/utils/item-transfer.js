@@ -27,6 +27,8 @@ export const transferTerms = (Plain, isWebsite = false) => {
 
   if (!Array.isArray(ChainData)) ChainData = [];
 
+  // let newItems = [];
+
   const items = View.map((v) => {
     const title = v.title || '';
     const onchain = ChainData.find((c) => c.title == title);

@@ -468,9 +468,9 @@ class WebsiteController extends EventEmitter {
   /**
    *
    */
-  async mergeLocalFromChainCypher() {
+  async mergeLocalFromChainCypher(fromBlock) {
     const { isUnlocked, selectedAddress, dev3 } = this.currentWalletState();
-    const fromBlock = this.getFromBlockNumber();
+    fromBlock = !fromBlock ? this.getFromBlockNumber() : fromBlock;
 
     const currCypher64 = await this.getCypher64();
     if (!currCypher64) {
@@ -493,9 +493,9 @@ class WebsiteController extends EventEmitter {
     return await this.memStore.getState();
   }
 
-  async getLatestLogs() {
+  async getLatestLogs(fromBlock) {
     const { selectedAddress } = this.currentWalletState();
-    const fromBlock = this.getFromBlockNumber();
+    fromBlock = !fromBlock ? this.getFromBlockNumber() : fromBlock;
 
     const currCypher64 = await this.getCypher64();
     if (!currCypher64) {
@@ -561,7 +561,7 @@ async function _GetFromChainLogs(selectedAddress, fromBlock = 0) {
     throw new BizError('Params illegal', INTERNAL_ERROR);
   }
 
-  logger.debug('_GetFromChainLogs>>>>>>>>>>>>', fromBlock);
+  logger.debug('Website _GetFromChainLogs>>>>>>>>>>>>', fromBlock);
   const web3js = getWeb3Inst(rpcUrl);
   const respLogs = await fetchEventLogsFromChain(web3js, chainId, selectedAddress, fromBlock);
   return respLogs;

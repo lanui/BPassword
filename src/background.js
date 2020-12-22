@@ -193,8 +193,12 @@ async function setupController(initState) {
         try {
           await controller.accountController.unlock(pass);
           const { dev3 } = await controller.accountController.getWalletState();
-          await controller.websiteController.unlock(dev3.SubPriKey);
-          await controller.mobileController.unlock(dev3.SubPriKey);
+          controller.websiteController.unlock(dev3.SubPriKey).catch((err) => {
+            logger.debug('auto login websiteController failed.>>>>>', err);
+          });
+          controller.mobileController.unlock(dev3.SubPriKey).catch((err) => {
+            logger.debug('auto login mobileController failed.>>>>>', err);
+          });
         } catch (error) {
           logger.debug('auto login failed.>>>>>', error);
         }
