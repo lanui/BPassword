@@ -18,7 +18,6 @@ export const webdiff = (state) => {
   let add = 0,
     del = 0;
   Plain.Commit.forEach((c) => {
-    console.log('>>>>>>>>>>>>>', c.CType);
     if (c.CType == 1) {
       add += 1;
     }

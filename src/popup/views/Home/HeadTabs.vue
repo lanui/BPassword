@@ -123,6 +123,7 @@ import syncBlocker from '@/ui/assets/icons/sync_blocker.png';
 import logger from '@lib/logger';
 import WhispererController from '@lib/messages/whisperer-controller';
 import { getWeb3Inst } from '@lib/web3/web3-helpers';
+import { INTERNAL_ERROR, INTERNAL_MISS_MSG } from '@lib/biz-error/error-codes';
 
 import GasControllerPanel from '@/popup/widgets/GasControllerPanel.vue';
 
@@ -131,7 +132,10 @@ import {
   API_RT_FETCH_WEBSITE_COMMIT_RAWDATA,
   API_RT_SYNC_MOBILE_DATA,
   API_RT_FETCH_MOBILE_COMMIT_RAWDATA,
+  API_RT_ADDORUP_TX_STATE,
 } from '@lib/msgapi/api-types';
+import { TX_PENDING, TX_FAILED, TX_CONFIRMED } from '@lib/web3/cnst';
+
 export default {
   name: 'HomeHeadTabs',
   components: {
@@ -215,7 +219,7 @@ export default {
         await this.$store.dispatch('passbook/subInitState4Site', respState);
         await this.openWebsiteDialog();
       } catch (err) {
-        logger.err('fetchWebsiteSignedRawData:', err);
+        logger.error('fetchWebsiteSignedRawData:', err);
         this.$toast(err.message, 'fail', 6000);
       }
     },
@@ -229,7 +233,107 @@ export default {
     async signedSyncRawDataHandler() {
       const reqId = this.$uid();
       const gasPriceSwei = this.$refs.gasCtx.gasPrice;
-      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', gasPriceSwei);
+      const isWebsite = this.tab === 'tabWebsite';
+
+      const that = this;
+      const API_TYPE = isWebsite
+        ? API_RT_FETCH_WEBSITE_COMMIT_RAWDATA
+        : API_RT_FETCH_MOBILE_COMMIT_RAWDATA;
+      try {
+        const whisperer = new WhispererController({ portName: `BT_SIGNED_WEBSITE` });
+        const respState = await whisperer.sendSimpleMessage(API_TYPE, { reqId, gasPriceSwei });
+        const { chainId, rawData, rpcUrl, diamondsFee } = respState;
+        logger.debug(`signed raw data for ${this.tab}:`, respState);
+        if (!rpcUrl || !rawData) {
+          throw new BizError('signed return data lost.', INTERNAL_ERROR);
+        }
+
+        const web3js = getWeb3Inst(rpcUrl);
+        that.trading = true;
+
+        let txState = {
+          reqId,
+          chainId,
+          cts: new Date().getTime(),
+          statusText: TX_PENDING,
+          txHash: null,
+        };
+
+        let toastMsg = '';
+
+        web3js.eth
+          .sendSignedTransaction(rawData)
+          .once('transactionHash', async (txHash) => {
+            txState.txHash = txHash;
+            await that.$store.dispatch('web3/addTxState', txState);
+            whisperer
+              .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, txState)
+              .then((respState) => {
+                if (respState && respState.chainTxs) {
+                  that.$store.dispatch('web3/updateChainTxs', respState.chainTxs);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+
+            toastMsg = `数据已提交,正在打包中... ${txHash}`;
+            that.$toast(toastMsg, 'normal', 4000);
+          })
+          .on('error', async (err, receipt) => {
+            let errTxState = txState;
+            if (typeof receipt === 'object') {
+              errTxState = Object.assign({}, txState, receipt);
+            }
+            errTxState.statusText = TX_FAILED;
+            whisperer
+              .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, errTxState)
+              .then((respState) => {
+                if (respState && respState.chainTxs) {
+                  that.$store.dispatch('web3/updateChainTxs', respState.chainTxs);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            toastMsg = err.message;
+            that.trading = false;
+            that.$toast(toastMsg, 'fail', 6000);
+          })
+          .then(async (receipt) => {
+            const _status = receipt.status;
+            let compTxState = Object.assign({}, txState, receipt, {
+              statusText: _status ? TX_CONFIRMED : TX_FAILED,
+            });
+
+            await that.$store.dispatch('web3/addOrUpdateChainTxState', compTxState);
+            whisperer
+              .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, compTxState)
+              .then((respState) => {
+                if (respState && respState.chainTxs) {
+                  that.$store.dispatch('web3/updateChainTxs', respState.chainTxs);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            const respState = await whisperer.sendSimpleMessage(API_RT_SYNC_WEBSITE_DATA, {
+              reqId: reqId,
+            });
+            await this.$store.dispatch('passbook/subInitState4Site', respState);
+            that.$toast('同步完成', 'success', 6000);
+            that.trading = false;
+            that.resetDialog(true);
+          });
+      } catch (err) {
+        that.trading = false;
+        logger.error(`BPass Error- ${INTERNAL_ERROR}:`, err);
+        if (err.code === INTERNAL_ERROR) {
+          this.$toast('同步失败,请重试.');
+        } else {
+          this.$toast(err.message, 'fail', 6000);
+        }
+      }
     },
   },
 };

@@ -275,6 +275,7 @@ class WebsiteController extends EventEmitter {
     if (!cypher64) throw new Error('local cypher lost.');
 
     const { title, username, password, hostname } = data;
+    logger.debug('>>>>>>>>>>>>>', data, cypher64);
     try {
       const f = UpdateCmdChange(subKey, cypher64, new Term(title, username, password));
       const { Plain, Cypher64 } = f;
@@ -479,19 +480,31 @@ class WebsiteController extends EventEmitter {
     const logsResp = await _GetFromChainLogs.call(this, selectedAddress, fromBlock);
 
     const { blockNumber, lastTxHash, logs = [] } = logsResp;
-    logger.debug('Chain data>>>>>>>', blockNumber, lastTxHash, logs.length);
+    logger.debug('Chain data>>>>>>>', fromBlock, blockNumber, lastTxHash, logs.length);
 
     let retFile = null;
-    if (logs.length > 0) {
+    if (logs.length > 0 && blockNumber > fromBlock) {
       retFile = UpdateBlockData(dev3.SubPriKey, currCypher64, blockNumber, lastTxHash, logs);
       logger.debug('>>>>>>>', retFile);
-
       this.reloadMemStore(retFile.Plain, retFile.Cypher64);
-
       this.updateLocalChainCypher64(retFile.Cypher64);
     }
 
     return await this.memStore.getState();
+  }
+
+  async getLatestLogs() {
+    const { selectedAddress } = this.currentWalletState();
+    const fromBlock = this.getFromBlockNumber();
+
+    const currCypher64 = await this.getCypher64();
+    if (!currCypher64) {
+      throw new BizError('Local Cypher Illegal.', INTERNAL_ERROR);
+    }
+
+    const logsResp = await _GetFromChainLogs.call(this, selectedAddress, fromBlock);
+
+    return logsResp;
   }
 
   /**
@@ -548,6 +561,7 @@ async function _GetFromChainLogs(selectedAddress, fromBlock = 0) {
     throw new BizError('Params illegal', INTERNAL_ERROR);
   }
 
+  logger.debug('_GetFromChainLogs>>>>>>>>>>>>', fromBlock);
   const web3js = getWeb3Inst(rpcUrl);
   const respLogs = await fetchEventLogsFromChain(web3js, chainId, selectedAddress, fromBlock);
   return respLogs;

@@ -437,7 +437,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
 
   let btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
 
-  //TODO valid insuffient
+  // valid insuffient
   let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || toWei('98', 'ether');
   if (compareWei(btsBalance, memberCostWeiPerYear) < 0) {
     throw new BizError('Insuffient BT Balance.', INSUFFICIENT_BTS_BALANCE);
@@ -807,6 +807,7 @@ async function _SignedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
   return {
     reqId,
     chainId,
+    rpcUrl,
     diamondsFee,
     rawData: txRawDataSerialize,
   };

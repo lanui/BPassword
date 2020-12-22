@@ -57,6 +57,7 @@ Cmd.prototype = {
   unpack: function (p) {
     cType = p[0];
     ls = splitBytesArray(p.slice(2), UnitSeparator);
+    console.log('BP-test-eeror>>unpack>>>', ls);
     if (ls.length != 3) {
       throw 'bad format of term';
     }
@@ -168,6 +169,7 @@ ChainCmdArray.prototype.DecryptChainCmdArray = function (key, bytes) {
   }
   var plainTxt = BPDecrypt(key, bytes);
   var ls = splitBytesArray(plainTxt, GroupSeparator);
+  console.log('BP-test-eeror>>>ls>', ls);
   var cs = [];
   for (var i = 0; i < ls.length; i++) {
     var c = new Cmd(1, null); // those values will be overwrite by unpack
