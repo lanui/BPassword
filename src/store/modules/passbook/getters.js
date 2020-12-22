@@ -11,11 +11,9 @@
 
 export const webdiff = (state) => {
   const Plain = state.webPlain;
-  // if (!Plain || !Array.isArray(Plain.Commit) ||Plain.Commit.length==0 ) {
-  //   return '';
-  // }
-
-  return diffCalcPlain(Plain);
+  if (!Plain || !Array.isArray(Plain.Commit) || Plain.Commit.length == 0) {
+    return '';
+  }
 
   let add = 0,
     del = 0;
@@ -40,7 +38,6 @@ export const mobdiff = (state) => {
   let add = 0,
     del = 0;
   Plain.Commit.forEach((c) => {
-    console.log('>>>>>>>>>>>>>', c.CType);
     if (c.CType == 1) {
       add += 1;
     }
@@ -99,4 +96,11 @@ export const webItemsState = (state) => {
 
 export const mobItemsState = (state) => {
   return state.mobItems;
+};
+
+export const websiteCommitItems = (state) => {
+  return state.webPlain.Commit.map((it) => {
+    it.title = it.Term.title;
+    return it;
+  });
 };

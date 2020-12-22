@@ -37,7 +37,9 @@ export default {
     ...mapGetters('web3', ['getBTsBalanceText', 'getEthBalanceText', 'getDiamondsText']),
   },
   data() {
-    return {};
+    return {
+      dialogshow: true,
+    };
   },
   methods: {},
 };
@@ -60,6 +62,7 @@ export default {
   background: linear-gradient(217deg, #86b3e7 0%, #6fa0ef 100%, #6fa0ef 100%);
   border-radius: 16px;
 }
+
 .wallet-item--wrap {
   display: flex;
   flex-direction: column;
@@ -88,6 +91,7 @@ export default {
   font-size: 1.75rem;
   padding: 1rem auto;
 }
+
 .wallet--wrapper .inner-wallet {
   font-size: 0.75rem;
   margin: 0.5rem auto;

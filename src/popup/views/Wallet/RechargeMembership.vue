@@ -52,7 +52,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import SubnavBar from '@/popup/widgets/SubnavBar.vue';
-import GasControllerPanel from './components/GasControllerPanel.vue';
+import GasControllerPanel from '@/popup/widgets/GasControllerPanel.vue';
 
 import logger from '@lib/logger';
 import WhispererController from '@lib/messages/whisperer-controller';

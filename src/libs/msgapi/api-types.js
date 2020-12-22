@@ -31,6 +31,12 @@ export const API_RT_FETCH_BTAPPROVED_RAW_DATA = 'fetchBtApprovedRawData';
 export const API_RT_FETCH_REGIST_MEMBER_RAW_DATA = 'fetchRegistMemberRawData';
 export const API_RT_APPROVE_TO_MEMBER = 'smartApproveBT2Member';
 
+export const API_RT_SYNC_WEBSITE_DATA = 'syncWebsiteChainDataToLocal';
+export const API_RT_FETCH_WEBSITE_COMMIT_RAWDATA = 'fetchWebsiteCommitRawData';
+
+export const API_RT_SYNC_MOBILE_DATA = 'syncMobileChainDataToLocal';
+export const API_RT_FETCH_MOBILE_COMMIT_RAWDATA = 'fetchMobileCommitRawData';
+
 export const API_RT_ADDORUP_TX_STATE = 'bpAddOrUpdateChainTxState';
 
 /** leech */

@@ -22,6 +22,7 @@ import {
   API_RT_FETCH_BTAPPROVED_RAW_DATA,
   API_RT_FETCH_REGIST_MEMBER_RAW_DATA,
   API_RT_ADDORUP_TX_STATE,
+  API_RT_SYNC_WEBSITE_DATA,
 } from '../../msgapi/api-types';
 
 import { checkApiType } from '../../msgapi';
@@ -226,6 +227,10 @@ class WhisperperListener {
     return this.controller.web3Controller.signedRegistedMemberByYear(reqData);
   }
 
+  async mergeWebsiteChainData(reqData) {
+    return this.controller.websiteController.mergeLocalFromChainCypher();
+  }
+
   /**
    *
    * {uid:txState}
@@ -292,6 +297,8 @@ async function HandleCypherApi(message, sender, sendResp) {
         return this.addOrUpdateChainTxState(reqData);
       case API_RT_FETCH_REGIST_MEMBER_RAW_DATA:
         return this.signedForRegistMember(reqData);
+      case API_RT_SYNC_WEBSITE_DATA:
+        return this.mergeWebsiteChainData(reqData);
       default:
         throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
     }

@@ -4,7 +4,7 @@
       <v-list-item class="member-status-item">
         <v-list-item-title> Gas Price: {{ gasPrice / 10 }} Gwei </v-list-item-title>
         <v-list-item-action>
-          <v-icon @click="gasPanelShow = !gasPanelShow">
+          <v-icon @click="gasPanelShow = !gasPanelShow" :size="iconsize">
             {{ gasPanelShow ? icons.ARROW_DOWN_MDI : icons.ARROW_RIGHT_MDI }}
           </v-icon>
         </v-list-item-action>
@@ -55,6 +55,13 @@ export default {
   },
   mounted() {
     this.gasPrice = this.gasState.average || this.gasState.gasPrice;
+  },
+  props: {
+    iconsize: {
+      type: Number,
+      default: 20,
+      required: false,
+    },
   },
 };
 </script>

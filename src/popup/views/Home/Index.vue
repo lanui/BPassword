@@ -16,7 +16,9 @@ export default {
   },
   computed: {},
   data() {
-    return {};
+    return {
+      maskshow: true,
+    };
   },
   methods: {},
 };

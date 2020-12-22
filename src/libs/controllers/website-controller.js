@@ -491,7 +491,7 @@ class WebsiteController extends EventEmitter {
       this.updateLocalChainCypher64(retFile.Cypher64);
     }
 
-    return retFile;
+    return await this.memStore.getState();
   }
 
   /**

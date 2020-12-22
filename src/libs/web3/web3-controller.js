@@ -358,7 +358,7 @@ class Web3Controller extends EventEmitter {
    * @return   {[array]}           [chainTxs]
    */
   async chainTxStatusUpdateForUI(txState) {
-    const txs = this.txStore.getState();
+    const txs = await this.txStore.getState();
     const { chainId, reqId } = txState || {};
     if (!reqId || !chainId) {
       throw new BizError('TxState must contains reqId,chainId and txHash');
