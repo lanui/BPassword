@@ -35,4 +35,6 @@ export const PROVIDER_ILLEGAL = '511511';
 export const INSUFFICIENT_ETH_BALANCE = '600001'; // insufficient eth balance
 export const INSUFFICIENT_BTS_BALANCE = '600002';
 
+export const MEMBERSHIP_EXPIRED = '610000'; //会员过期
+
 /** UI Start */

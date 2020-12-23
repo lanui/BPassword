@@ -747,9 +747,10 @@ async function _runtimeStartupHandler() {
   const { provider } = await this.networkController.store.getState();
 
   // logger.debug("_runtimeStartupHandler>>>", provider, selectedAddress)
-  await this.web3Controller.emit('web3:reload:member:status', provider, selectedAddress);
-
-  await this.web3Controller.emit('web3:reload:config', provider, selectedAddress);
+  if (selectedAddress) {
+    await this.web3Controller.emit('web3:reload:member:status', provider, selectedAddress);
+    await this.web3Controller.emit('web3:reload:config', provider, selectedAddress);
+  }
 
   if (provider.rpcUrl && LOG_LEVEL === 'DEBUG') {
     const web3 = new Web3(new Web3.providers.HttpProvider(provider.rpcUrl));

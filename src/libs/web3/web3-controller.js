@@ -1,8 +1,9 @@
-import { chain, debounce } from 'lodash';
+import { debounce } from 'lodash';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
 import ComposedStore from 'obs-store/lib/composed';
+import moment from 'moment';
 
 import { SmartAddressesTranslate } from './contracts/index';
 
@@ -16,6 +17,7 @@ import {
   INSUFFICIENT_BTS_BALANCE,
   INSUFFICIENT_ETH_BALANCE,
   WALLET_LOCKED,
+  MEMBERSHIP_EXPIRED,
 } from '../biz-error/error-codes';
 
 import {
@@ -48,7 +50,7 @@ import {
 } from './cnst';
 
 import { getBTContractInst } from './apis/bt-api';
-import { getBptMemberAddress } from './apis/bpt-member-api';
+import { getBptMemberAddress, getBPTMemberContractInst } from './apis/bpt-member-api';
 import { signedDataTransaction, signedRawTxData4Method } from './send-rawtx';
 import Web3 from 'web3';
 
@@ -775,12 +777,14 @@ async function _SignedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
   //valid sdk parse bytes
   validSdkExtractCommit(dev3.SubPriKey, cypherBytes);
 
+  await _validMembership(web3js, chainId, selectedAddress);
+
   let gasLimitNumber = await this.lastEstimateGas(BPT_STORAGE_WEB_COMMIT_ESGAS, chainId);
 
   if (!gasLimitNumber) {
     logger.debug('gasLimit >>>>>>', gasLimitNumber, cypher64Hex);
     gasLimitNumber = await storageInst.methods
-      .commit(cypherBytes)
+      .commit(cypher64Hex)
       .estimateGas({ from: selectedAddress });
 
     const updateGasState = {
@@ -859,6 +863,8 @@ async function _SignedMobileCommitCypher(reqId, gasPriceSwei, Cypher64) {
 
   let gasLimit = this.lastEstimateGas(BPT_STORAGE_MOB_COMMIT_ESGAS, chainId);
 
+  await _validMembership(web3js, chainId, selectedAddress);
+
   if (!gasLimit) {
     gasLimit = await storageInst.methods.commit(cypherBytes).estimateGas({ from: selectedAddress });
 
@@ -917,21 +923,18 @@ function validSdkExtractCommit(subPriKey, cypherBytes) {
   }
 }
 
-async function _syncWebsiteChainData() {
-  const currentProvider = (await this.getCurrentProvider()) || {};
-  const { isUnlocked, dev3, selectedAddress } =
-    (await ctx.web3Controller.currentWalletState()) || {};
-  const { chainId, rpcUrl } = currentProvider;
+async function _validMembership(web3js, chainId, address) {
+  const inst = getBPTMemberContractInst(web3js, chainId, address);
+  const membershipDeadline = await inst.methods.allMembership(address).call();
 
-  if (!chainId || rpcUrl || !selectedAddress) {
-    throw new BizError('Params miss.', INTERNAL_ERROR);
+  if (!membershipDeadline || membershipDeadline == '0') {
+    throw new BizError('non-member', MEMBERSHIP_EXPIRED);
   }
 
-  if (!isUnlocked || !dev3) {
-    throw new BizError('Wallet locked.', WALLET_LOCKED);
+  if (new Date().getTime() / 1000 - parseFloat(membershipDeadline) > 0) {
+    const expiredDate = moment(new Date(membershipDeadline * 1000)).format('YYYY-MM-DD');
+    throw new BizError(`Membership Expired : [${expiredDate}]`, MEMBERSHIP_EXPIRED);
   }
-
-  const web3js = getWeb3Inst(rpcUrl);
 }
 
 export default Web3Controller;

@@ -57,15 +57,20 @@ Cmd.prototype = {
   unpack: function (p) {
     cType = p[0];
     ls = splitBytesArray(p.slice(2), UnitSeparator);
-    if (ls.length != 3) {
-      throw 'bad format of term';
+    if (cType == CmdDelete) {
+      _term = ls.map((x) => Buffer.from(x).toString());
+      this.Term = new Term(_term[0], null, null);
+    } else {
+      if (ls.length != 3) {
+        throw 'bad format of term';
+      }
+      _term = ls.map((x) => Buffer.from(x).toString());
+      this.CType = cType;
+      if (_term.length != 3) {
+        throw 'bad format';
+      }
+      this.Term = new Term(_term[0], _term[1], _term[2]);
     }
-    _term = ls.map((x) => Buffer.from(x).toString());
-    this.CType = cType;
-    if (_term.length != 3) {
-      throw 'bad format';
-    }
-    this.Term = new Term(_term[0], _term[1], _term[2]);
   },
   check: function () {
     if (this.CType != CmdAdd && this.CType != CmdDelete && this.CType != CmdChange) {

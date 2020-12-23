@@ -70,6 +70,7 @@ class WhisperperListener {
     const { env3 } = ret;
 
     const { dev3 } = await this.controller.accountController.getWalletState();
+
     await this.controller.websiteController.unlock(dev3.SubPriKey);
     await this.controller.mobileController.unlock(dev3.SubPriKey);
 
