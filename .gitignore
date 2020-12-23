@@ -105,6 +105,7 @@ dist
 
 # locak env ignore
 config/.*.env.js
+config/test.acc.template
 distribution-src-zip.js
 
 # project ignore
