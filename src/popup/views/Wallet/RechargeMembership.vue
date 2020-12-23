@@ -81,6 +81,7 @@ export default {
       'membershipCostBTsPerYear',
       'validNeedApprove',
       'chainTxs',
+      'validGasAndBtsEnought',
     ]),
     expiredText() {
       let text = this.getMembershipExpired;
@@ -127,6 +128,12 @@ export default {
       const that = this;
 
       let tradingText = '';
+
+      if (!this.validGasAndBtsEnought) {
+        let msg = 'Insufficient BTs or Diamonds balance';
+        this.$toast('Insufficient BTs or Diamonds balance', 'warn', 5000);
+        return;
+      }
 
       try {
         that.startLoading('Approving...');
@@ -251,6 +258,12 @@ export default {
     async rechargeHandler() {
       const reqId = this.$uid();
       const chainId = this.chainTxs;
+
+      if (!this.validGasAndBtsEnought) {
+        let msg = 'Insufficient BTs or Diamonds balance';
+        this.$toast('Insufficient BTs or Diamonds balance', 'warn', 5000);
+        return;
+      }
 
       const that = this;
       let toastMsg = '',

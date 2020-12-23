@@ -40,7 +40,7 @@ export const signedDataTransaction = async (txParams, signOpts) => {
 
   const signedTx = tx.sign(dev3.MainPriKey);
   const txRawData = signedTx.serialize();
-  console.log(txRawData.toString('hex'));
+
   return '0x' + txRawData.toString('hex');
 };
 
@@ -51,6 +51,7 @@ export const signedDataTransaction = async (txParams, signOpts) => {
  * @param {object} txParams
  * @param {methodABI} data
  * @param {object} opts
+ * @returns {object} [nonce,rawData]
  */
 export const signedRawTxData4Method = async (web3js, dev3, txParams, data, opts) => {
   if (!web3js || !dev3 || !data || !opts || !opts.selectedAddress) {
@@ -94,7 +95,11 @@ export const signedRawTxData4Method = async (web3js, dev3, txParams, data, opts)
 
   logger.debug(`${selectedAddress} signed rawData`, txData, txRawData.toString('hex'));
 
-  return `0x${txRawData.toString('hex')}`;
+  return {
+    nonce,
+    rawData: `0x${txRawData.toString('hex')}`,
+  };
+  // return `0x${txRawData.toString('hex')}`;
 };
 
 /**

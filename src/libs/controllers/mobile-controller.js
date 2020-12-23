@@ -19,6 +19,7 @@ import {
 } from '../web3/apis/mob-storage-event-api';
 
 import { getWeb3Inst } from '../web3/web3-helpers';
+import Web3 from 'web3';
 
 /*********************************************************************
  * AircraftClass ::Mobile passbook management
@@ -203,6 +204,19 @@ class MobileController extends EventEmitter {
   getFromBlockNumber() {
     const { Plain } = this.memStore.getState();
     return Plain && Plain.BlockNumber ? Plain.BlockNumber : 0;
+  }
+
+  async getCypherBytesHex() {
+    const curCypher64 = await this.getCypher64();
+    const { dev3 } = await this.currentWalletState();
+    if (!dev3) {
+      throw new BizError('no wallet or account locked.', INTERNAL_ERROR);
+    }
+    if (!curCypher64) {
+      throw new BizError('cypher illegal.', INTERNAL_ERROR);
+    }
+    const cypherHex = Web3.utils.bytesToHex(ExtractCommit(dev3.SubPriKey, curCypher64));
+    return cypherHex;
   }
 
   /** -------------------- Block Chain ------------------------ */

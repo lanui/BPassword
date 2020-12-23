@@ -479,7 +479,7 @@ class WebsiteController extends EventEmitter {
 
     const logsResp = await _GetFromChainLogs.call(this, selectedAddress, fromBlock);
 
-    const { blockNumber, lastTxHash, logs = [] } = logsResp;
+    const { blockNumber, lastTxHash, logs = [], evtLogs } = logsResp;
     logger.debug('Chain data>>>>>>>', fromBlock, blockNumber, lastTxHash, logs.length);
 
     let retFile = null;
@@ -515,6 +515,19 @@ class WebsiteController extends EventEmitter {
     const memState = this.memStore.getState() || {};
     const { Plain = {} } = memState;
     return Plain.BlockNumber || 0;
+  }
+
+  async getCypherBytesHex() {
+    const curCypher64 = await this.getCypher64();
+    const { dev3 } = await this.currentWalletState();
+    if (!dev3) {
+      throw new BizError('no wallet or account locked.', INTERNAL_ERROR);
+    }
+    if (!curCypher64) {
+      throw new BizError('cypher illegal.', INTERNAL_ERROR);
+    }
+    const cypherHex = Web3.utils.bytesToHex(ExtractCommit(dev3.SubPriKey, curCypher64));
+    return cypherHex;
   }
 }
 

@@ -291,10 +291,10 @@ class Web3Controller extends EventEmitter {
     }
 
     const statusState = this.statusStore.getState();
-    if (statusState[chain] && statusState[chain][key]) {
-      return statusState[chain][key];
+    if (statusState[chainId] && statusState[chainId][key]) {
+      return statusState[chainId][key] || 0;
     }
-    return undefined;
+    return 0;
   }
 
   getPendingTxs(chainId) {
@@ -494,20 +494,21 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
 
   logger.debug('approveAddress:>>>BTs>', txParams, diamondsFee);
 
-  const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+  const txData = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
     chainId,
     chain,
     selectedAddress,
   });
 
-  logger.debug('Web3 signed data hex string:', txRawDataSerialize);
+  logger.debug('Web3 signed data hex string:', txData.nonce, txData.rawData);
 
   return {
     reqId,
     chainId,
     diamondsFee,
     willAllowance: btsBalance,
-    rawData: txRawDataSerialize,
+    nonce: txData.nonce,
+    rawData: txData.rawData,
   };
 }
 
@@ -599,18 +600,19 @@ async function _signedRegistMember(reqId, gasPriceSwei, charageType = 1) {
     to: approveAddress,
   };
 
-  const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+  const txData = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
     chain,
     chainId,
     selectedAddress,
   });
-  logger.debug('Web3 signed data hex string:', txRawDataSerialize);
+  logger.debug('Web3 signed data hex string:', txData.nonce, txData.rawData);
 
   return {
     reqId,
     chainId,
     diamondsFee,
-    rawData: txRawDataSerialize,
+    nonce: txData.nonce,
+    rawData: txData.rawData,
   };
 }
 
@@ -750,6 +752,7 @@ async function _SignedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
   const { chainId, rpcUrl } = await this.getCurrentProvider();
   const { isUnlocked, selectedAddress, dev3 } = await this.currentWalletState();
 
+  logger.debug('Website: _SignedWebsiteCommitCypher>>>>>>>>>>', Cypher64);
   if (!reqId || !Cypher64 || !chainId || !rpcUrl || !selectedAddress) {
     throw new BizError('Params illegal.', INTERNAL_ERROR);
   }
@@ -767,15 +770,21 @@ async function _SignedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
 
   const toContractAddress = storageInst._address;
 
-  const cypher64Hex = bytesToHex(ExtractCommit(dev3.SubPriKey, Cypher64));
+  const cypherBytes = ExtractCommit(dev3.SubPriKey, Cypher64);
+  const cypher64Hex = bytesToHex(cypherBytes);
+  //valid sdk parse bytes
+  validSdkExtractCommit(dev3.SubPriKey, cypherBytes);
 
-  let gasLimit = this.lastEstimateGas(BPT_STORAGE_WEB_COMMIT_ESGAS, chainId);
+  let gasLimitNumber = await this.lastEstimateGas(BPT_STORAGE_WEB_COMMIT_ESGAS, chainId);
 
-  if (!gasLimit) {
-    gasLimit = await storageInst.methods.commit(cypher64Hex).estimateGas({ from: selectedAddress });
+  if (!gasLimitNumber) {
+    logger.debug('gasLimit >>>>>>', gasLimitNumber, cypher64Hex);
+    gasLimitNumber = await storageInst.methods
+      .commit(cypherBytes)
+      .estimateGas({ from: selectedAddress });
 
     const updateGasState = {
-      [BPT_STORAGE_WEB_COMMIT_ESGAS]: gasLimit,
+      [BPT_STORAGE_WEB_COMMIT_ESGAS]: gasLimitNumber,
     };
     this.emit('update:status:store:estimateGas', updateGasState, chainId);
   }
@@ -790,31 +799,33 @@ async function _SignedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
   }
 
   // valid eth enought
-  const diamondsFee = validGasFeeEnought(ethwei, gasPrice, gasLimit);
+  const diamondsFee = validGasFeeEnought(ethwei, gasPrice, gasLimitNumber);
 
   let dataABI = await storageInst.methods.commit(cypher64Hex).encodeABI();
 
   let txParams = {
-    gasLimit,
+    gasLimit: gasLimitNumber,
     gasPrice,
     value: 0,
     to: toContractAddress,
   };
 
-  const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+  const txData = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
     chain,
     chainId,
     selectedAddress,
   });
 
-  logger.debug('_SignedWebsiteCommitCypher>>', txRawDataSerialize);
+  logger.debug('_SignedWebsiteCommitCypher>>', txData.nonce, txData.rawData);
 
   return {
     reqId,
     chainId,
     rpcUrl,
     diamondsFee,
-    rawData: txRawDataSerialize,
+    paramHex: cypher64Hex,
+    nonce: txData.nonce,
+    rawData: txData.rawData,
   };
 }
 
@@ -840,12 +851,16 @@ async function _SignedMobileCommitCypher(reqId, gasPriceSwei, Cypher64) {
 
   const toContractAddress = storageInst._address;
 
-  const cypher64Hex = bytesToHex(ExtractCommit(dev3.SubPriKey, Cypher64));
+  const cypherBytes = ExtractCommit(dev3.SubPriKey, Cypher64);
+  const cypher64Hex = bytesToHex(cypherBytes);
+
+  //valid sdk parse bytes
+  validSdkExtractCommit(dev3.SubPriKey, cypherBytes);
 
   let gasLimit = this.lastEstimateGas(BPT_STORAGE_MOB_COMMIT_ESGAS, chainId);
 
   if (!gasLimit) {
-    gasLimit = await storageInst.methods.commit(cypher64Hex).estimateGas({ from: selectedAddress });
+    gasLimit = await storageInst.methods.commit(cypherBytes).estimateGas({ from: selectedAddress });
 
     const updateGasState = {
       [BPT_STORAGE_MOB_COMMIT_ESGAS]: gasLimit,
@@ -874,21 +889,32 @@ async function _SignedMobileCommitCypher(reqId, gasPriceSwei, Cypher64) {
     to: toContractAddress,
   };
 
-  const txRawDataSerialize = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
+  const txData = await signedRawTxData4Method(web3js, dev3, txParams, dataABI, {
     chain,
     chainId,
     selectedAddress,
   });
 
-  logger.debug('_SignedMobileCommitCypher>>', txRawDataSerialize);
+  logger.debug('_SignedMobileCommitCypher>>', txData.nonce, txData.rawData);
 
   return {
     reqId,
     chainId,
     rpcUrl,
     diamondsFee,
-    rawData: txRawDataSerialize,
+    paramHex: cypher64Hex,
+    nonce: txData.nonce,
+    rawData: txData.rawData,
   };
+}
+
+function validSdkExtractCommit(subPriKey, cypherBytes) {
+  var chainData = new ChainCmdArray();
+  chainData.DecryptChainCmdArray(subPriKey, cypherBytes);
+
+  if (!chainData.data || !chainData.data.length) {
+    throw new BizError('call Sdk ExtractCommit err', INTERNAL_ERROR);
+  }
 }
 
 async function _syncWebsiteChainData() {

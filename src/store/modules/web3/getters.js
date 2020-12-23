@@ -58,7 +58,8 @@ export const membershipCostBTsPerYear = (state) => {
 };
 
 export const estimateBts = (state) => {
-  const { chainStatus = {}, chainBalances = {} } = state;
+  const { chainStatus = {}, chainBalances = {}, gasState = {} } = state;
+
   const ethWei = chainBalances[ETH_TOKEN];
   if (!ethWei || ethWei == '0') return false;
 
@@ -68,6 +69,35 @@ export const estimateBts = (state) => {
   if (compareWei(btsWei, memberCostWeiPerYear) < 0) {
     return false;
   }
+  return true;
+};
+
+export const showRechargeBtn = (state) => {
+  const { chainStatus = {}, chainBalances = {}, gasState = {} } = state;
+
+  const ethWei = chainBalances[ETH_TOKEN];
+  if (!ethWei || ethWei == '0') return false;
+
+  const btsWei = chainBalances[BT_TOKEN] || 0;
+  const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
+
+  if (compareWei(btsWei, memberCostWeiPerYear) < 0) {
+    return false;
+  }
+  return true;
+};
+
+export const validGasAndBtsEnought = (state) => {
+  const { chainStatus = {}, chainBalances = {}, gasState = {} } = state;
+  const ethWei = chainBalances[ETH_TOKEN];
+  if (!ethWei || ethWei == '0') return false;
+  const btsWei = chainBalances[BT_TOKEN] || 0;
+  const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
+
+  if (compareWei(btsWei, memberCostWeiPerYear) < 0) {
+    return false;
+  }
+
   return true;
 };
 

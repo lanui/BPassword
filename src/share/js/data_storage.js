@@ -57,7 +57,6 @@ Cmd.prototype = {
   unpack: function (p) {
     cType = p[0];
     ls = splitBytesArray(p.slice(2), UnitSeparator);
-    console.log('BP-test-eeror>>unpack>>>', ls);
     if (ls.length != 3) {
       throw 'bad format of term';
     }
@@ -167,9 +166,8 @@ ChainCmdArray.prototype.DecryptChainCmdArray = function (key, bytes) {
   if (bytes == null || bytes.length == 0) {
     throw 'nothing to decrypt';
   }
-  var plainTxt = BPDecrypt(key, bytes);
+  var plainTxt = BPDecryptB(key, bytes);
   var ls = splitBytesArray(plainTxt, GroupSeparator);
-  console.log('BP-test-eeror>>>ls>', ls);
   var cs = [];
   for (var i = 0; i < ls.length; i++) {
     var c = new Cmd(1, null); // those values will be overwrite by unpack
@@ -243,7 +241,7 @@ LocalCmdArray.prototype = {
   },
   encrypt: function (aesKey) {
     p = this.pack();
-    return aesEncrypt(aesKey, p);
+    return BPEncryptB(aesKey, p);
   },
 };
 
@@ -384,7 +382,7 @@ PlainTxt.prototype = {
   },
   encrypt: function (key) {
     var j = JSON.stringify(this.unwrap());
-    return BPEncrypt(key, j);
+    return BPEncryptB(key, j).toString('base64');
   },
   acceptBlockCmd: function (cmds) {
     for (var i = 0; i < cmds.data.length; i++) {
@@ -393,21 +391,21 @@ PlainTxt.prototype = {
         case CmdAdd:
           var t = this.ChainData.addRespectNew(v.Term);
           if (t != null) {
-            this.Trash.add(t.Term);
+            this.Trash.add(t);
           }
           this.Commit.removeAllTitle(v.Term.title);
           break;
         case CmdDelete:
           var t = this.ChainData.deleteRespectNew(v.Term);
           if (t != null) {
-            this.Trash.add(t.Term);
+            this.Trash.add(t);
             this.Commit.removeAllTitle(v.Term.title);
           }
           break;
         case CmdChange:
           var t = this.ChainData.changeRespectNew(v.Term);
           if (t != null) {
-            this.Trash.add(t.Term);
+            this.Trash.add(t);
             this.Commit.removeAllTitle(v.Term.title);
           }
           break;
@@ -447,7 +445,7 @@ PlainTxt.prototype = {
 };
 
 function decryptToPlainTxt(key, cipher64) {
-  var b = BPDecrypt(key, cipher64);
+  var b = BPDecryptB(key, Buffer.from(cipher64, 'base64'));
   var obj = JSON.parse(Buffer.from(b).toString());
   var p = new PlainTxt();
   //do some wrapping
@@ -465,7 +463,6 @@ function decryptToPlainTxt(key, cipher64) {
   }
   for (let i = 0; i < obj.Trash.length; i++) {
     let t = obj.Trash[i];
-
     p.Trash.data.push(new Term(t.title, t.name, t.password));
   }
   p.BlockNumber = obj.BlockNumber;
@@ -583,13 +580,14 @@ function aesDecrypt(key, cipherTxt) {
   return plainBytes.slice(0, plainBytes.length - padded[1]);
 }
 
-//encrypt then base64 encode
-function BPEncrypt(key, plainTxt) {
-  return aesEncrypt(key, plainTxt).toString('base64');
+function BPEncryptB(key, plainTxt) {
+  key = ed25519ToCurve25519(key);
+  return aesEncrypt(key, plainTxt);
 }
 
-function BPDecrypt(key, cipher64) {
-  return aesDecrypt(key, Buffer.from(cipher64, 'base64'));
+function BPDecryptB(key, Cypher64) {
+  key = ed25519ToCurve25519(key);
+  return aesDecrypt(key, Cypher64);
 }
 
 function ed25519ToCurve25519(secretKey) {
@@ -607,8 +605,15 @@ const options = {
 };
 
 function generateWallet(password) {
+  generateWallet2(password)[0];
+}
+
+function generateWallet2(password) {
   // create eth account
-  var params = { keyBytes: 32, ivBytes: 16 };
+  var params = {
+    keyBytes: 32,
+    ivBytes: 16,
+  };
   var edk = keythereum.create(params);
   var keyObject = keythereum.dump(password, edk.privateKey, edk.salt, edk.iv, options);
   //create ed25519 keypair
@@ -618,7 +623,9 @@ function generateWallet(password) {
   var pass = Buffer.from(password);
   var dk = keythereum.deriveKey(Buffer.from(pass), determinsticSalt, {
     kdf: 'scrypt',
-    kdfparams: { n: 32768 },
+    kdfparams: {
+      n: 32768,
+    },
   });
   //encrypt ed25519 priKey
   var cipher = aesEncrypt(dk, ed25519KeyPair.secretKey);
@@ -633,12 +640,27 @@ function generateWallet(password) {
     subAddress: subAddr,
     subCipher: base58Cipher,
   };
-  return pWallet;
+  return [pWallet, edk.privateKey, ed25519KeyPair.secretKey];
+}
+
+function generateWalletAsync(password) {
+  return new Promise(function (resolve, reject) {
+    try {
+      setTimeout(function () {
+        let w = generateWallet(password);
+        resolve(w);
+      }, 100);
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
 function openWallet(pWallet, password) {
   //open keystore
-  var keyObject = { crypto: pWallet.crypto };
+  var keyObject = {
+    crypto: pWallet.crypto,
+  };
   var privateKey = keythereum.recover(password, keyObject);
   //recover publicKey
   var ed25519PublicKey = bs58.decode(pWallet.subAddress.slice(2));
@@ -647,21 +669,41 @@ function openWallet(pWallet, password) {
   var pass = Buffer.from(password);
   var dk = keythereum.deriveKey(Buffer.from(pass), determinsticSalt, {
     kdf: 'scrypt',
-    kdfparams: { n: 32768 },
+    kdfparams: {
+      n: 32768,
+    },
   });
   //decrypt sub privateKey
   var cipher = bs58.decode(pWallet.subCipher);
   var iv = cipher.slice(0, 16);
   var aesCfb = new aesjs.ModeOfOperation.cfb(dk, iv, 16);
   var subPriKey = aesCfb.decrypt(cipher.slice(16));
-  return { MainPriKey: privateKey, SubPriKey: subPriKey };
+  return {
+    MainPriKey: privateKey,
+    SubPriKey: subPriKey,
+  };
+}
+
+function openWalletAsync(pWallet, password) {
+  return new Promise(function (resolve, reject) {
+    try {
+      setTimeout(function () {
+        let keys = openWallet(pWallet, password);
+        resolve(keys);
+      }, 100);
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
 //implemented by frontend
 // function closeWallet(){}
 
 function exportEth(pWallet, password) {
-  var keyObject = { crypto: pWallet.crypto };
+  var keyObject = {
+    crypto: pWallet.crypto,
+  };
   var privateKey = keythereum.recover(password, keyObject);
   return keythereum.dump(
     password,

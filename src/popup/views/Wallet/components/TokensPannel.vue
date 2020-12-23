@@ -25,7 +25,7 @@
     <v-row justify="center" class="text-center">
       <v-col cols="6" class="py-0"></v-col>
       <v-col cols="6" class="py-0">
-        <v-btn v-if="estimateBts" @click.stop="gotoRechargePage" small color="primary">
+        <v-btn v-if="showRechargeBtn" @click.stop="gotoRechargePage" small color="primary">
           {{ $t('btn.recharge') }}
         </v-btn>
       </v-col>
@@ -41,7 +41,12 @@ import iconBPTs from '@/ui/assets/icons/icon_bpts.png';
 export default {
   name: 'WalletTokensPannel',
   computed: {
-    ...mapGetters('web3', ['getBTsBalanceText', 'getDiamondsText', 'estimateBts']),
+    ...mapGetters('web3', [
+      'getBTsBalanceText',
+      'getDiamondsText',
+      'estimateBts',
+      'showRechargeBtn',
+    ]),
   },
   data() {
     return {
@@ -51,9 +56,7 @@ export default {
   },
   methods: {
     gotoRechargePage() {
-      if (this.estimateBts) {
-        this.$router.push({ path: '/wallet/recharge' });
-      }
+      this.$router.push({ path: '/wallet/recharge' });
     },
   },
   mounted() {},

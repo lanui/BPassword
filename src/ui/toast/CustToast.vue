@@ -55,6 +55,7 @@ export default {
 <style scoped>
 .cust-toast {
   position: fixed;
+  z-index: 99999;
   min-width: calc(100% - 77px);
   max-width: calc(100% - 37px);
   left: 50%;

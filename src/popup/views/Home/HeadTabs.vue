@@ -237,7 +237,7 @@ export default {
         const respState = await whisperer.sendSimpleMessage(API_RT_SYNC_MOBILE_DATA, {
           reqId: this.$uid(),
         });
-        await this.$store.dispatch('passbook/subInitState4Site', respState);
+        await this.$store.dispatch('passbook/subInitState4Mob', respState);
         await this.openMobileDialog();
       } catch (err) {
         logger.error('fetchWebsiteSignedRawData:', err);
@@ -300,6 +300,7 @@ export default {
             if (typeof receipt === 'object') {
               errTxState = Object.assign({}, txState, receipt);
             }
+            logger.debug('error response receipt:', receipt);
             errTxState.statusText = TX_FAILED;
             whisperer
               .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, errTxState)
@@ -320,7 +321,7 @@ export default {
             let compTxState = Object.assign({}, txState, receipt, {
               statusText: _status ? TX_CONFIRMED : TX_FAILED,
             });
-
+            logger.debug('then response receipt:', receipt);
             await that.$store.dispatch('web3/addOrUpdateChainTxState', compTxState);
             whisperer
               .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, compTxState)

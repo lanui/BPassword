@@ -11,31 +11,25 @@
 
 export const webdiff = (state) => {
   const Plain = state.webPlain;
-  if (!Plain || !Array.isArray(Plain.Commit) || Plain.Commit.length == 0) {
-    return '';
-  }
-
-  let add = 0,
-    del = 0;
-  Plain.Commit.forEach((c) => {
-    if (c.CType == 1) {
-      add += 1;
-    }
-    if (c.CType == 2) {
-      del += 1;
-    }
-  });
-
-  return add > 0 ? '+' + add : del > 0 ? '-' + del : '';
+  return diffCalcPlain(Plain);
 };
 
 export const mobdiff = (state) => {
   const Plain = state.mobPlain;
+  return diffCalcPlain(Plain);
+};
+
+/**
+ *
+ * @param {object} Plain
+ */
+function diffCalcPlain(Plain) {
   if (!Plain || !Plain.Commit || !Array.isArray(Plain.Commit) || !Plain.Commit.length) {
     return '';
   }
   let add = 0,
-    del = 0;
+    del = 0,
+    edit = 0;
   Plain.Commit.forEach((c) => {
     if (c.CType == 1) {
       add += 1;
@@ -43,31 +37,14 @@ export const mobdiff = (state) => {
     if (c.CType == 2) {
       del += 1;
     }
+    if (c.CType == 3) {
+      edit += 1;
+    }
   });
 
-  return add > 0 ? '+' + add : del > 0 ? '-' + del : '';
-};
-
-function diffCalcPlain(Plain) {
-  if (!Plain) {
-    return '';
-  }
-
-  let vLen = Plain.View.length,
-    chainLen = Plain.ChainData.length,
-    delLen = Plain.Trash.length,
-    commitLen = Plain.Commit.length;
-
-  let diff = vLen - chainLen;
-  if (diff !== 0) {
-    return diff > 0 ? `+${diff}` : '' + diff;
-  }
-
-  let dLen = Plain.Commit.filter((c) => c.CType == 2).length;
-  if (dLen) {
-    return '-' + dLen;
-  }
-  return '';
+  if (add > 0) return `+${add}`;
+  if (del > 0) return `-${del}`;
+  if (edit > 0) return edit.toString();
 }
 
 function diffCalcCommit(commits = []) {
