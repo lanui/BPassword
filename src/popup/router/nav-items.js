@@ -29,7 +29,7 @@ const navs = [
   {
     name: 'membership',
     path: '/wallet/recharge',
-    text: '会员设置',
+    text: '会员充值',
     i18n: 'membership',
     icon: 'mdi-wallet-membership',
     iconImg: iconMembership,

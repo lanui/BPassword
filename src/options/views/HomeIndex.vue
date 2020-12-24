@@ -4,7 +4,7 @@
     <v-row justify="center">
       <v-col cols="11">
         <v-radio-group v-model="autoLocked" column>
-          <v-radio label="永久" value="-1"></v-radio>
+          <v-radio label="Not automatically locked" value="0"></v-radio>
           <v-radio label="5 Minutes" value="5"></v-radio>
           <v-radio label="15 Minutes" value="15"></v-radio>
           <v-radio label="30 Minutes" value="30"></v-radio>

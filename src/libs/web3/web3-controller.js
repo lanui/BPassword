@@ -15,19 +15,11 @@ import {
   ACCOUNT_NOT_EXISTS,
   INTERNAL_ERROR,
   INSUFFICIENT_BTS_BALANCE,
-  INSUFFICIENT_ETH_BALANCE,
   WALLET_LOCKED,
   MEMBERSHIP_EXPIRED,
 } from '../biz-error/error-codes';
 
-import {
-  getWeb3Inst,
-  getChainConfig,
-  compareWei,
-  calcGasFee,
-  wei2Diamonds,
-  validGasFeeEnought,
-} from './web3-helpers';
+import { getWeb3Inst, getChainConfig, compareWei, validGasFeeEnought } from './web3-helpers';
 import APIManager from './apis';
 
 import {

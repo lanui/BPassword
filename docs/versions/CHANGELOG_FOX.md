@@ -1,12 +1,14 @@
 # Firefox
 
-## v0.8.5 (**self signed**)
+## v0.8.7 (**self signed**)
 
 > 12-23
 
 - [x] Sync website pass items from block chain
 - [x] Sync mobile pass items from block chain
+- [x] Add membership view page menu.
 - [x] fixed sdk parse empty array.
+- [x] fixed Create Wallet or Import Wallet ,Basic member information is not synchronized.
 
 ## v0.8.0 (**self signed**)
 
