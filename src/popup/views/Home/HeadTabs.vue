@@ -91,7 +91,22 @@
               </v-list-item>
             </template>
           </v-virtual-scroll>
-          <gas-controller-panel :iconsize="16" ref="gasCtx" v-if="Boolean(dialog.items.length)" />
+          <div class="py-1">
+            <v-progress-linear
+              v-if="trading"
+              buffer-value="10"
+              color="success"
+              reverse
+              stream
+              value="35"
+            >
+            </v-progress-linear>
+          </div>
+          <gas-controller-panel
+            :iconsize="16"
+            ref="gasCtx"
+            v-if="Boolean(dialog.items.length) && !trading"
+          />
         </div>
         <div class="row-flex sync-footer--wrap">
           <v-btn
@@ -321,7 +336,7 @@ export default {
             let compTxState = Object.assign({}, txState, receipt, {
               statusText: _status ? TX_CONFIRMED : TX_FAILED,
             });
-            logger.debug('then response receipt:', receipt);
+
             await that.$store.dispatch('web3/addOrUpdateChainTxState', compTxState);
             whisperer
               .sendSimpleMessage(API_RT_ADDORUP_TX_STATE, compTxState)
@@ -334,7 +349,16 @@ export default {
                 console.log(err);
               });
 
-            await that.fetchWebsiteSignedRawData();
+            whisperer
+              .sendSimpleMessage(API_RT_SYNC_WEBSITE_DATA, {
+                reqId: this.$uid(),
+              })
+              .then(async (websiteState) => {
+                await this.$store.dispatch('passbook/subInitState4Site', websiteState);
+              })
+              .catch((ex) => {
+                logger.warn(ex.message);
+              });
 
             that.$toast('同步完成', 'success', 6000);
             that.trading = false;
@@ -435,13 +459,17 @@ export default {
                 console.log(err);
               });
 
-            const respState = await whisperer.sendSimpleMessage(API_RT_SYNC_MOBILE_DATA, {
-              reqId: reqId,
-            });
-            await this.$store.dispatch('passbook/subInitState4Mob', respState);
+            whisperer
+              .sendSimpleMessage(API_RT_SYNC_MOBILE_DATA, {
+                reqId: this.$uid(),
+              })
+              .then(async (mobState) => {
+                logger.debug('>>>>>>>>>>', mobState);
+                await that.$store.dispatch('passbook/subInitState4Mob', mobState);
+              });
 
-            that.$toast('同步完成', 'success', 6000);
             that.trading = false;
+            that.$toast('同步完成', 'success', 6000);
             that.resetDialog(true);
           });
       } catch (err) {

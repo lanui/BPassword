@@ -47,6 +47,7 @@ export const subInitState4Site = async ({ commit }, WebsiteController = {}) => {
 };
 
 export const subInitState4Mob = async ({ commit }, MobileController = {}) => {
+  console.log('subInitState4Mob>>>>>', MobileController);
   const { Plain, items = [] } = MobileController;
   commit(types.UPDATE_MOBPLAIN, Plain);
   commit(types.UPDATE_MOB_ITEMS, items);
