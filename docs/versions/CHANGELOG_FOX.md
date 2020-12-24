@@ -1,11 +1,12 @@
 # Firefox
 
-## v0.8.3 (**self signed**)
+## v0.8.5 (**self signed**)
 
 > 12-23
 
 - [x] Sync website pass items from block chain
 - [x] Sync mobile pass items from block chain
+- [x] fixed sdk parse empty array.
 
 ## v0.8.0 (**self signed**)
 

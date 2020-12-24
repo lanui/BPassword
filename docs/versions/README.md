@@ -34,7 +34,7 @@
 
 ### Firefox add-on
 
-> Current Version Features (**v0.8.3**)
+> Current Version Features (**v0.8.5**)
 
 - [x] Base on ethereum Account generate,import&export
 - [x] Website pass item CURD functions management by popup UI.
