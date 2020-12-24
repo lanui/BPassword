@@ -771,8 +771,8 @@ async function _reloadDependencyWalletState() {
   if (env3 && env3.mainAddress) {
     selectedAddress = env3.mainAddress;
   }
-
-  if (selectedAddress) {
+  const { provider } = await this.networkController.store.getState();
+  if (selectedAddress && provider) {
     await this.web3Controller.emit('web3:reload:member:status', provider, selectedAddress);
     await this.web3Controller.emit('web3:reload:config', provider, selectedAddress);
   }

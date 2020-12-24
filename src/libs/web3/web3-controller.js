@@ -100,8 +100,8 @@ class Web3Controller extends EventEmitter {
 
     this.on('reloadBalances', this.reloadBalances.bind(this));
 
-    this.on('web3:reload:config', debounce(_reloadConfig.bind(this), 1000));
-    this.on('web3:reload:member:status', _reloadChainStatus.bind(this));
+    this.on('web3:reload:config', debounce(_reloadConfig.bind(this), 100));
+    this.on('web3:reload:member:status', debounce(_reloadChainStatus.bind(this), 100));
 
     this.on('web3:reload:gasStation', _gasStation.bind(this));
     this.on(

@@ -185,7 +185,7 @@ class NetworkController extends EventEmitter {
   /*------------------------------  private methods ---------------------------------- */
 }
 
-function buildDefaultCurrentProvider() {
+export function buildDefaultCurrentProvider() {
   const rpcUrl = buildTSLRpcURL({ network: ROPSTEN });
   const ropstenNetwork = NETWORK_TYPE_NAME_KV[ROPSTEN];
 
