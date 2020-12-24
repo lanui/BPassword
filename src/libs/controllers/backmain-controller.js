@@ -723,6 +723,10 @@ class BackMainController extends EventEmitter {
       valtState,
     };
   }
+
+  async reloadDependencyWalletState() {
+    _reloadDependencyWalletState.call(this);
+  }
 }
 
 /** ------------------------------  File Scope Functions ----------------------------- */
@@ -759,6 +763,19 @@ async function _runtimeStartupHandler() {
   }
 
   logger.debug('Backmain:runtimeStartupHandler>>>call>>>', new Date(), provider);
+}
+
+async function _reloadDependencyWalletState() {
+  let selectedAddress = '';
+  const { env3 } = this.accountController.store.getState();
+  if (env3 && env3.mainAddress) {
+    selectedAddress = env3.mainAddress;
+  }
+
+  if (selectedAddress) {
+    await this.web3Controller.emit('web3:reload:member:status', provider, selectedAddress);
+    await this.web3Controller.emit('web3:reload:config', provider, selectedAddress);
+  }
 }
 
 export default BackMainController;

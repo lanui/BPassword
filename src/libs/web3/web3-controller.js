@@ -40,6 +40,7 @@ import {
   BPT_MEMBER,
 } from './contracts/enums';
 import {
+  MEMBER_COSTWEI_PER_YEAR,
   DEFAULT_GAS_LIMIT,
   TX_PENDING,
   TX_FAILED,
@@ -51,7 +52,7 @@ import {
 
 import { getBTContractInst } from './apis/bt-api';
 import { getBptMemberAddress, getBPTMemberContractInst } from './apis/bpt-member-api';
-import { signedDataTransaction, signedRawTxData4Method } from './send-rawtx';
+import { signedRawTxData4Method } from './send-rawtx';
 import Web3 from 'web3';
 
 import { getWebStorageEventInst } from './apis/web-storage-event-api';
@@ -445,7 +446,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
   let btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
 
   // valid insuffient
-  let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || toWei('98', 'ether');
+  let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || MEMBER_COSTWEI_PER_YEAR;
   if (compareWei(btsBalance, memberCostWeiPerYear) < 0) {
     throw new BizError('Insuffient BT Balance.', INSUFFICIENT_BTS_BALANCE);
   }
@@ -918,6 +919,9 @@ function validSdkExtractCommit(subPriKey, cypherBytes) {
   var chainData = new ChainCmdArray();
   chainData.DecryptChainCmdArray(subPriKey, cypherBytes);
 
+  logger.debug('>>>>>>>>>>>>', chainData);
+
+  // throw new BizError('ooo',INTERNAL_ERROR);
   if (!chainData.data || !chainData.data.length) {
     throw new BizError('call Sdk ExtractCommit err', INTERNAL_ERROR);
   }

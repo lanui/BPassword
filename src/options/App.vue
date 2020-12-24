@@ -51,7 +51,7 @@ export default {
       mini: true,
       items: [
         { title: 'Auto locked', icon: 'mdi-lock-clock', path: '/home' },
-        // { title: 'Locale', icon: 'mdi-translate', path: '/base' },
+        { title: 'Basic Options', icon: 'mdi-focus-field', path: '/base' },
       ],
     };
   },

@@ -3,6 +3,7 @@ import iconWallet from '@/ui/assets/icons/icon-wallet.png';
 import iconExport from '@/ui/assets/icons/icon-ex.png';
 import iconImport from '@/ui/assets/icons/icon-im.png';
 import iconOptions from '@/ui/assets/icons/icon-options.png';
+import iconMembership from '@/ui/assets/icons/icon-membership.png';
 
 const navs = [
   {
@@ -26,13 +27,23 @@ const navs = [
     hidden: false,
   },
   {
+    name: 'membership',
+    path: '/wallet/recharge',
+    text: '会员设置',
+    i18n: 'membership',
+    icon: 'mdi-wallet-membership',
+    iconImg: iconMembership,
+    sort: 3,
+    hidden: false,
+  },
+  {
     name: 'exportorWallet',
     path: '/wallet/export',
     text: '导出账号',
     i18n: 'exportor',
     icon: 'mdi-export',
     iconImg: iconExport,
-    sort: 3,
+    sort: 4,
     hidden: false,
   },
   {
@@ -42,7 +53,7 @@ const navs = [
     i18n: 'importor',
     icon: 'mdi-content-duplicate',
     iconImg: iconImport,
-    sort: 4,
+    sort: 5,
     hidden: true,
   },
   {
@@ -52,7 +63,7 @@ const navs = [
     i18n: 'profile',
     icon: 'mdi-cog',
     iconImg: iconOptions,
-    sort: 5,
+    sort: 6,
     hidden: false,
   },
 ];

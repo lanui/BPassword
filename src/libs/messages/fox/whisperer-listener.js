@@ -74,6 +74,8 @@ class WhisperperListener {
     await this.controller.websiteController.unlock(dev3.SubPriKey);
     await this.controller.mobileController.unlock(dev3.SubPriKey);
 
+    await this.controller.reloadDependencyWalletState();
+
     const initState = this.controller.getState();
     const respData = { env3, ...initState };
     logger.debug(`addWebsiteItem:${this._uuid}:Response Data>>>`, respData);
@@ -89,6 +91,8 @@ class WhisperperListener {
     const { dev3 } = this.controller.accountController.getWalletState();
     await this.controller.websiteController.unlock(dev3.SubPriKey);
     await this.controller.mobileController.unlock(dev3.SubPriKey);
+
+    await this.controller.reloadDependencyWalletState();
 
     logger.debug(`addWebsiteItem:${this._uuid}:Response Data>>>`, respData);
     return respData;
@@ -107,6 +111,9 @@ class WhisperperListener {
     // website unlock
     await this.controller.websiteController.unlock(dev3.SubPriKey);
     await this.controller.mobileController.unlock(dev3.SubPriKey);
+
+    // reload web3 state[status config]
+    await this.controller.reloadDependencyWalletState();
 
     const initState = this.controller.getState();
     await this.controller.unlockedNotifyCommunications();
