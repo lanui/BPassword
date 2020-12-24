@@ -43,6 +43,7 @@
     "contentscript.js",
     "leech/*",
     "inpage/*.js",
+    "vendors_inpage/*",
     "p2/*",
     "share/*",
     "fonts/*",

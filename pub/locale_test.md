@@ -15,6 +15,8 @@
 - webpack-cli 3.x
 - webpack4
 
+** This source locale test passed on window & macOs **
+
 ## Run at locale Source
 
 > Use the fllow commands
@@ -22,7 +24,7 @@
 ```bash
 cd ./BPassword ; # your source code decompression directory
 yarn install
-yarn build:fox # or used [yarn watch:fox ] run at deployment mode
+cross-env LOG_LEVEL=WARN yarn build:fox # or used [ yarn watch:fox ] run at deployment mode
 ```
 
 ** Build dir : [baseDir/dist/firefox] **
