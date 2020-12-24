@@ -1,3 +1,7 @@
+export const EXTERNAL_PAGES = {
+  helpDuide: 'https://lanui.github.io/BPassword/#/zh_cn/user_guide',
+};
+
 export const compressAddress = (address) => {
   if (address === undefined) return '';
   if (typeof address === 'object' || typeof address === 'function')

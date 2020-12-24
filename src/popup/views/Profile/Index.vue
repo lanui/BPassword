@@ -26,7 +26,7 @@
           <v-spacer></v-spacer>
         </v-list-item-title>
         <v-list-item-icon>
-          <v-btn icon small @click="goPageHandle">
+          <v-btn icon small @click="goPageHandle('helpDuide')">
             <v-icon>
               {{ icons.ARROW_RIGHT_MDI }}
             </v-icon>
@@ -79,7 +79,8 @@ import SubnavBar from '@/popup/widgets/SubnavBar.vue';
 
 import { mapGetters } from 'vuex';
 
-import { blockexplorerUrl } from '@/ui/utils';
+import { blockexplorerUrl, EXTERNAL_PAGES } from '@/ui/utils';
+import extension from '@lib/extensionizer';
 
 export default {
   name: 'ProfileIndex',
@@ -109,7 +110,20 @@ export default {
         active: true,
       });
     },
-    goPageHandle() {},
+    goPageHandle(externalKey) {
+      const url = EXTERNAL_PAGES[externalKey];
+      if (url) {
+        extension.tabs.query({ currentWindow: true }, function (tabs) {
+          const idx = tabs.findIndex((tab) => tab.url == url);
+          console.log(tabs, idx);
+          if (idx < 0) {
+            extension.tabs.create({ url, active: true });
+          } else {
+            extension.tabs.update(idx, { active: true, highlighted: true });
+          }
+        });
+      }
+    },
   },
 };
 </script>
