@@ -49,6 +49,11 @@ const artifactDir = () => {
   return tmpArtifact;
 };
 
+const removeStatFile = () => {
+  const statFile = R(dist, 'stats.json');
+  fse.removeSync(statFile);
+};
+
 const webextConfig = {
   verbose: true,
   sourceDir: dist,
@@ -66,7 +71,7 @@ const webextConfig = {
 };
 
 const task = process.env.TASK_COMMAND;
-
+removeStatFile();
 if (task === 'build') {
   const ret = webExt.cmd.build(webextConfig);
   console.log(task, ret);

@@ -1,5 +1,12 @@
 # Firefox
 
+## v0.8.3 (**self signed**)
+
+> 12-23
+
+- [x] Sync website pass items from block chain
+- [x] Sync mobile pass items from block chain
+
 ## v0.8.0 (**self signed**)
 
 > [click download self signed version](https://github.com/lanui/BPassword/releases/download/v0.8.0/bpassword-0.8.0-an+fx.xpi)
