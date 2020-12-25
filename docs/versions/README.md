@@ -39,8 +39,9 @@
 - [x] Base on ethereum Account generate,import&export
 - [x] Website pass item CURD functions management by popup UI.
 - [x] Mobile pass item CURD functions management by popup UI.
+- [x] Membership page
 - [ ] auto locked setting.
-- [ ] Synchronize local data with blockchain
+- [x] Synchronize local data with blockchain
 - [x] Tokens query
 - [x] send Transaction
 - [x] toggler popui hot key

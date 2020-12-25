@@ -113,15 +113,16 @@ export default {
     goPageHandle(externalKey) {
       const url = EXTERNAL_PAGES[externalKey];
       if (url) {
-        extension.tabs.query({ currentWindow: true }, function (tabs) {
-          const idx = tabs.findIndex((tab) => tab.url == url);
-          console.log(tabs, idx);
-          if (idx < 0) {
-            extension.tabs.create({ url, active: true });
-          } else {
-            extension.tabs.update(idx, { active: true, highlighted: true });
-          }
-        });
+        extension.tabs.create({ url, active: true });
+        // extension.tabs.query({ currentWindow: true }, function (tabs) {
+        //   const idx = tabs.findIndex((tab) => tab.url == url);
+        //   console.log(tabs, idx);
+        //   if (idx < 0) {
+        //     extension.tabs.create({ url, active: true });
+        //   } else {
+        //     extension.tabs.update(idx, { active: true, highlighted: true });
+        //   }
+        // });
       }
     },
   },

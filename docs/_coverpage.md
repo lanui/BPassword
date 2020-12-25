@@ -2,7 +2,7 @@
 
 # <span style="font-weight:400;">BPassword</span>
 
-## <span style="font-size:14px">Last Version:&nbsp;</span> <span style="font-size:14px">0.8.6(Firefox);</span>&nbsp;<span style="font-size:14px">2.1.0(Chrome)</span>
+## <span style="font-size:14px">Last Version:&nbsp;</span> <span style="font-size:14px">0.8.8(Firefox);</span>&nbsp;<span style="font-size:14px">2.1.0(Chrome)</span>
 
 > <span style="line-height:1.8rem;font-weight:400;font-size:1.3rem">Using Block Chain Technology<span>
 

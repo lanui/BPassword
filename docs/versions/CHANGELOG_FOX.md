@@ -1,8 +1,10 @@
 # Firefox
 
-## v0.8.9 (**self signed**)
+## v0.8.7 (**self signed**) & v0.8.8 (AMO Awaiting review)
 
-> 12-25
+> 12-25 submmit AMO
+
+> [v0.8.7 Self signed download]()
 
 - [x] Add membership view page menu.
 - [x] fixed Create Wallet or Import Wallet ,Basic member information is not synchronized.
@@ -10,7 +12,7 @@
 
 ## v0.8.5 (**self signed**)
 
-> 12-23
+> 12-23 self signed
 
 - [x] Sync website pass items from block chain
 - [x] Sync mobile pass items from block chain
