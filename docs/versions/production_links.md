@@ -1,8 +1,8 @@
 # Download & Install BPassword Extension
 
-## Chrome or Edge
+## Chrome
 
-**Current Version:2.0.0**
+**Current Version:2.1.0**
 
 > If you can access the chrome web store, please click this link [[BPassword For Chrome](https://chrome.google.com/webstore/detail/bpassword/bacldcokcfmemiljlckpeokehiloamcj)] to install
 
@@ -10,6 +10,8 @@
 
 ## Firefox
 
-**Current Versioon:0.8.0**
+**Current Versioon: 0.8.x**
 
 > Click this link [AMO Download](https://addons.mozilla.org/cn-ZH/firefox/addon/bpassword/)
+
+> Get Latest Self signed [GitHub](https://github.com/lanui/BPassword/releases)
