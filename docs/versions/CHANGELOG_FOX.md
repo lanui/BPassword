@@ -1,10 +1,12 @@
 # Firefox
 
-## v0.8.7 (**self signed**) & v0.8.8 (AMO Awaiting review)
-
 > 12-25 submmit AMO
 
-> [v0.8.7 Self signed download]()
+## v0.8.7 (**self signed**) & v0.8.8 (AMO awaiting review)
+
+> 12-25 AMO subbmit
+
+> Self signed [download](https://github.com/lanui/BPassword/releases/download/v0.8.7/bpassword-0.8.7-an+fx.xpi)
 
 - [x] Add membership view page menu.
 - [x] fixed Create Wallet or Import Wallet ,Basic member information is not synchronized.
