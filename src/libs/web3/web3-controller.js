@@ -21,6 +21,7 @@ import {
 
 import { getWeb3Inst, getChainConfig, compareWei, validGasFeeEnought } from './web3-helpers';
 import APIManager from './apis';
+import { getMemberBaseInFo } from './apis/bpt-member-api';
 
 import {
   BT_TOKEN,
@@ -250,11 +251,11 @@ class Web3Controller extends EventEmitter {
 
   /**
    *
-   * @param {object} allowState
-   *    key-value : accAddress+'_'+'bptMember' : allowance
+   * @param {object} allowanceState [BPT_MEMBER:value]
+   *    key-value : 'bptMember' : allowance
    * @param {number} chainId
    */
-  setAllowanceState(allowState, chainId) {
+  setAllowanceState(allowanceState, chainId) {
     if (!chainId) {
       chainId = this.configStore.getState().chainId;
     }
@@ -263,7 +264,7 @@ class Web3Controller extends EventEmitter {
     const updateState = {
       [chainId]: {
         ...old,
-        ...allowState,
+        ...allowanceState,
       },
     };
 
@@ -548,7 +549,8 @@ async function _signedRegistMember(reqId, gasPriceSwei, charageType = 1) {
   const { config = {} } = this.store.getState();
   let { chain, gasPrice, gasStation = {} } = config;
   const { chainStatus = {} } = this.getSendState(chainId);
-  let memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || toWei('98', 'ether');
+  let memberCostWeiPerYear =
+    chainStatus.memberCostWeiPerYear || toWei(MEMBER_COSTWEI_PER_YEAR, 'ether');
 
   //check bts allownce
   const btsBalance = await tokenInst.methods.balanceOf(selectedAddress).call();
@@ -665,26 +667,19 @@ async function _reloadBalances(provider) {
       spenderAddress
     );
 
-    let allowKey = `${selectedAddress}_${BPT_MEMBER}`;
     const allowanceState = {
-      [allowKey]: allowance,
+      [BPT_MEMBER]: allowance,
     };
 
     logger.debug('Web3Controller:reloadBalances>>>>', allowanceState);
-
     this.balanceStore.updateState(balances);
     this.setAllowanceState(allowanceState, chainId);
+
     logger.debug('Web3Controller:reloadBalances>>>>', allowanceState);
 
     // update membership
-    const bptMemberInst = APIManager.BPTMemberApi.getBPTMemberContractInst(
-      web3js,
-      chainId,
-      selectedAddress
-    );
-    const membershipDeadline = await bptMemberInst.methods.allMembership(selectedAddress).call();
-    logger.debug('Web3Controller:reloadBalances>membershipTs>>>', membershipDeadline);
-    this.updateMembershipDeadline(chainId, membershipDeadline);
+    const memberInfo = await getMemberBaseInFo(web3js, chainId, selectedAddress);
+    this.statusStore.updateState(memberInfo);
 
     return this.getSendState(chainId);
   } catch (err) {

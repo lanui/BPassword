@@ -1,7 +1,7 @@
 import mutations from './mutations';
 import * as actions from './actions';
 import * as getters from './getters';
-import { ETH_TOKEN, BT_TOKEN } from '@lib/web3/contracts/enums';
+import { ETH_TOKEN, BT_TOKEN, BPT_MEMBER } from '@lib/web3/contracts/enums';
 import { MEMBER_COSTWEI_PER_YEAR } from '@lib/web3/cnst.js';
 
 export default {
@@ -50,7 +50,9 @@ export default {
       fastest: 0,
     },
     chainTxs: [],
-    chainAllowance: {},
+    chainAllowance: {
+      [BPT_MEMBER]: 0,
+    },
     lasttimestamp: 0,
   },
 };

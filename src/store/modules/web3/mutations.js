@@ -61,16 +61,4 @@ export default {
       state.chainAllowance = Object.assign(state.chainAllowance, chainAllowance);
     }
   },
-  [types.UPDATE_CHAIN_BT_ALLOWANCE](state, btAllowance) {
-    const { selectedAddress } = state;
-
-    if (btAllowance && selectedAddress) {
-      let key = `${selectedAddress}_${BPT_MEMBER}`;
-      if (typeof state.chainAllowance === 'object') {
-        state.chainAllowance[key] = btAllowance;
-      } else {
-        state.chainAllowance = { [key]: btAllowance };
-      }
-    }
-  },
 };

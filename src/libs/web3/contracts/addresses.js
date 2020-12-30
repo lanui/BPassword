@@ -43,7 +43,7 @@ const smarts = {
       address: '0xB574E1611dBC27Ae4123cCfa1C1954AA86F4676E',
     },
     {
-      contractName: 'bptWebStorageByEvent',
+      contractName: 'bptStorageByEventSite',
       address: '0x9b9688211D4f74D706a6250F89d1214846Da0291',
     },
   ],
@@ -62,14 +62,14 @@ const smarts = {
     },
     {
       contractName: 'bptStorage',
-      address: '',
+      address: '0xa691571A54eE924855753e0eeA07db78840a81B7',
     },
     {
       contractName: 'bptStorageByEvent',
       address: '0x8A91F4b3A1249Cb29ee0b80B2CDF57EbfbD53b07',
     },
     {
-      contractName: 'bptWebStorageByEvent',
+      contractName: 'bptStorageByEventSite',
       address: '',
     },
   ],

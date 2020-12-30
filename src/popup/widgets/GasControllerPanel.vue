@@ -31,7 +31,7 @@
         <v-card-subtitle class="gas-pannel-footer px-0 py-1" v-if="false">
           <div class="inner text-right">
             <label>Current Approved:</label>
-            <span>{{ currentAllowanceBT }} </span>
+            <span>{{ currentMemberAllowanceBT }} </span>
             <span>BT</span>
           </div>
         </v-card-subtitle>
@@ -45,7 +45,7 @@ export default {
   name: 'GasControllerPanel',
   computed: {
     ...mapGetters('ui', ['icons']),
-    ...mapGetters('web3', ['gasState', 'estimateBts', 'currentAllowanceBT']),
+    ...mapGetters('web3', ['gasState', 'estimateBts', 'currentMemberAllowanceBT']),
   },
   data() {
     return {

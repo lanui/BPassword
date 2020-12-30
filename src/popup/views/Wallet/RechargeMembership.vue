@@ -223,8 +223,6 @@ export default {
               statusText: _status ? TX_CONFIRMED : TX_FAILED,
             };
 
-            await that.$store.dispatch('web3/updateBTAllowance', willAllowance);
-
             await that.$store.dispatch('web3/addOrUpdateChainTxState', _retTxState);
 
             let allowanceBT = web3js.utils.fromWei(willAllowance, 'ether');
@@ -241,6 +239,18 @@ export default {
               })
               .catch((err) => {
                 console.log(err);
+              });
+
+            whisperer
+              .sendSimpleMessage(API_RT_RELOAD_CHAIN_BALANCES, { from: 'Registion Success' })
+              .then(async (web3State) => {
+                if (web3State) {
+                  logger.debug('API_RT_RELOAD_CHAIN_BALANCES>>', web3State);
+                  await that.$store.dispatch('web3/subInitWeb3State', web3State);
+                }
+              })
+              .catch((err) => {
+                console.warn(err.message);
               });
             that.stopLoading();
           });

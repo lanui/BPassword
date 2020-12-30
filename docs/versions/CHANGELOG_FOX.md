@@ -2,6 +2,14 @@
 
 > 12-25 submmit AMO
 
+## v0.9.x
+
+>
+
+- [x] Fixed Approve success refresh membership info.
+- [x] Fixed customed local develop test contract address.
+- [x] Update allowance memcache struct.
+
 ## v0.8.7 (**self signed**) & v0.8.8 (AMO awaiting review)
 
 > 12-25 AMO subbmit

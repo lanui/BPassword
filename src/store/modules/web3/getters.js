@@ -101,26 +101,14 @@ export const validGasAndBtsEnought = (state) => {
   return true;
 };
 
-export const currentAllowanceWei = (state) => {
-  const { selectedAddress, chainAllowance = {} } = state;
-  if (!selectedAddress) {
-    return '0';
-  }
-
-  let key = `${selectedAddress}_${BPT_MEMBER}`;
-  const wei = chainAllowance[key] || '0';
-
-  return wei;
+export const currentMemberAllowance = (state) => {
+  const { chainAllowance = {} } = state;
+  return chainAllowance[BPT_MEMBER] || 0;
 };
 
-export const currentAllowanceBT = (state) => {
-  const { selectedAddress, chainAllowance = {} } = state;
-  if (!selectedAddress) {
-    return '0';
-  }
-  let key = `${selectedAddress}_${BPT_MEMBER}`;
-  const wei = chainAllowance[key] || '0';
-
+export const currentMemberAllowanceBT = (state) => {
+  const { chainAllowance = {} } = state;
+  const wei = chainAllowance[BPT_MEMBER] || '0';
   return Web3.utils.fromWei(wei, 'ether');
 };
 
@@ -131,6 +119,6 @@ export const currentAllowanceBT = (state) => {
 export const validNeedApprove = (state) => {
   const { chainStatus } = state;
   const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
-  const allowanceWei = currentAllowanceWei(state);
+  const allowanceWei = currentMemberAllowance(state);
   return compareWei(allowanceWei, memberCostWeiPerYear) < 0;
 };

@@ -80,12 +80,3 @@ export const updateChainTxs = async ({ commit }, chainTxs) => {
     commit(types.SET_CHAIN_TXS, chainTxs);
   }
 };
-
-/**
- * 更新授权余额
- * @param {object} context
- * @param {string|number} allowanceWei
- */
-export const updateBTAllowance = async ({ commit }, allowanceWei) => {
-  commit(types.UPDATE_CHAIN_BT_ALLOWANCE, allowanceWei);
-};
