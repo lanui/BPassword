@@ -3,6 +3,7 @@
 ## 0.9.3 (Self Signed)
 
 > 2021-1-4
+> Self signed [download](https://github.com/lanui/BPassword/releases/download/v0.9.3/bpassword-0.9.3-an+fx.xpi)
 
 - [x] add Estimate Diamonds Fee Cost
 - [x] Optimization Changed Network Pass item Cypher initialization.
