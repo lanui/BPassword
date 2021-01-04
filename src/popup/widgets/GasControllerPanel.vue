@@ -2,7 +2,12 @@
   <div>
     <v-list dense class="px-0">
       <v-list-item class="member-status-item">
-        <v-list-item-title> Gas Price: {{ gasPrice / 10 }} Gwei </v-list-item-title>
+        <v-list-item-title v-if="!showGasDiamonds">
+          Gas Price: {{ gasPrice / 10 }} Gwei
+        </v-list-item-title>
+        <v-list-item-title v-if="showGasDiamonds">
+          Estimated cost: {{ estimateDiamonds }} Diamonds
+        </v-list-item-title>
         <v-list-item-action>
           <v-icon @click="gasPanelShow = !gasPanelShow" :size="iconsize">
             {{ gasPanelShow ? icons.ARROW_DOWN_MDI : icons.ARROW_RIGHT_MDI }}
@@ -21,13 +26,9 @@
             v-model="gasPrice"
           >
             <template v-slot:append>
-              <div class="gas-price" v-if="!showGasDiamonds">
+              <div class="gas-price">
                 <div>{{ gasPrice / 10 }}</div>
                 <div>Gwei</div>
-              </div>
-              <div class="gas-price" v-if="showGasDiamonds">
-                <div>{{ transGwei2Diamonds }}</div>
-                <div>Diamonds</div>
               </div>
             </template>
           </v-slider>
@@ -45,17 +46,24 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
+import Web3 from 'web3';
 export default {
   name: 'GasControllerPanel',
   computed: {
     ...mapGetters('ui', ['icons']),
     ...mapGetters('web3', ['gasState', 'estimateBts', 'currentMemberAllowanceBT']),
+    estimateDiamonds() {
+      let gwei = parseFloat(this.gasPrice || 0) / 10;
+      let ether = Web3.utils.fromWei(Web3.utils.toWei(gwei.toString(), 'Gwei'), 'ether');
+      return (parseFloat(ether) * parseFloat(this.estimate) * 1000.0).toFixed(4);
+    },
   },
   data() {
     return {
       showGasDiamonds: true,
       gasPanelShow: false,
       gasPrice: 0,
+      gasLimit: 21000,
     };
   },
   mounted() {
@@ -65,6 +73,11 @@ export default {
     iconsize: {
       type: Number,
       default: 20,
+      required: false,
+    },
+    estimate: {
+      type: Number,
+      default: 21000,
       required: false,
     },
   },

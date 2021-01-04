@@ -14,6 +14,7 @@ export default {
     selectedAddress: (state) => state.selectedAddress || '',
     gasState: (state) => state.gasState,
     chainTxs: (state) => state.chainTxs,
+    statusState: (state) => state.chainStatus,
     rpcUrl: (state) => state.rpcUrl,
     ...getters,
   },

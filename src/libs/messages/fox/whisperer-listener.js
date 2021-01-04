@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
-import extension from '../../extensionizer';
-import logger from '../../logger';
+import extension from '@lib/extensionizer';
+import logger from '@lib/logger';
 
 import { injetExtState } from './extension-info';
 
@@ -26,11 +26,11 @@ import {
   API_RT_FETCH_WEBSITE_COMMIT_RAWDATA,
   API_RT_SYNC_MOBILE_DATA,
   API_RT_FETCH_MOBILE_COMMIT_RAWDATA,
-} from '../../msgapi/api-types';
+} from '@lib/msgapi/api-types';
 
-import { checkApiType } from '../../msgapi';
-import BPError from '../../biz-error';
-import { INTERNAL_ERROR } from '../../biz-error/error-codes';
+import { checkApiType } from '@lib/msgapi';
+import BizError from '@lib/biz-error';
+import { INTERNAL_ERROR, APITYPE_ILLEGAL } from '@lib/biz-error/error-codes';
 /*********************************************************************
  * AircraftClass :: Whisperer for fox
  *    @description:
@@ -220,11 +220,14 @@ class WhisperperListener {
     );
 
     const WebsiteController = await this.controller.websiteController.reinitializeCypher(false);
+    const MobileController = await this.controller.mobileController.reinitializeCypher(false);
+
     // logger.debug('>>>changedNetworkState>>>>', networkState, web3State, selectedAddress);
     return {
       NetworkController: networkState,
       Web3Controller: web3State,
       WebsiteController,
+      MobileController,
     };
   }
 
@@ -301,7 +304,7 @@ class WhisperperListener {
 
 async function HandleCypherApi(message, sender, sendResp) {
   if (typeof message !== 'object' && !message.apiType) {
-    throw new BPError('Message type illegal.');
+    throw new BizError('Message type illegal.');
   }
   const apiType = message.apiType;
   checkApiType(apiType);
@@ -354,22 +357,22 @@ async function HandleCypherApi(message, sender, sendResp) {
         return this.signedMobileCommitRawData(reqData);
 
       default:
-        throw new BPError(`Message type: ${apiType} unsupport in firefox.`);
+        throw new BizError(`Message type: ${apiType} unsupport in firefox.`, APITYPE_ILLEGAL);
     }
   } catch (error) {
+    logger.debug('Whisper listener:', error);
     errorThrower(error);
   }
 }
 
 function errorThrower(err) {
-  logger.debug('Whisper listener:', err);
   if (typeof err === 'object' && err.code) {
     throw err;
-  } else if (typeof err === 'object' && err.code) {
-    throw new BPError(err.message, INTERNAL_ERROR);
+  } else if (typeof err === 'object' && !err.code) {
+    throw new BizError(err.message, INTERNAL_ERROR);
   } else {
     err = err ? err.toString() : 'unknow error';
-    throw new BPError(err, INTERNAL_ERROR);
+    throw new BizError(err, INTERNAL_ERROR);
   }
 }
 

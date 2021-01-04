@@ -103,6 +103,7 @@
             </v-progress-linear>
           </div>
           <gas-controller-panel
+            :estimate="estimate"
             :iconsize="16"
             ref="gasCtx"
             v-if="Boolean(dialog.items.length) && !trading"
@@ -138,7 +139,11 @@ import syncBlocker from '@/ui/assets/icons/sync_blocker.png';
 import logger from '@lib/logger';
 import WhispererController from '@lib/messages/whisperer-controller';
 import { getWeb3Inst } from '@lib/web3/web3-helpers';
-import { INTERNAL_ERROR, INTERNAL_MISS_MSG } from '@lib/biz-error/error-codes';
+import {
+  INTERNAL_ERROR,
+  INTERNAL_MISS_MSG,
+  CONTRACT_ADDRESS_ILLEGAL,
+} from '@lib/biz-error/error-codes';
 
 import GasControllerPanel from '@/popup/widgets/GasControllerPanel.vue';
 
@@ -160,7 +165,8 @@ export default {
   },
   computed: {
     ...mapGetters('ui', ['icons']),
-    ...mapGetters('passbook', ['webdiff', 'mobdiff', 'websiteCommitItems']),
+    ...mapGetters('passbook', ['webdiff', 'mobdiff']),
+    ...mapGetters('web3', ['estimateWebsiteCommit', 'estimateMobileCommit']),
     diff() {
       // return '+5';
       const activeTab = this.tab;
@@ -181,6 +187,7 @@ export default {
       editIcon: editCtypeIcon,
       syncImage: syncBlocker,
       trading: false,
+      estimate: 21000,
       dialog: {
         title: '待同步数据',
         mainType: 0,
@@ -214,6 +221,7 @@ export default {
     async openWebsiteDialog(mainText) {
       this.dialogshow = true;
       this.dialog.items = this.$store.getters['passbook/websiteCommitItems'];
+      this.estimate = this.estimateWebsiteCommit;
       if (mainText) {
         this.dialog.mainText = mainText;
       }
@@ -221,6 +229,7 @@ export default {
     async openMobileDialog(mainText) {
       this.dialogshow = true;
       this.dialog.items = this.$store.getters['passbook/mobileCommitItems'];
+      this.estimate = this.estimateMobileCommit;
       if (mainText) {
         this.dialog.mainText = mainText;
       }
@@ -242,8 +251,11 @@ export default {
         await this.$store.dispatch('passbook/subInitState4Site', respState);
         await this.openWebsiteDialog();
       } catch (err) {
-        logger.error('fetchWebsiteSignedRawData:', err);
-        this.$toast(err.message, 'fail', 6000);
+        let errMsg = err.message;
+        if (errMsg.startsWith('Lookup smart')) {
+          errMsg = '当前版本不支持以太坊主网存储.';
+        }
+        this.$toast(errMsg, 'fail', 6000);
       }
     },
     async fetchMobileSignedRawData() {

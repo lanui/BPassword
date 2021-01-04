@@ -1,4 +1,12 @@
-import { ETH_TOKEN, BT_TOKEN, BPT_MEMBER } from '@lib/web3/contracts/enums';
+import {
+  ETH_TOKEN,
+  BT_TOKEN,
+  BPT_MEMBER,
+  BT_APPRPOVE_ESGAS,
+  BPT_MEMBER_RECHARGE_ESGAS,
+  BPT_STORAGE_WEB_COMMIT_ESGAS,
+  BPT_STORAGE_MOB_COMMIT_ESGAS,
+} from '@lib/web3/contracts/enums';
 
 import { wei2Ether, wei2Diamonds, compareWei } from '@lib/web3/web3-helpers';
 
@@ -121,4 +129,24 @@ export const validNeedApprove = (state) => {
   const memberCostWeiPerYear = chainStatus.memberCostWeiPerYear || 0;
   const allowanceWei = currentMemberAllowance(state);
   return compareWei(allowanceWei, memberCostWeiPerYear) < 0;
+};
+
+export const estimateApproved = (state) => {
+  const statusState = state.chainStatus || {};
+  return statusState[BT_APPRPOVE_ESGAS] || 21000;
+};
+
+export const estimateRecharged = (state) => {
+  const statusState = state.chainStatus || {};
+  return statusState[BPT_MEMBER_RECHARGE_ESGAS] || 21000;
+};
+
+export const estimateWebsiteCommit = (state) => {
+  const statusState = state.chainStatus || {};
+  return statusState[BPT_STORAGE_WEB_COMMIT_ESGAS] || 21000;
+};
+
+export const estimateMobileCommit = (state) => {
+  const statusState = state.chainStatus || {};
+  return statusState[BPT_STORAGE_MOB_COMMIT_ESGAS] || 21000;
 };

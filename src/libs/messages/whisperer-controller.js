@@ -50,7 +50,7 @@ async function foxSendMessage(message) {
     // logger.debug('WhispererController:sendSimpleMessage:received -fox>>>', respData);
     return respData;
   } catch (err) {
-    logger.debug('WhispererController:sendSimpleMessage:received -fox>>>', err);
+    logger.debug('WhispererController:sendSimpleMessage:received -fox>>>', err, err.name);
     throw err;
   }
 

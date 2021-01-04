@@ -48,17 +48,17 @@ class MobileController extends EventEmitter {
 
     const initState = opts.initState || {};
 
-    const { localState = {}, versionState = {} } = initState;
+    const { chainState = {}, versionState = {} } = initState;
     /**
      * locale State
      * chainId:Cypher64
      */
-    this.localStore = new ObservableStore(localState);
+    this.chainStore = new ObservableStore(chainState);
 
     this.versionStore = new ObservableStore(versionState);
 
     this.store = new ComposedStore({
-      localState: this.localStore,
+      chainState: this.chainStore,
       versionState: this.versionStore,
     });
 
@@ -175,8 +175,8 @@ class MobileController extends EventEmitter {
 
   async getCypher64() {
     const { chainId } = this.getCurrentProvider();
-    const localState = this.localStore.getState() || {};
-    return localState && localState[chainId] ? localState[chainId] : '';
+    const chainState = this.chainStore.getState() || {};
+    return chainState && chainState[chainId] ? chainState[chainId] : '';
   }
 
   async updateLocalChainCypher64(Cypher64) {
@@ -185,7 +185,7 @@ class MobileController extends EventEmitter {
       throw new BizError('lost chainId in provider', INTERNAL_ERROR);
     }
 
-    this.localStore.updateState({ [chainId]: Cypher64 });
+    this.chainStore.updateState({ [chainId]: Cypher64 });
   }
 
   async getState() {
@@ -266,11 +266,9 @@ class MobileController extends EventEmitter {
     const logsResp = await _GetFromChainLogs.call(this, selectedAddress, fromBlock);
 
     const { blockNumber, lastTxHash, logs = [] } = logsResp;
-    logger.debug('Chain data>>>>>>>', fromBlock, blockNumber, lastTxHash, logs.length);
     let retFile = null;
     if (logs.length > 0 && blockNumber > fromBlock) {
       retFile = UpdateBlockData(dev3.SubPriKey, currCypher64, blockNumber, lastTxHash, logs);
-      logger.debug('Mobile mergeLocalFromChainCypher>>>>>>>', retFile);
       this.reloadMemStore(retFile.Plain, retFile.Cypher64);
       this.updateLocalChainCypher64(retFile.Cypher64);
     }
@@ -304,10 +302,8 @@ async function _GetFromChainLogs(selectedAddress, fromBlock = 0) {
     throw new BizError('Params illegal', INTERNAL_ERROR);
   }
 
-  logger.debug('_GetFromChainLogs>>>>>>>>>>>>', fromBlock);
   const web3js = getWeb3Inst(rpcUrl);
   const respLogs = await fetchEventLogsFromChain(web3js, chainId, selectedAddress, fromBlock);
-  logger.debug('Mobile _GetFromChainLogs>>>>>>>>>>>>', respLogs);
   return respLogs;
 }
 

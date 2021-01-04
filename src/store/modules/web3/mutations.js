@@ -1,5 +1,4 @@
 import * as types from './mutation-types';
-import { BPT_MEMBER } from '@lib/web3/contracts/enums';
 
 export default {
   [types.UPDATE_CHAINID](state, chainId) {

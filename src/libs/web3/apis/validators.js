@@ -1,5 +1,5 @@
 import BizError from '@lib/biz-error';
-import { INTERNAL_ERROR } from '@lib/biz-error/error-codes';
+import { INTERNAL_ERROR, CONTRACT_ADDRESS_ILLEGAL } from '@lib/biz-error/error-codes';
 import { SmartAddressesTranslate } from '../contracts';
 
 /*********************************************************************
@@ -14,6 +14,11 @@ import { SmartAddressesTranslate } from '../contracts';
  *    @comments:
  **********************************************************************/
 const NUMBER_REGEX = /^[0-9]*$/;
+/**
+ *
+ * @param {*} web3js
+ * @param {*} address
+ */
 export const validWeb3Addr = (web3js, address) => {
   if (!web3js) {
     throw new BizError('web3 instance undefined.', INTERNAL_ERROR);
@@ -42,7 +47,7 @@ export const validChainAddress = (chainId, contractName) => {
   if (!btInfo || !btInfo.address) {
     throw new BizError(
       `Lookup smart [${contractName}] at chain [${chainId}] unset.`,
-      INTERNAL_ERROR
+      CONTRACT_ADDRESS_ILLEGAL
     );
   }
 
