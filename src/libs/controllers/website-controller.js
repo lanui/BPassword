@@ -6,7 +6,7 @@ import RemoveableObserverStore from '../observestore/removeable-obs-store';
 
 import logger from '@/libs/logger';
 import { transferTerms, getDiff } from '../utils/item-transfer';
-import BPError from '../biz-error';
+import BizError from '../biz-error';
 import {
   VEX_ITEM_EXIST,
   VEX_ITEM_EDIT,
@@ -51,8 +51,8 @@ class WebsiteController extends EventEmitter {
     const initState = opts.initState || {};
     const { chainState = {}, versionState = {} } = initState;
 
-    this.currentProvider = opts.currentProvider;
-    this.currentWalletState = opts.currentWalletState;
+    this.getCurrentProvider = opts.getCurrentProvider;
+    this.getCurrentWalletState = opts.getCurrentWalletState;
 
     this.notifyInjet = opts.notifyInjet;
     this.getActivedMuxStream = opts.getActivedMuxStream;
@@ -211,7 +211,7 @@ class WebsiteController extends EventEmitter {
   }
 
   async unlock(SubPriKey) {
-    let { chainId } = (await this.currentProvider()) || {};
+    let { chainId } = (await this.getCurrentProvider()) || {};
 
     if (!chainId) {
       throw new BizError('lost chainId & provider', INTERNAL_ERROR);
@@ -328,14 +328,12 @@ class WebsiteController extends EventEmitter {
 
   async getState() {
     const state = await this.memStore.getState();
-    const { chainId } = await this.currentProvider();
-    const diff = getDiff(state.Plain);
+    const { chainId } = await this.getCurrentProvider();
 
     const lastChainState = this.getlatestBlockState(chainId);
 
     return {
       ...state,
-      diff,
       lastChainState,
     };
   }
@@ -344,14 +342,14 @@ class WebsiteController extends EventEmitter {
    * get Locale chainStore State
    */
   async getCypher64() {
-    const { chainId } = this.currentProvider();
+    const { chainId } = this.getCurrentProvider();
     const chainState = (await this.chainStore.getState()) || {};
     const cypher64 = chainState[chainId] && chainState[chainId] ? chainState[chainId] : '';
     return cypher64;
   }
 
   updateLocalChainCypher64(Cypher64) {
-    const { chainId } = this.currentProvider();
+    const { chainId } = this.getCurrentProvider();
     if (!chainId) {
       throw new BizError('lost chainId in currentProvider.', INTERNAL_ERROR);
     }
@@ -392,9 +390,9 @@ class WebsiteController extends EventEmitter {
    *
    */
   async networkChanged() {
-    const { chainId, rpcUrl } = this.currentProvider();
+    const { chainId, rpcUrl } = this.getCurrentProvider();
 
-    const { selectedAddress, isUnlocked, dev3 } = (await this.currentWalletState()) || {};
+    const { selectedAddress, isUnlocked, dev3 } = (await this.getCurrentWalletState()) || {};
     if (chainId) {
       throw new BizError(
         'Websiete changed network fail. may be lost chainId or rpcUrl',
@@ -465,11 +463,45 @@ class WebsiteController extends EventEmitter {
    */
   updateSyncBlockLogs(blockLogs) {}
 
+  async reinitializeCypher(force = false) {
+    const { chainId } = this.getCurrentProvider();
+    const { dev3 } = this.getCurrentWalletState();
+    if (!chainId || !dev3) {
+      throw new BizError('Account logout or no account.', WALLET_LOCKED);
+    }
+
+    const wholeChainState = this.chainStore.getState() || {};
+    let Cypher64 = wholeChainState[chainId];
+
+    let Plain;
+    if (force) {
+      const f = InitFile(dev3.SubPriKey);
+      Plain = f.Plain;
+      Cypher64 = f.Cypher64;
+      logger.warn('Website locale passbook reset empty.');
+      this.chainStore.updateState({ [chainId]: Cypher64 });
+    }
+    if (!Cypher64) {
+      const f = InitFile(dev3.SubPriKey);
+      Plain = f.Plain;
+      Cypher64 = f.Cypher64;
+      this.chainStore.updateState({ [chainId]: Cypher64 });
+    }
+
+    if (!Plain) {
+      Plain = decryptToPlainTxt(dev3.SubPriKey, Cypher64);
+    }
+    await this.reloadMemStore(Plain, Cypher64);
+
+    return this.getState();
+  }
+
+  /* <----------------------- Block Chain methods ----------------------> */
   /**
    *
    */
   async mergeLocalFromChainCypher(fromBlock) {
-    const { isUnlocked, selectedAddress, dev3 } = this.currentWalletState();
+    const { isUnlocked, selectedAddress, dev3 } = this.getCurrentWalletState();
     fromBlock = !fromBlock ? this.getFromBlockNumber() : fromBlock;
 
     const currCypher64 = await this.getCypher64();
@@ -494,7 +526,7 @@ class WebsiteController extends EventEmitter {
   }
 
   async getLatestLogs(fromBlock) {
-    const { selectedAddress } = this.currentWalletState();
+    const { selectedAddress } = this.getCurrentWalletState();
     fromBlock = !fromBlock ? this.getFromBlockNumber() : fromBlock;
 
     const currCypher64 = await this.getCypher64();
@@ -519,7 +551,7 @@ class WebsiteController extends EventEmitter {
 
   async getCypherBytesHex() {
     const curCypher64 = await this.getCypher64();
-    const { dev3 } = await this.currentWalletState();
+    const { dev3 } = await this.getCurrentWalletState();
     if (!dev3) {
       throw new BizError('no wallet or account locked.', INTERNAL_ERROR);
     }
@@ -568,7 +600,7 @@ function _initChainState(chainId, Cypher64) {
  * @param {number} fromBlock
  */
 async function _GetFromChainLogs(selectedAddress, fromBlock = 0) {
-  const { chainId, rpcUrl } = this.currentProvider();
+  const { chainId, rpcUrl } = this.getCurrentProvider();
 
   if (!chainId || !rpcUrl || !selectedAddress) {
     throw new BizError('Params illegal', INTERNAL_ERROR);

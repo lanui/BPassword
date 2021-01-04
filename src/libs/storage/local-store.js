@@ -60,7 +60,7 @@ export default class ExtensionStore {
    */
   _set(obj) {
     const local = extension.storage.local;
-    console.log('Local-storage>>>>>', obj);
+    logger.debug('Local-storage>>>>>', obj);
     return new Promise((resolve, reject) => {
       local.set(obj, () => {
         const err = checkForError();

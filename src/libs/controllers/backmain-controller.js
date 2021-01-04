@@ -101,7 +101,7 @@ class BackMainController extends EventEmitter {
     this.web3Controller = new Web3Controller({
       initState: initState.Web3Controller,
       getCurrentProvider: this.networkController.getCurrentProvider.bind(this.networkController),
-      walletState: this.accountController.getWalletState.bind(this.accountController),
+      getCurrentWalletState: this.accountController.getWalletState.bind(this.accountController),
     });
 
     /**
@@ -110,8 +110,8 @@ class BackMainController extends EventEmitter {
      */
     this.websiteController = new WebsiteController({
       initState: initState.WebsiteController,
-      currentProvider: this.networkController.currentProvider.bind(this.networkController),
-      currentWalletState: this.accountController.getWalletState.bind(this.accountController),
+      getCurrentProvider: this.networkController.currentProvider.bind(this.networkController),
+      getCurrentWalletState: this.accountController.getWalletState.bind(this.accountController),
       notifyInjet: this.notifiedAllInjetConnection.bind(this),
       getActivedMuxStream: this.getLeechConnection.bind(this),
       getActivedTopMuxStream: this.getActiveTopInjetConnection.bind(this),
@@ -119,8 +119,8 @@ class BackMainController extends EventEmitter {
 
     this.mobileController = new MobileController({
       initState: initState.MobileController,
-      currentProvider: this.networkController.currentProvider.bind(this.networkController),
-      currentWalletState: this.accountController.getWalletState.bind(this.accountController),
+      getCurrentProvider: this.networkController.currentProvider.bind(this.networkController),
+      getCurrentWalletState: this.accountController.getWalletState.bind(this.accountController),
     });
 
     /** binding store state changed subscribe to update store value */

@@ -178,7 +178,7 @@ export default class AccountController extends EventEmitter {
    */
   getWalletState() {
     let memState = this.memStore.getState();
-    let { env3 } = this.store.getState();
+    let { env3 } = this.store.getState() || {};
     if (!env3) return null;
     let baseState = {
       selectedAddress: env3.mainAddress,

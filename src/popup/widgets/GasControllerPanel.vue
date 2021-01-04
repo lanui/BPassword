@@ -21,9 +21,13 @@
             v-model="gasPrice"
           >
             <template v-slot:append>
-              <div class="gas-price">
+              <div class="gas-price" v-if="!showGasDiamonds">
                 <div>{{ gasPrice / 10 }}</div>
                 <div>Gwei</div>
+              </div>
+              <div class="gas-price" v-if="showGasDiamonds">
+                <div>{{ transGwei2Diamonds }}</div>
+                <div>Diamonds</div>
               </div>
             </template>
           </v-slider>
@@ -49,6 +53,7 @@ export default {
   },
   data() {
     return {
+      showGasDiamonds: true,
       gasPanelShow: false,
       gasPrice: 0,
     };

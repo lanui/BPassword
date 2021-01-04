@@ -218,8 +218,14 @@ class WhisperperListener {
       currentProvider,
       selectedAddress
     );
+
+    const WebsiteController = await this.controller.websiteController.reinitializeCypher(false);
     // logger.debug('>>>changedNetworkState>>>>', networkState, web3State, selectedAddress);
-    return { NetworkController: networkState, Web3Controller: web3State };
+    return {
+      NetworkController: networkState,
+      Web3Controller: web3State,
+      WebsiteController,
+    };
   }
 
   async reloadTokenBalances(reqData) {

@@ -68,7 +68,7 @@ class Web3Controller extends EventEmitter {
     super();
     this.getCurrentProvider = opts.getCurrentProvider;
 
-    this.currentWalletState = opts.walletState;
+    this.getCurrentWalletState = opts.getCurrentWalletState;
     const initState = opts.initState || {};
     const {
       config = _initConfigState(),
@@ -409,7 +409,7 @@ async function _reloadChainStatus(provider, address) {
 
 async function _signedApproved4Member(reqId, gasPriceSwei) {
   const toWei = Web3.utils.toWei;
-  const walletState = await this.currentWalletState();
+  const walletState = await this.getCurrentWalletState();
   if (
     !walletState ||
     !walletState.isUnlocked ||
@@ -514,7 +514,7 @@ async function _signedApproved4Member(reqId, gasPriceSwei) {
  */
 async function _signedRegistMember(reqId, gasPriceSwei, charageType = 1) {
   const toWei = Web3.utils.toWei;
-  const walletState = await this.currentWalletState();
+  const walletState = await this.getCurrentWalletState();
   logger.debug('_signedRegistMember>>>', walletState);
   if (
     !walletState ||
@@ -637,7 +637,7 @@ async function _reloadBalances(provider) {
     throw new BizError('Provider Unset or illegal rpcUrl.', PROVIDER_ILLEGAL);
   }
 
-  const accState = await this.currentWalletState();
+  const accState = await this.getCurrentWalletState();
   if (!accState || !accState.isUnlocked) {
     logger.warn('get current account state fail', accState);
     throw new BizError('account not exists or logout', ACCOUNT_NOT_EXISTS);
@@ -740,7 +740,7 @@ async function _SignedWebsiteCommitCypher(reqId, gasPriceSwei, Cypher64) {
   const toWei = Web3.utils.toWei;
   const bytesToHex = Web3.utils.bytesToHex;
   const { chainId, rpcUrl } = await this.getCurrentProvider();
-  const { isUnlocked, selectedAddress, dev3 } = await this.currentWalletState();
+  const { isUnlocked, selectedAddress, dev3 } = await this.getCurrentWalletState();
 
   logger.debug('Website: _SignedWebsiteCommitCypher>>>>>>>>>>', Cypher64);
   if (!reqId || !Cypher64 || !chainId || !rpcUrl || !selectedAddress) {
@@ -825,7 +825,7 @@ async function _SignedMobileCommitCypher(reqId, gasPriceSwei, Cypher64) {
   const toWei = Web3.utils.toWei;
   const bytesToHex = Web3.utils.bytesToHex;
   const { chainId, rpcUrl } = await this.getCurrentProvider();
-  const { isUnlocked, selectedAddress, dev3 } = await this.currentWalletState();
+  const { isUnlocked, selectedAddress, dev3 } = await this.getCurrentWalletState();
 
   if (!reqId || !Cypher64 || !chainId || !rpcUrl || !selectedAddress) {
     throw new BizError('Params illegal.', INTERNAL_ERROR);
