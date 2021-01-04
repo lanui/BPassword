@@ -78,6 +78,7 @@ class Web3Controller extends EventEmitter {
       txs = {},
       status = {},
       allowance = {},
+      estimateState = {},
     } = initState;
 
     // config not depend chainId
@@ -88,6 +89,7 @@ class Web3Controller extends EventEmitter {
     this.historyStore = new ObservableStore(historys);
     this.statusStore = new ObservableStore(status);
     this.allowStore = new ObservableStore(allowance);
+    this.estimateStore = new ObservableStore(estimateState);
 
     this.store = new ComposedStore({
       config: this.configStore,
@@ -97,6 +99,7 @@ class Web3Controller extends EventEmitter {
       txs: this.txStore,
       status: this.statusStore,
       allowance: this.allowStore,
+      estimateState: this.estimateStore,
     });
 
     this.on('reloadBalances', this.reloadBalances.bind(this));
@@ -107,7 +110,7 @@ class Web3Controller extends EventEmitter {
     this.on('web3:reload:gasStation', _gasStation.bind(this));
     this.on(
       'update:status:store:estimateGas',
-      debounce(this.updateEstimateGasConfig.bind(this), 2 * 60 * 1000)
+      debounce(this.updateEstimateGasConfig.bind(this), 1000)
     );
   }
 
@@ -138,6 +141,36 @@ class Web3Controller extends EventEmitter {
     return balances[chainId];
   }
 
+  getChainEstimate(chainId) {
+    if (!chainId && !!this.getCurrentProvider()) {
+      provider = this.getCurrentProvider() || {};
+      chainId = provider.chainId;
+    }
+
+    const wholeState = this.estimateStore.getState() || {};
+
+    return wholeState[chainId] || {};
+  }
+
+  updateGasEstimate(key, gasNumber) {
+    let { chainId } = this.getCurrentProvider();
+    if (!chainId) {
+      throw new BizError('lost chainId', INTERNAL_ERROR);
+    }
+
+    const wholeState = this.estimateStore.getState() || {};
+    const old = wholeState[chainId] || {};
+    let upState = {
+      [chainId]: {
+        ...old,
+        [key]: gasNumber,
+      },
+    };
+
+    this.estimateStore.updateState(upState);
+    return upState;
+  }
+
   getSendState(chainId) {
     const { balances = {}, txs = {}, config = {}, status = {} } = this.store.getState();
     if (!chainId) {
@@ -145,6 +178,7 @@ class Web3Controller extends EventEmitter {
     }
     let chainBalances = {},
       chainStatus = {},
+      chainEstimateState = {},
       chainTxs = [];
     if (chainId && typeof balances[chainId] === 'object') {
       chainBalances = balances[chainId];
@@ -156,6 +190,13 @@ class Web3Controller extends EventEmitter {
     if (chainId && status[chainId]) {
       chainStatus = status[chainId];
     }
+
+    chainEstimateState = this.getChainEstimate(chainId);
+
+    chainStatus = {
+      ...chainStatus,
+      ...chainEstimateState,
+    };
 
     const configState = this.configStore.getState();
     let gasState = _translateGasStation(configState, chainId);
@@ -236,7 +277,7 @@ class Web3Controller extends EventEmitter {
       chainId = this.configStore.getState().chainId;
     }
     if (typeof gasUsedState === 'object') {
-      const wholeState = this.statusStore.getState();
+      const wholeState = this.estimateStore.getState();
       const old = wholeState[chainId] || {};
       const updateState = {
         [chainId]: {
@@ -245,7 +286,7 @@ class Web3Controller extends EventEmitter {
         },
       };
 
-      this.statusStore.updateState(updateState);
+      this.estimateStore.updateState(updateState);
     }
   }
 
@@ -286,9 +327,9 @@ class Web3Controller extends EventEmitter {
       chainId = this.configStore.getState().chainId;
     }
 
-    const statusState = this.statusStore.getState();
-    if (statusState[chainId] && statusState[chainId][key]) {
-      return statusState[chainId][key] || 0;
+    const wholeState = this.estimateStore.getState();
+    if (wholeState[chainId] && wholeState[chainId][key]) {
+      return wholeState[chainId][key] || 0;
     }
     return 0;
   }

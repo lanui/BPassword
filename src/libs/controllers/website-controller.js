@@ -275,7 +275,7 @@ class WebsiteController extends EventEmitter {
     if (!cypher64) throw new Error('local cypher lost.');
 
     const { title, username, password, hostname } = data;
-    logger.debug('>>>>>>>>>>>>>', data, cypher64);
+
     try {
       const f = UpdateCmdChange(subKey, cypher64, new Term(title, username, password));
       const { Plain, Cypher64 } = f;
@@ -286,7 +286,7 @@ class WebsiteController extends EventEmitter {
       if (hostname) this.emit('notify:injet:client', hostname);
       return await this.getState();
     } catch (err) {
-      logger.debug('>>>>', err);
+      logger.debug('updateItem Error>>>>', err);
       throw new BPError(`Title ${title} unfound.`, VEX_ITEM_EDIT);
     }
   }
@@ -377,7 +377,6 @@ class WebsiteController extends EventEmitter {
       // it.password = 'bp-hidden';
       return it;
     });
-    // logger.debug('>>bp-hidden>>>>>>>>>>>>>>>>>>>>>>>>',items,newItems)
 
     return {
       matchedNum,
@@ -517,7 +516,6 @@ class WebsiteController extends EventEmitter {
     let retFile = null;
     if (logs.length > 0 && blockNumber > fromBlock) {
       retFile = UpdateBlockData(dev3.SubPriKey, currCypher64, blockNumber, lastTxHash, logs);
-      logger.debug('>>>>>>>', retFile);
       this.reloadMemStore(retFile.Plain, retFile.Cypher64);
       this.updateLocalChainCypher64(retFile.Cypher64);
     }
@@ -606,7 +604,6 @@ async function _GetFromChainLogs(selectedAddress, fromBlock = 0) {
     throw new BizError('Params illegal', INTERNAL_ERROR);
   }
 
-  logger.debug('Website _GetFromChainLogs>>>>>>>>>>>>', fromBlock);
   const web3js = getWeb3Inst(rpcUrl);
   const respLogs = await fetchEventLogsFromChain(web3js, chainId, selectedAddress, fromBlock);
   return respLogs;
