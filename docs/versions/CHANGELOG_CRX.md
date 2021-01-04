@@ -4,6 +4,8 @@
 
 > 12-7 发布
 
+[Github Download](https://github.com/lanui/BPassword/releases/download/v0.9.3/bpassword_2.10.crx)
+
 - [x] 增加解锁 Inject 状态更新
 - [x] 增加锁定 Inject 状态更新
 - [x] Fixed [阿里云](https://account.aliyun.com/login/qr_login.htm) 多层 iframe 嵌套位置计算 BUG.
