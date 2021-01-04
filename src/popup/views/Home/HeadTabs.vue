@@ -389,6 +389,7 @@ export default {
     async signedAndCommitMobileData() {
       const reqId = this.$uid();
       const gasPriceSwei = this.$refs.gasCtx.gasPrice;
+      console.log('gasPriceSwei', gasPriceSwei.toFixed(2));
       const that = this;
       try {
         const whisperer = new WhispererController({ portName: `BT_SIGNED_MObile` });
@@ -476,7 +477,6 @@ export default {
                 reqId: this.$uid(),
               })
               .then(async (mobState) => {
-                logger.debug('>>>>>>>>>>', mobState);
                 await that.$store.dispatch('passbook/subInitState4Mob', mobState);
               });
 

@@ -55,19 +55,21 @@ export default {
     estimateDiamonds() {
       let gwei = parseFloat(this.gasPrice || 0) / 10;
       let ether = Web3.utils.fromWei(Web3.utils.toWei(gwei.toString(), 'Gwei'), 'ether');
-      return (parseFloat(ether) * parseFloat(this.estimate) * 1000.0).toFixed(4);
+      return (parseFloat(ether) * parseFloat(this.estimate) * 10000.0).toFixed(4);
     },
   },
   data() {
     return {
       showGasDiamonds: true,
       gasPanelShow: false,
-      gasPrice: 0,
+      gasPrice: 0, //anotation Gwei*10
       gasLimit: 21000,
     };
   },
   mounted() {
-    this.gasPrice = this.gasState.average || this.gasState.gasPrice;
+    const defaultGasPriceGwei =
+      parseFloat(Web3.utils.fromWei(this.gasState.gasPrice.toString(), 'Gwei')) * 10;
+    this.gasPrice = parseFloat(this.gasState.average) || defaultGasPriceGwei;
   },
   props: {
     iconsize: {
