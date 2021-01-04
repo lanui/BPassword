@@ -1,10 +1,16 @@
 # Firefox
 
-> 12-25 submmit AMO
+## 0.9.3 (Self Signed)
+
+> 2021-1-4
+
+- [x] add Estimate Diamonds Fee Cost
+- [x] Optimization Changed Network Pass item Cypher initialization.
+- [x] Optimization Main Ethereum Website storage Warnning.
 
 ## v0.9.x
 
->
+> 12-25 submmit AMO
 
 - [x] Fixed Approve success refresh membership info.
 - [x] Fixed customed local develop test contract address.
