@@ -22,14 +22,6 @@
 - [x] Export BPassword account QrCode & keystore
 - [x] Add,Modify,Delete Website pass item used popup page.
 - [x] Add,Modify,Delete Mobile pass item used popup page.
-- [ ] Add Website pass item on website login page.
-- [ ] Filled pass item to website login fields(username&password).
-- [ ] inject contentscript into website page.
-
-### Version 1.0.1
-
-> Future Features
-
-- [ ] Add Website pass item on website login page.
-- [ ] Filled pass item to website login fields(username&password).
-- [ ] inject contentscript into website page.
+- [x] Add Website pass item on website login page.
+- [x] Filled pass item to website login fields(username&password).
+- [x] inject contentscript into website page.
