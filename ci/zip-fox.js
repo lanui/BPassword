@@ -1,23 +1,19 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs-extra');
 const archiver = require('archiver');
 
-const { R } = require('./paths');
-
+process.env.EXT_TARGET = 'firefox';
+const { R, dist, distzip, targetPath } = require('./paths');
 const WrapperEnv = require('../config/wrapper.env');
 
-const DEST_DIR = path.resolve(__dirname, '../dist', 'firefox');
-const DEST_ZIP_DIR = path.resolve(__dirname, '../dist-zip', 'firefox');
-
-const ManifestJson = require(R(DEST_DIR, 'manifest.json'));
+const ManifestJson = require(R(dist, 'manifest.json'));
 
 let VER_SUFFIX = '';
 
-if (WrapperEnv.LOG_LEVEL === 'DEBUG') {
-  VER_SUFFIX = '_pre';
-}
+// if (WrapperEnv.LOG_LEVEL === 'DEBUG') {
+//   VER_SUFFIX = '_pre';
+// }
 
 const extractExtensionData = () => {
   return {
@@ -27,16 +23,16 @@ const extractExtensionData = () => {
 };
 
 const makeDestZipDirIfNotExists = () => {
-  if (!fs.existsSync(DEST_ZIP_DIR)) {
-    fs.mkdirSync(DEST_ZIP_DIR, { recursive: true });
+  if (!fs.existsSync(distzip)) {
+    fs.mkdirSync(distzip, { recursive: true });
   }
 };
 
-const buildZip = (src, dist, zipFilename) => {
+const buildZip = (src, dest, zipFilename) => {
   console.info(`Building ${zipFilename}...`);
 
   const archive = archiver('zip', { zlib: { level: 9 } });
-  const stream = fs.createWriteStream(path.join(dist, zipFilename));
+  const stream = fs.createWriteStream(R(dest, zipFilename));
 
   return new Promise((resolve, reject) => {
     archive
@@ -51,12 +47,12 @@ const buildZip = (src, dist, zipFilename) => {
 
 const main = () => {
   const { name, version } = extractExtensionData();
-  const zipFilename = `${name}-v${version}${VER_SUFFIX}.zip`;
+  const zipFilename = `${name}-v${version}.zip`;
 
   makeDestZipDirIfNotExists();
 
-  buildZip(DEST_DIR, DEST_ZIP_DIR, zipFilename)
-    .then(() => console.info('OK'))
+  buildZip(dist, R(distzip, targetPath), zipFilename)
+    .then(() => console.info('OK', R(distzip, targetPath, zipFilename)))
     .catch(console.err);
 };
 

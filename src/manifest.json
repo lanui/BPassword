@@ -21,7 +21,7 @@
       "share/js/ed2curve.min.js",
       "share/js/keythereum.min.js",
       "share/js/data_storage.js",
-      "share/js/web3.min.js",
+      "share/js/web3.js",
       "commons.js",
       "vendors_background.js",
       "background.js"

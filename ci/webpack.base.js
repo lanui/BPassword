@@ -193,7 +193,7 @@ let baseConfig = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      global: 'window',
+      global: 'window', // maybe resolve CSP
       __EXT_TARGET__: JSON.stringify(providerEnv.EXT_TARGET),
       __EXT_NAME__: JSON.stringify(providerEnv.APP_NAME),
       __EXT_VERION__: JSON.stringify(providerEnv.APP_VERSION),
@@ -239,6 +239,7 @@ if (isDev) {
     }),
   ]);
 } else {
+  baseConfig.devtool = false;
   baseConfig.plugins = (baseConfig.plugins || []).concat([
     new webpack.DefinePlugin({
       __LOG_LEVEL__: JSON.stringify(providerEnv.LOG_LEVEL || 'WARN'),
