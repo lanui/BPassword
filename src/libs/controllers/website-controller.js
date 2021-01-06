@@ -94,7 +94,7 @@ class WebsiteController extends EventEmitter {
     this.activeValtStore.subscribe(this.notifyLeechPageValtStateListener.bind(this));
 
     //item changed notify same host tabs
-    this.on('notify:injet:client', _.debounce(this.callNotifiedInjetClient.bind(this), 500));
+    this.on('notify:injet:client', _.debounce(this.callNotifiedInjetClient.bind(this), 100));
   }
 
   /*
