@@ -7,33 +7,41 @@
 > version 2.2.x
 
 - [ ] Edge Test
+- [ ] add Tx view page
+- [ ] reimport wallet & reinitial all memcache state & reload all tabs inject states
 
 ### Phase 5
 
 > version 2.1.x
 
-- [ ] Synchronize local data with blockchain
-- [ ] Tokens query & send Transaction
+- [x] Synchronize local data with blockchain
+- [x] Tokens query & send Transaction
 
 ### Phase 4
 
 > version 2.0.x
 
 - [ ] auto locked setting.
-- [ ] multi layer position used message report chain . like firefox logic.
-- [ ] fixed unreaded login fields
+- [x] multi layer position used message report chain . like firefox logic.
+- [x] fixed unreaded login fields
 
 ---
 
 ## Firefox
 
+### Phase 5
+
+> version 1.x
+
+- [ ] add Tx view page
+- [ ] reimport wallet & reinitial all memcache state & reload all tabs inject states
+
 ### Phase 4
 
 > version 0.9.x
 
-- [ ] add Tx view page
-- [ ] sync block pass items for type of website
-- [ ] sync block pass items for type of mobile
+- [x] sync block pass items for type of website
+- [x] sync block pass items for type of mobile
 
 ### Phase 3
 

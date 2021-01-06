@@ -10,7 +10,7 @@
 
 ## Firefox
 
-**Versioon: 0.9.x**
+**Versioon: 1.0.x**
 
 > Click this link [AMO Download](https://addons.mozilla.org/cn-ZH/firefox/addon/bpassword/)
 

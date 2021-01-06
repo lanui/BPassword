@@ -9,7 +9,7 @@
 - [x] Optimization Changed Network Pass item Cypher initialization.
 - [x] Optimization Main Ethereum Website storage Warnning.
 
-## v0.9.x
+## v0.8.8 & v1.0.0
 
 > 12-25 submmit AMO
 

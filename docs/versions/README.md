@@ -22,9 +22,9 @@
 - [x] Website pass item CURD functions management by popup UI.
 - [x] Mobile pass item CURD functions management by popup UI.
 - [ ] auto locked setting.
-- [ ] Synchronize local data with blockchain
-- [ ] Tokens query
-- [ ] send Transaction
+- [x] Synchronize local data with blockchain
+- [x] Tokens query
+- [x] send Transaction
 - [x] toggler popui hot key
 - [ ] options page
 - [x] website inject & auto filled login fields.
@@ -34,7 +34,7 @@
 
 ### Firefox add-on
 
-> Current Version Features (**v0.8.8**)
+> Current Version Features (**v1.0.0**)
 
 - [x] Base on ethereum Account generate,import&export
 - [x] Website pass item CURD functions management by popup UI.

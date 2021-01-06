@@ -1,5 +1,21 @@
 # Chrome
 
+## v2.1.5 (RELEASE)
+
+- [x] Sync website pass items to website page inject instance holder.
+- [x] Fixed Index Tab label text
+
+## v2.1.4 (RELEASE)
+
+> 1-5 发布
+
+- [x] Sync website pass items from block chain
+- [x] Sync mobile pass items from block chain
+- [x] fixed sdk parse empty array.
+- [x] Add membership view page menu.
+- [x] fixed Create Wallet or Import Wallet ,Basic member information is not synchronized.
+- [x] Add help Guide link
+
 ## v2.1.0 (RELEASE )
 
 > 12-7 发布

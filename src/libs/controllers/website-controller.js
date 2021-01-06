@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { debounce } from 'lodash';
 import EventEmitter from 'events';
 import ObservableStore from 'obs-store';
 import ComposedStore from 'obs-store/lib/composed';
@@ -13,7 +13,11 @@ import {
   VEX_ITEM_DELETE,
   INTERNAL_ERROR,
 } from '../biz-error/error-codes';
-import { API_RT_FIELDS_VALT_CHANGED, API_RT_FIELDS_MATCHED_STATE } from '@/libs/msgapi/api-types';
+import {
+  API_JET_INIT_STATE,
+  API_RT_FIELDS_VALT_CHANGED,
+  API_RT_FIELDS_MATCHED_STATE,
+} from '@/libs/msgapi/api-types';
 
 import {
   getWebStorageEventInst,
@@ -55,6 +59,18 @@ class WebsiteController extends EventEmitter {
     this.getCurrentWalletState = opts.getCurrentWalletState;
 
     this.notifyInjet = opts.notifyInjet;
+
+    //v2.1.6 changed network to update inject tabs
+    this.getAllLiveOriginMuxStreams = opts.getAllLiveOriginMuxStreams;
+    this.getAllLiveTopMuxStreams = opts.getAllLiveTopMuxStreams;
+
+    this.getAllLiveLeechMuxStreams = opts.getAllLiveLeechMuxStreams;
+
+    this.getActivedTabInfo = opts.getActivedTabInfo;
+
+    this.notifyCurrentTabActivedLeech = opt.notifyCurrentTabActivedLeech;
+
+    //TODO remove
     this.getActivedMuxStream = opts.getActivedMuxStream;
     this.getActivedTopMuxStream = opts.getActivedTopMuxStream;
 
@@ -94,7 +110,9 @@ class WebsiteController extends EventEmitter {
     this.activeValtStore.subscribe(this.notifyLeechPageValtStateListener.bind(this));
 
     //item changed notify same host tabs
-    this.on('notify:injet:client', _.debounce(this.callNotifiedInjetClient.bind(this), 100));
+    this.on('notify:injet:client', debounce(this.callNotifiedInjetClient.bind(this), 100));
+
+    this.on('notify:allinject:tabs:state', debounce(this.notifyAllTabMuxStreams.bind(this), 500));
   }
 
   /*
@@ -119,6 +137,10 @@ class WebsiteController extends EventEmitter {
     }
   }
 
+  /**
+   *
+   * @param {object} activeTabState
+   */
   notifyLeechPageValtStateListener(activeTabState) {
     logger.debug('notifyLeechPageValtStateListener>>>>>>>>>>>>>>>>>>', activeTabState);
     if (typeof activeTabState === 'object') {
@@ -203,6 +225,58 @@ class WebsiteController extends EventEmitter {
   callNotifiedInjetClient(hostname) {
     if (typeof this.notifyInjet === 'function') {
       this.notifyInjet(hostname);
+    }
+  }
+
+  /**
+   * when chang network or sync from block need
+   * notify all tabs muxStream
+   */
+  async notifyAllTabMuxStreams() {
+    logger.debug('notifyAllTabMuxStreams &&&&&>>>');
+    if (this.getAllLiveOriginMuxStreams && this.getAllLiveOriginMuxStreams().length) {
+      this.getAllLiveOriginMuxStreams().forEach(async (tabMux) => {
+        const hostname = tabMux.hostname;
+        if (hostname) {
+          const sendState = await this.getZombieState(hostname);
+          if (tabMux.muxStream && sendState) {
+            try {
+              logger.debug(`notify all tabs ${tabMux.muxId}:`, hostname, sendState);
+              tabMux.muxStream.write({
+                apiType: API_JET_INIT_STATE,
+                respData: sendState,
+              });
+            } catch (err) {
+              logger.debug(`notify all tabs ${tabMux.muxId} failed.`, err);
+            }
+          }
+        }
+      });
+    }
+
+    if (this.getAllLiveTopMuxStreams && this.getAllLiveTopMuxStreams().length) {
+      this.getAllLiveTopMuxStreams().forEach(async (tabTopMux) => {
+        const hostname = tabTopMux.hostname;
+        if (hostname) {
+          const sendTopState = await this.getZombieState(hostname);
+          logger.debug(`notify all tabs ${tabTopMux.muxId} : `, hostname, sendTopState);
+          if (tabTopMux.muxStream && sendTopState) {
+            try {
+              tabTopMux.muxStream.write({
+                apiType: API_JET_INIT_STATE,
+                respData: sendTopState,
+              });
+            } catch (err) {
+              logger.debug(`notify all tabs ${tabTopMux.muxId} failed.`, err);
+            }
+          }
+        }
+      });
+    }
+
+    //更新 leech page
+    if (this.notifyCurrentTabActivedLeech) {
+      this.notifyCurrentTabActivedLeech();
     }
   }
 
