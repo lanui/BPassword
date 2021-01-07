@@ -43,7 +43,7 @@ class FieldController extends BaseController {
   constructor({ extid }) {
     super({ type: '__bpfield_' });
     this.extid = extid;
-    this.enabledFocusout = false;
+    this.enabledFocusout = true;
 
     this.backendStore = new ObservableStore({ isUnlocked: false, items: [], matchedNum: 0 });
 
@@ -549,11 +549,11 @@ function BindingFocusEvents() {
     });
 
     elem.addEventListener('focusout', (e) => {
-      logger.debug('FieldController@focusout>>>', e);
       // disabled:input:valtChanged
       ctx.emit('disabled:input:valtChanged', e.target);
 
       if (ctx.enabledFocusout) {
+        logger.debug('FieldController@focusout ::remove>>>');
         //remove icon when focusout
         document.querySelector(BPASS_BUTTON_TAG) &&
           document.querySelector(BPASS_BUTTON_TAG).remove();

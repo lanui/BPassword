@@ -68,10 +68,10 @@ class WebsiteController extends EventEmitter {
 
     this.getActivedTabInfo = opts.getActivedTabInfo;
 
-    this.notifyCurrentTabActivedLeech = opt.notifyCurrentTabActivedLeech;
+    this.notifyCurrentTabActivedLeech = opts.notifyCurrentTabActivedLeech;
 
     //TODO remove
-    this.getActivedMuxStream = opts.getActivedMuxStream;
+    this.getActivedLeechMuxStream = opts.getActivedLeechMuxStream;
     this.getActivedTopMuxStream = opts.getActivedTopMuxStream;
 
     // this.store = new ObservableStore(Object.assign({}, StateStruct, initState));
@@ -167,15 +167,15 @@ class WebsiteController extends EventEmitter {
         }
       }
 
-      if (this.getActivedMuxStream) {
+      if (this.getActivedLeechMuxStream) {
         const message = {
           apiType: API_RT_FIELDS_VALT_CHANGED,
           valtState,
         };
-        const muxStream = this.getActivedMuxStream(tabId);
-        logger.debug('Back Send ValtState to leech muxStream', tabId, valtState, muxStream);
-        if (muxStream) {
-          muxStream.write(message);
+        const activeLeechConn = this.getActivedLeechMuxStream(tabId);
+        logger.debug('Back Send ValtState to leech muxStream', tabId, valtState);
+        if (activeLeechConn && activeLeechConn.muxStream) {
+          activeLeechConn.muxStream.write(message);
         }
       }
 

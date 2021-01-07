@@ -173,15 +173,15 @@ export default class AccountController extends EventEmitter {
   }
 
   /**
-   * @returns object or null
-   *
+   * provide to other controllers
+   * @returns object [selectedAddress='',isUnlocked = false,dev3]
    */
-  getWalletState() {
+  getCurrentWalletState() {
     let memState = this.memStore.getState();
-    let { env3 } = this.store.getState() || {};
-    if (!env3) return null;
+    let { env3 = {} } = this.store.getState() || {};
+
     let baseState = {
-      selectedAddress: env3.mainAddress,
+      selectedAddress: env3.mainAddress || '',
       isUnlocked: false,
     };
     const walletState = { ...baseState, ...memState };

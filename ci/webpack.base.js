@@ -226,7 +226,7 @@ let baseConfig = {
 
 // https://webpack.js.org/configuration/devtool/#development
 if (isDev) {
-  baseConfig.devtool = config.devtool;
+  baseConfig.devtool = config.jetDevtool;
   baseConfig.plugins = (baseConfig.plugins || []).concat([
     new webpack.DefinePlugin({
       __LOG_LEVEL__: JSON.stringify(providerEnv.LOG_LEVEL || 'WARN'),

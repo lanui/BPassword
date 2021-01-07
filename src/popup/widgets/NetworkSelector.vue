@@ -56,9 +56,16 @@ export default {
       whisperer
         .sendSimpleMessage(API_RT_CHANGED_NETWORK, network)
         .then(async (respState = {}) => {
-          const { NetworkController = {}, Web3Controller = {} } = respState;
+          const {
+            NetworkController = {},
+            Web3Controller = {},
+            WebsiteController = {},
+            MobileController = {},
+          } = respState;
           await this.$store.dispatch('web3/subInitNetworkState', NetworkController);
           await this.$store.dispatch('web3/subInitWeb3State', Web3Controller);
+          await this.$store.dispatch('passbook/reloadWebsiteController', WebsiteController);
+          await this.$store.dispatch('passbook/reloadMobileController', MobileController);
           this.$toast(`Changed Network ${network.type}`, 'success');
         })
         .catch((err) => {

@@ -1,7 +1,7 @@
 /*********************************************************************
  * AircraftClass ::
  *    @description: mainnet
- *
+ *      0xA3CFebAB3c2fCdAC18b2921Cb6E1c248DA53B438 - bptStorageByEvent-new
  *    @description: ropsten app
  *      0x4458F6813Cd8d7dc56A7c5729Bd5B0b2F7b7720d - BT
  *      0x734B9833b0B57e249C1DD338aEaD86a45674d9d1 - bptMember
@@ -70,7 +70,7 @@ const smarts = {
     },
     {
       contractName: 'bptStorageByEventSite',
-      address: '',
+      address: '0xA3CFebAB3c2fCdAC18b2921Cb6E1c248DA53B438',
     },
   ],
 };

@@ -1,3 +1,4 @@
+import { debounce } from 'lodash';
 import { Mutex } from 'await-semaphore';
 import EventEmitter from 'events';
 import endOfStream from 'end-of-stream';
@@ -101,7 +102,9 @@ class BackMainController extends EventEmitter {
     this.web3Controller = new Web3Controller({
       initState: initState.Web3Controller,
       getCurrentProvider: this.networkController.getCurrentProvider.bind(this.networkController),
-      getCurrentWalletState: this.accountController.getWalletState.bind(this.accountController),
+      getCurrentWalletState: this.accountController.getCurrentWalletState.bind(
+        this.accountController
+      ),
     });
 
     /**
@@ -111,16 +114,20 @@ class BackMainController extends EventEmitter {
     this.websiteController = new WebsiteController({
       initState: initState.WebsiteController,
       getCurrentProvider: this.networkController.currentProvider.bind(this.networkController),
-      getCurrentWalletState: this.accountController.getWalletState.bind(this.accountController),
+      getCurrentWalletState: this.accountController.getCurrentWalletState.bind(
+        this.accountController
+      ),
       notifyInjet: this.notifiedAllInjetConnection.bind(this),
-      getActivedMuxStream: this.getLeechConnection.bind(this),
+      getActivedLeechMuxStream: this.getLeechConnection.bind(this),
       getActivedTopMuxStream: this.getActiveTopInjetConnection.bind(this),
     });
 
     this.mobileController = new MobileController({
       initState: initState.MobileController,
       getCurrentProvider: this.networkController.currentProvider.bind(this.networkController),
-      getCurrentWalletState: this.accountController.getWalletState.bind(this.accountController),
+      getCurrentWalletState: this.accountController.getCurrentWalletState.bind(
+        this.accountController
+      ),
     });
 
     /** binding store state changed subscribe to update store value */
@@ -153,6 +160,11 @@ class BackMainController extends EventEmitter {
 
     //global event registed
     this.once('ctx:runtime:initial', _runtimeStartupHandler.bind(this));
+
+    this.on(
+      'ctx:send:zombieState:toAll:communications:delay',
+      debounce(this.sendToAllInjectMuxStreams.bind(this), 200)
+    );
   }
 
   memStoreWatch(state) {
@@ -520,19 +532,28 @@ class BackMainController extends EventEmitter {
       }
     });
 
-    this.addLeechConnections(tabId, muxStream);
-
-    const data = await this.getLeechSendState(tabId);
-    muxStream.write(data);
+    if (hostname) {
+      this.addLeechConnections(tabId, muxStream, hostname);
+      const data = await this.getLeechSendState(tabId);
+      muxStream.write(data);
+    }
   }
 
-  addLeechConnections(tabId, muxStream) {
+  addLeechConnections(tabId, muxStream, hostname) {
     if (!this.leechTabConnections) {
       this.leechTabConnections = {};
     }
-    this.leechTabConnections[tabId] = muxStream;
+    this.leechTabConnections[tabId] = {
+      hostname,
+      muxStream,
+    };
   }
 
+  /**
+   *
+   * @param {number} tabId
+   * @returns object [hostname,muxStream]
+   */
   getLeechConnection(tabId) {
     return this.leechTabConnections ? this.leechTabConnections[tabId] : false;
   }
@@ -684,8 +705,8 @@ class BackMainController extends EventEmitter {
     }
 
     const leechMuxStream = this.getLeechConnection(tabId);
-    if (leechMuxStream) {
-      leechMuxStream.write(sendData);
+    if (leechMuxStream.muxStream) {
+      leechMuxStream.muxStream.write(sendData);
     }
   }
 
@@ -722,6 +743,51 @@ class BackMainController extends EventEmitter {
       items,
       valtState,
     };
+  }
+
+  /** Fixed changed block or network reload :: version 1.0.1 */
+  // getCurrent Connections
+  getAllLiveOriginMuxStreams() {
+    return typeof this.injetOriginConnections === 'object'
+      ? Object.values(this.injetOriginConnections)
+      : [];
+  }
+
+  getAllLiveTopMuxStreams() {
+    return typeof this.topInjetConnections === 'object'
+      ? Object.values(this.topInjetConnections)
+      : [];
+  }
+
+  getAllLiveLeechMuxStreams() {
+    return typeof this.leechTabConnections === 'object'
+      ? Object.values(this.leechTabConnections)
+      : [];
+  }
+
+  /**
+   * 同步数据到webpage inject holders
+   */
+  async sendToAllInjectMuxStreams() {
+    const originConns = this.injetOriginConnections
+      ? Object.values(this.injetOriginConnections)
+      : [];
+    originConns.forEach(async (jetConns) => {
+      const { hostname, muxStream, muxId } = jetConns;
+      if (hostname && muxStream) {
+        const respData = await this.getSendZombieState(hostname);
+        muxStream.write({ apiType: API_JET_INIT_STATE, respData });
+      }
+    });
+
+    const topConns = this.topInjetConnections ? Object.values(this.topInjetConnections) : [];
+    topConns.forEach(async (conns) => {
+      const { hostname, muxStream, muxId } = conns;
+      if (hostname && muxStream) {
+        const respData = await this.getSendZombieState(hostname);
+        muxStream.write({ apiType: API_JET_INIT_STATE, respData });
+      }
+    });
   }
 
   async reloadDependencyWalletState() {

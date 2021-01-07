@@ -69,7 +69,7 @@ class WhisperperListener {
     const ret = await this.controller.accountController.createWallet(password);
     const { env3 } = ret;
 
-    const { dev3 } = await this.controller.accountController.getWalletState();
+    const { dev3 } = await this.controller.accountController.getCurrentWalletState();
 
     await this.controller.websiteController.unlock(dev3.SubPriKey);
     await this.controller.mobileController.unlock(dev3.SubPriKey);
@@ -88,7 +88,7 @@ class WhisperperListener {
     const retState = await this.controller.accountController.importWallet(env3, password);
     const respData = Object.assign({}, this.controller.getState(), retState);
 
-    const { dev3 } = this.controller.accountController.getWalletState();
+    const { dev3 } = this.controller.accountController.getCurrentWalletState();
     await this.controller.websiteController.unlock(dev3.SubPriKey);
     await this.controller.mobileController.unlock(dev3.SubPriKey);
 
@@ -105,8 +105,7 @@ class WhisperperListener {
   async login(reqData) {
     const { password } = reqData;
     await this.controller.accountController.unlock(password);
-    // const { selectedAddress, isUnlocked } = this.controller.accountController.getWalletState();
-    const { dev3 } = this.controller.accountController.getWalletState();
+    const { dev3 } = this.controller.accountController.getCurrentWalletState();
     logger.debug('unlock dev3', dev3);
     // website unlock
     await this.controller.websiteController.unlock(dev3.SubPriKey);
@@ -204,8 +203,9 @@ class WhisperperListener {
   async changedNetworkState(reqData) {
     const networkState = await this.controller.networkController.changedNetwork(reqData);
     const currentProvider = await this.controller.networkController.getCurrentProvider();
-    const web3State = await this.controller.web3Controller.reloadBalances(currentProvider);
-    const selectedAddress = await this.controller.accountController.getMainAddress();
+
+    const walletState = await this.controller.accountController.getCurrentWalletState();
+    const { selectedAddress } = walletState;
 
     await this.controller.web3Controller.emit(
       'web3:reload:member:status',
@@ -222,7 +222,18 @@ class WhisperperListener {
     const WebsiteController = await this.controller.websiteController.reinitializeCypher(false);
     const MobileController = await this.controller.mobileController.reinitializeCypher(false);
 
-    // logger.debug('>>>changedNetworkState>>>>', networkState, web3State, selectedAddress);
+    const web3State = await this.controller.web3Controller.reloadBalances(currentProvider);
+
+    //notify all tabs inject streams
+    this.controller.emit('ctx:send:zombieState:toAll:communications:delay');
+
+    logger.debug(
+      '>>>changedNetworkState>>>>',
+      networkState,
+      web3State,
+      WebsiteController,
+      MobileController
+    );
     return {
       NetworkController: networkState,
       Web3Controller: web3State,
@@ -248,7 +259,9 @@ class WhisperperListener {
   }
 
   async mergeWebsiteChainData(reqData) {
-    return this.controller.websiteController.mergeLocalFromChainCypher();
+    const respData = await this.controller.websiteController.mergeLocalFromChainCypher();
+    await this.controller.emit('ctx:send:zombieState:toAll:communications:delay');
+    return respData;
   }
 
   async signedWebsiteCommitRawData(reqData) {
@@ -338,7 +351,7 @@ async function HandleCypherApi(message, sender, sendResp) {
       case API_RT_FILL_FEILDS:
         return this.filledFieldValt(reqData, sender);
       case API_RT_CHANGED_NETWORK:
-        return this.changedNetworkState(reqData);
+        return await this.changedNetworkState(reqData);
       case API_RT_RELOAD_CHAIN_BALANCES:
         return this.reloadTokenBalances(reqData);
       case API_RT_FETCH_BTAPPROVED_RAW_DATA:
